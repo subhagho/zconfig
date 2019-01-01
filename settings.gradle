@@ -1,0 +1,4 @@
+rootProject.name = 'zconfig'
+
+include 'zconfig-common'
+
