@@ -27,22 +27,25 @@ package com.wookler.zconfig.common.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import org.joda.time.DateTime;
 
 /**
  * Abstract base node for defining configuration elements.
- *
  */
 public abstract class AbstractConfigNode {
     /**
+     * Configuration instance this node belongs to.
+     */
+    @JsonIgnore
+    private Configuration configuration;
+    /**
      * Parent element of this configuration node.
-     *
+     * <p>
      * Note: Should be null only for the root configuration element.
      */
     private AbstractConfigNode parent = null;
     /**
      * Name of this configuration node.
-     *
+     * <p>
      * Note: Name must be unique for a path.
      */
     private String name;
@@ -87,14 +90,34 @@ public abstract class AbstractConfigNode {
     }
 
     /**
+     * Get the parent configuration instance.
+     *
+     * @return - Parent configuration.
+     */
+    public Configuration getConfiguration() {
+        return configuration;
+    }
+
+    /**
+     * Set the parent configuration instance.
+     *
+     * @param configuration - Parent configuration.
+     */
+    public void setConfiguration(
+            Configuration configuration) {
+        this.configuration = configuration;
+    }
+
+    /**
      * Set the name of this configuration node.
      *
      * @param name - Configuration node name.
      */
     public void setName(String name) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(name));
-        if (name.indexOf('.') >=0 || name.indexOf('/') >= 0) {
-            throw new RuntimeException("Invalid name string. Name cannot contain (.) or (/)");
+        if (name.indexOf('.') >= 0 || name.indexOf('/') >= 0) {
+            throw new RuntimeException(
+                    "Invalid name string. Name cannot contain (.) or (/)");
         }
         this.name = name;
     }
@@ -131,7 +154,7 @@ public abstract class AbstractConfigNode {
      *
      * @return - Created By info.
      */
-    public ModifiedBy getCreateBy() {
+    public ModifiedBy getCreatedBy() {
         return createdBy;
     }
 
@@ -140,7 +163,7 @@ public abstract class AbstractConfigNode {
      *
      * @param createdBy - Created timestamp.
      */
-    public void setCreateTimeStamp(ModifiedBy createdBy) {
+    public void setCreatedBy(ModifiedBy createdBy) {
         Preconditions.checkArgument(createdBy != null);
 
         this.createdBy = createdBy;
@@ -151,7 +174,7 @@ public abstract class AbstractConfigNode {
      *
      * @return - Last updation info.
      */
-    public ModifiedBy getUpdateTimeStamp() {
+    public ModifiedBy getUpdatedBy() {
         return updatedBy;
     }
 
@@ -160,7 +183,7 @@ public abstract class AbstractConfigNode {
      *
      * @param updatedBy - Last updated timestamp
      */
-    public void setUpdateTimeStamp(ModifiedBy updatedBy) {
+    public void setUpdatedBy(ModifiedBy updatedBy) {
         Preconditions.checkArgument(updatedBy != null);
 
         this.updatedBy = updatedBy;
@@ -255,7 +278,7 @@ public abstract class AbstractConfigNode {
     /**
      * Find a configuration node specified by the path/index.
      *
-     * @param path - Tokenized Path array.
+     * @param path  - Tokenized Path array.
      * @param index - Current index in the path array to search for.
      * @return - Configuration Node found.
      */

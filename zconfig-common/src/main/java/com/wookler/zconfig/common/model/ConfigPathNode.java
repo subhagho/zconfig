@@ -114,9 +114,51 @@ public class ConfigPathNode extends AbstractConfigNode {
     }
 
     /**
+     * Get the parameters, if any for this path node.
+     *
+     * @return - Parameters node, else NULL.
+     */
+    public ConfigParametersNode parmeters() {
+        if (children != null &&
+                children.containsKey(ConfigParametersNode.NODE_NAME)) {
+            return (ConfigParametersNode) children
+                    .get(ConfigParametersNode.NODE_NAME);
+        }
+        return null;
+    }
+
+    /**
+     * Get the attributes, if any for this path node.
+     *
+     * @return - Attributes node, else NULL.
+     */
+    public ConfigAttributesNode attributes() {
+        if (children != null &&
+                children.containsKey(ConfigAttributesNode.NODE_NAME)) {
+            return (ConfigAttributesNode) children
+                    .get(ConfigAttributesNode.NODE_NAME);
+        }
+        return null;
+    }
+
+    /**
+     * Get the properties, if any for this path node.
+     *
+     * @return - Properties node, else NULL.
+     */
+    public ConfigPropertiesNode properties() {
+        if (children != null &&
+                children.containsKey(ConfigPropertiesNode.NODE_NAME)) {
+            return (ConfigPropertiesNode) children
+                    .get(ConfigPropertiesNode.NODE_NAME);
+        }
+        return null;
+    }
+
+    /**
      * Search for the path under this node.
      *
-     * @param path - Tokenized Path array.
+     * @param path  - Tokenized Path array.
      * @param index - Current index in the path array to search for.
      * @return
      */

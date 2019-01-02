@@ -24,6 +24,9 @@
 
 package com.wookler.zconfig.common.model;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Configuration node representing configuration properties. Properties can be defined for any path scope and used as
  * substitutions markers when specifying configuration values.
@@ -73,5 +76,20 @@ public class ConfigPropertiesNode extends ConfigKeyValueNode {
     @Override
     public AbstractConfigNode find(String[] path, int index) {
         return null;
+    }
+
+    /**
+     * Create a copy of this configuration node.
+     *
+     * @return - Copy of node.
+     */
+    public ConfigPropertiesNode copy() {
+        ConfigPropertiesNode node = new ConfigPropertiesNode();
+        node.setName(this.getName());
+        node.setNodeVersion(0);
+        Map<String, String> properties = new HashMap<>(this.getKeyValues());
+        node.setKeyValues(properties);
+
+        return node;
     }
 }

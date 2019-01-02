@@ -89,6 +89,31 @@ public abstract class ConfigKeyValueNode extends AbstractConfigNode {
     }
 
     /**
+     * Check if this node is empty (doesn't have any key/values).
+     *
+     * @return - Is empty?
+     */
+    public boolean isEmpty() {
+        return (keyValues == null || keyValues.isEmpty());
+    }
+
+    /**
+     * Add all the key/values to this map.
+     *
+     * @param map - Key/Value map.
+     */
+    public void addAll(Map<String, String> map) {
+        Preconditions.checkArgument(map != null);
+        if (!map.isEmpty()) {
+            if (keyValues == null) {
+                keyValues = new HashMap<>(map);
+            } else {
+                keyValues.putAll(map);
+            }
+        }
+    }
+
+    /**
      * Add a new key/value with the specified key and value.
      *
      * @param key   - Parameter key.
