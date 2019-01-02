@@ -24,6 +24,7 @@
 
 package com.wookler.zconfig.common.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.joda.time.DateTime;
@@ -47,18 +48,19 @@ public abstract class AbstractConfigNode {
     private String name;
 
     /**
-     * Represents the state of this configuration node.
+     * Represents the local state of this configuration node instance.
      */
+    @JsonIgnore
     private NodeState state;
 
     /**
-     * Timestamp this node was created.
+     * Node creation info.
      */
-    private DateTime createTimeStamp;
+    private ModifiedBy createdBy;
     /**
-     * Timestamp this node was last updated.
+     * Node updation info.
      */
-    private DateTime updateTimeStamp;
+    private ModifiedBy updatedBy;
 
     /**
      * Incremented version indicator.
@@ -78,8 +80,9 @@ public abstract class AbstractConfigNode {
      * Default constructor - Will initialize the update indicators.
      */
     public AbstractConfigNode() {
-        this.createTimeStamp = DateTime.now();
-        this.updateTimeStamp = DateTime.now();
+        state = new NodeState();
+        state.setState(ENodeState.Loading);
+
         this.nodeVersion = 0;
     }
 
@@ -124,52 +127,43 @@ public abstract class AbstractConfigNode {
     }
 
     /**
-     * Set the state handle for this node.
+     * Get the node creation info.
      *
-     * @param state - Node state handle.
+     * @return - Created By info.
      */
-    public void setState(NodeState state) {
-        this.state = state;
+    public ModifiedBy getCreateBy() {
+        return createdBy;
     }
 
     /**
-     * Get the timestamp this node was created.
+     * Set the node creation info.
      *
-     * @return - Created timestamp.
+     * @param createdBy - Created timestamp.
      */
-    public DateTime getCreateTimeStamp() {
-        return createTimeStamp;
+    public void setCreateTimeStamp(ModifiedBy createdBy) {
+        Preconditions.checkArgument(createdBy != null);
+
+        this.createdBy = createdBy;
     }
 
     /**
-     * Set the timestamp this node was created.
+     * Get node last updation info.
      *
-     * @param createTimeStamp - Created timestamp.
+     * @return - Last updation info.
      */
-    public void setCreateTimeStamp(DateTime createTimeStamp) {
-        Preconditions.checkArgument(createTimeStamp != null);
-
-        this.createTimeStamp = createTimeStamp;
+    public ModifiedBy getUpdateTimeStamp() {
+        return updatedBy;
     }
 
     /**
-     * Get the last updated timestamp of this node.
+     * Set the last updation info for this node.
      *
-     * @return - Last updated timestamp.
+     * @param updatedBy - Last updated timestamp
      */
-    public DateTime getUpdateTimeStamp() {
-        return updateTimeStamp;
-    }
+    public void setUpdateTimeStamp(ModifiedBy updatedBy) {
+        Preconditions.checkArgument(updatedBy != null);
 
-    /**
-     * Set the last updated timestamp for this node.
-     *
-     * @param updateTimeStamp - Last updated timestamp
-     */
-    public void setUpdateTimeStamp(DateTime updateTimeStamp) {
-        Preconditions.checkArgument(updateTimeStamp != null);
-
-        this.updateTimeStamp = updateTimeStamp;
+        this.updatedBy = updatedBy;
     }
 
     /**
@@ -224,7 +218,6 @@ public abstract class AbstractConfigNode {
     protected void updated() {
         if (state.isSynced()) {
             this.nodeVersion++;
-            this.updateTimeStamp = DateTime.now();
             this.state.setState(ENodeState.Updated);
         }
     }
@@ -235,7 +228,6 @@ public abstract class AbstractConfigNode {
     protected void deleted() {
         if (state.isSynced()) {
             this.nodeVersion++;
-            this.updateTimeStamp = DateTime.now();
             this.state.setState(ENodeState.Deleted);
         } else if (state.isUpdated()) {
             this.state.setState(ENodeState.Deleted);
@@ -259,4 +251,13 @@ public abstract class AbstractConfigNode {
         Preconditions.checkNotNull(state);
         state.setState(ENodeState.Synced);
     }
+
+    /**
+     * Find a configuration node specified by the path/index.
+     *
+     * @param path - Tokenized Path array.
+     * @param index - Current index in the path array to search for.
+     * @return - Configuration Node found.
+     */
+    public abstract AbstractConfigNode find(String[] path, int index);
 }

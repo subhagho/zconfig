@@ -26,18 +26,28 @@ package com.wookler.zconfig.common.model;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.wookler.zconfig.common.GlobalConstants;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 /**
  * Class represents a configuration value element. All configuration values are treated as String values
  * and converters provided to get a specific value type.
- *
+ * <p>
  * JSON:
  * <pre>
  *     name : value,
  *     ...
  * </pre>
+ * <p>
+ * XML:
+ * <pre>
+ *     <name value="value"/>
+ * </pre>
  */
-public class ConfigValue extends AbstractConfigNode implements IConfigValue<String> {
+public class ConfigValue extends AbstractConfigNode
+        implements IConfigValue<String> {
     /**
      * Configuration value element.
      */
@@ -53,9 +63,170 @@ public class ConfigValue extends AbstractConfigNode implements IConfigValue<Stri
         return value;
     }
 
+    /**
+     * Set this config node value to the specified value string.
+     *
+     * @param value - Value String.
+     */
     public void setValue(String value) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(value));
         updated();
         this.value = value;
+    }
+
+    /**
+     * Get the value parsed as Boolean.
+     * <p>
+     * Note: If value string is NULL/Empty will return false.
+     *
+     * @return - Value parsed as boolean.
+     */
+    public boolean getBooleanValue() {
+        if (!Strings.isNullOrEmpty(value)) {
+            return Boolean.parseBoolean(value);
+        }
+        return false;
+    }
+
+    /**
+     * Get the value parsed as Short.
+     * <p>
+     * Note: If value string is NULL/Empty will return Short.MIN_VALUE.
+     *
+     * @return - Value parsed as short.
+     */
+    public short getShortValue() {
+        if (!Strings.isNullOrEmpty(value)) {
+            return Short.parseShort(value);
+        }
+        return Short.MIN_VALUE;
+    }
+
+    /**
+     * Get the value parsed as Integer.
+     * <p>
+     * Note: If value string is NULL/Empty will return Integer.MIN_VALUE.
+     *
+     * @return - Value parsed as integer.
+     */
+    public int getIntValue() {
+        if (!Strings.isNullOrEmpty(value)) {
+            return Integer.parseInt(value);
+        }
+        return Integer.MIN_VALUE;
+    }
+
+    /**
+     * Get the value parsed as Long.
+     * <p>
+     * Note: If value string is NULL/Empty will return Long.MIN_VALUE.
+     *
+     * @return - Value parsed as long.
+     */
+    public long getLongValue() {
+        if (!Strings.isNullOrEmpty(value)) {
+            return Long.parseLong(value);
+        }
+        return Long.MIN_VALUE;
+    }
+
+    /**
+     * Get the value parsed as Float.
+     * <p>
+     * Note: If value string is NULL/Empty will return Float.MIN_VALUE.
+     *
+     * @return - Value parsed as float.
+     */
+    public float getFloatValue() {
+        if (!Strings.isNullOrEmpty(value)) {
+            return Float.parseFloat(value);
+        }
+        return Float.MIN_VALUE;
+    }
+
+    /**
+     * Get the value parsed as Double.
+     * <p>
+     * Note: If value string is NULL/Empty will return Double.MIN_VALUE.
+     *
+     * @return - Value parsed as double.
+     */
+    public double getDoubleValue() {
+        if (!Strings.isNullOrEmpty(value)) {
+            return Double.parseDouble(value);
+        }
+        return Double.MIN_VALUE;
+    }
+
+    /**
+     * Get the value parsed as DateTime (Joda). This will use the
+     * com.wookler.zconfig.common.GlobalConstants#DEFAULT_DATE_FORMAT for parsing the date.
+     *
+     * <p>
+     * Note: If value string is NULL/Empty will return null.
+     *
+     * @return - Value parsed as double.
+     */
+    public DateTime getDateValue() {
+        if (!Strings.isNullOrEmpty(value)) {
+            DateTimeFormatter formatter =
+                    DateTimeFormat.forPattern(GlobalConstants.DEFAULT_DATE_FORMAT);
+            return DateTime.parse(value, formatter);
+        }
+        return null;
+    }
+
+    /**
+     * Get the value parsed as DateTime (Joda). This will use the
+     * specified date format for parsing the date.
+     *
+     * <p>
+     * Note: If value string is NULL/Empty will return null.
+     *
+     * @return - Value parsed as double.
+     */
+    public DateTime getDateValue(String format) {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(format));
+        if (!Strings.isNullOrEmpty(value)) {
+            DateTimeFormatter formatter =
+                    DateTimeFormat.forPattern(format);
+            return DateTime.parse(value, formatter);
+        }
+        return null;
+    }
+
+    /**
+     * Get the value parsed as DateTime (Joda). This will use the
+     * com.wookler.zconfig.common.GlobalConstants#DEFAULT_DATETIME_FORMAT for parsing the date.
+     *
+     * <p>
+     * Note: If value string is NULL/Empty will return null.
+     *
+     * @return - Value parsed as double.
+     */
+    public DateTime getDateTimeValue() {
+        if (!Strings.isNullOrEmpty(value)) {
+            DateTimeFormatter formatter =
+                    DateTimeFormat
+                            .forPattern(GlobalConstants.DEFAULT_DATETIME_FORMAT);
+            return DateTime.parse(value, formatter);
+        }
+        return null;
+    }
+
+    /**
+     * Check if the current path element matches this node name, if so return this instance.
+     *
+     * @param path - Tokenized Path array.
+     * @param index - Current index in the path array to search for.
+     * @return - This instance or NULL.
+     */
+    @Override
+    public AbstractConfigNode find(String[] path, int index) {
+        String key = path[index];
+        if (getName().compareTo(key) == 0 && (index == path.length - 1)) {
+            return this;
+        }
+        return null;
     }
 }

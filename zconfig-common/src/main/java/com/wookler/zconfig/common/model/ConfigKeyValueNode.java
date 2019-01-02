@@ -75,9 +75,23 @@ public abstract class ConfigKeyValueNode extends AbstractConfigNode {
     }
 
     /**
+     * Check if the specified key exists in the Map.
+     *
+     * @param key - Key to look for.
+     * @return - Exists?
+     */
+    public boolean hasKey(String key) {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(key));
+        if (keyValues != null) {
+            return keyValues.containsKey(key);
+        }
+        return false;
+    }
+
+    /**
      * Add a new key/value with the specified key and value.
      *
-     * @param key - Parameter key.
+     * @param key   - Parameter key.
      * @param value - Parameter value.
      */
     public void addKeyValue(String key, String value) {
@@ -91,6 +105,7 @@ public abstract class ConfigKeyValueNode extends AbstractConfigNode {
 
     /**
      * Remove the key/value with the specified key.
+     *
      * @param key - Parameter key.
      * @return - True if removed, else NULL.
      */

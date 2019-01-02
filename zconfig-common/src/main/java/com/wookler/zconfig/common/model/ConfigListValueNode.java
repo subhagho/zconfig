@@ -24,8 +24,58 @@
 
 package com.wookler.zconfig.common.model;
 
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+
+import java.util.List;
+
 /**
  * Class represent a configuration node of type list with String values.
  */
-public class ConfigListValueNode extends ConfigListNode<String> {
+public class ConfigListValueNode extends ConfigListNode<ConfigValue> {
+
+    /**
+     * Find the value node in the list with the specified name.
+     *
+     * @param name - Name of node to find.
+     * @return - Value node, else NULL.
+     */
+    public ConfigValue getValue(String name) {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(name));
+        List<ConfigValue> values = getValues();
+        if (values != null && !values.isEmpty()) {
+            for (ConfigValue value : values) {
+                if (value != null && value.getName().compareTo(name) == 0) {
+                    return value;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     *
+     * @param path - Tokenized Path array.
+     * @param index - Current index in the path array to search for.
+     * @return
+     */
+    @Override
+    public AbstractConfigNode find(String[] path, int index) {
+        String key = path[index];
+        if (getName().compareTo(key) == 0) {
+            if (index == path.length - 1) {
+                return this;
+            } else if (!isEmpty()) {
+                index = index + 1;
+                List<ConfigValue> nodes = getValues();
+                for (AbstractConfigNode node : nodes) {
+                    AbstractConfigNode fn = node.find(path, index);
+                    if (fn != null) {
+                        return fn;
+                    }
+                }
+            }
+        }
+        return null;
+    }
 }

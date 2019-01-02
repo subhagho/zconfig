@@ -25,10 +25,12 @@
 package com.wookler.zconfig.common.model;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+
+import java.util.List;
 
 /**
  * Class represents a configuration node that is a list of configuration elements.
- *
  */
 public class ConfigListElementNode extends ConfigListNode<AbstractConfigNode> {
     /**
@@ -41,5 +43,51 @@ public class ConfigListElementNode extends ConfigListNode<AbstractConfigNode> {
         Preconditions.checkArgument(value != null);
         value.setParent(this);
         super.addValue(value);
+    }
+
+    /**
+     * Find the value node in the list with the specified name.
+     *
+     * @param name - Name of node to find.
+     * @return - Value node, else NULL.
+     */
+    public AbstractConfigNode getElement(String name) {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(name));
+        List<AbstractConfigNode> values = getValues();
+        if (values != null && !values.isEmpty()) {
+            for (AbstractConfigNode value : values) {
+                if (value != null && value.getName().compareTo(name) == 0) {
+                    return value;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Search for the configuration node in the list of node elements.
+     *
+     * @param path  - Tokenized Path array.
+     * @param index - Current index in the path array to search for.
+     * @return
+     */
+    @Override
+    public AbstractConfigNode find(String[] path, int index) {
+        String key = path[index];
+        if (getName().compareTo(key) == 0) {
+            if (index == path.length - 1) {
+                return this;
+            } else if (!isEmpty()) {
+                index = index + 1;
+                List<AbstractConfigNode> nodes = getValues();
+                for (AbstractConfigNode node : nodes) {
+                    AbstractConfigNode fn = node.find(path, index);
+                    if (fn != null) {
+                        return fn;
+                    }
+                }
+            }
+        }
+        return null;
     }
 }

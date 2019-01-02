@@ -25,6 +25,7 @@
 package com.wookler.zconfig.common.model;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +38,7 @@ import java.util.List;
  *
  * @param <T> - Element type
  */
-public class ConfigListNode<T> extends AbstractConfigNode {
+public abstract class ConfigListNode<T> extends AbstractConfigNode {
     private List<T> values;
 
     /**
@@ -102,5 +103,14 @@ public class ConfigListNode<T> extends AbstractConfigNode {
             return values.get(index);
         }
         throw new ArrayIndexOutOfBoundsException("Values is NULL or specified index is out of bounds.");
+    }
+
+    /**
+     * Check if this list is empty (values == null or empty list).
+     *
+     * @return - Is empty?
+     */
+    public boolean isEmpty() {
+        return (values == null || values.isEmpty());
     }
 }

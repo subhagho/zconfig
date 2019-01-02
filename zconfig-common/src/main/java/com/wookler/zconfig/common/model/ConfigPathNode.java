@@ -27,14 +27,13 @@ package com.wookler.zconfig.common.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import org.joda.time.DateTime;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Class represents a configuration path node.
- *
+ * <p>
  * Configuration path(s) can be represented using a (.) or (/) notation while referencing.
  */
 public class ConfigPathNode extends AbstractConfigNode {
@@ -43,7 +42,6 @@ public class ConfigPathNode extends AbstractConfigNode {
      * Map containing the child nodes.
      */
     private Map<String, AbstractConfigNode> children;
-
 
 
     /**
@@ -66,7 +64,7 @@ public class ConfigPathNode extends AbstractConfigNode {
 
     /**
      * Add a new child node to this path element.
-     *
+     * <p>
      * Note: Node names are assumed to be unique, adding a child node with an existing name will
      * override the element if already present.
      *
@@ -80,14 +78,13 @@ public class ConfigPathNode extends AbstractConfigNode {
         }
         node.setParent(this);
         children.put(node.getName(), node);
-        setUpdateTimeStamp(DateTime.now());
+        updated();
     }
 
     /**
      * Get the child node (if any) with the specified node name.
      *
      * @param name - Node name to search for.
-     *
      * @return - Config Node, if found else NULL.
      */
     @JsonIgnore
@@ -110,10 +107,34 @@ public class ConfigPathNode extends AbstractConfigNode {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(name));
         if (children != null && children.containsKey(name)) {
             children.remove(name);
-            setUpdateTimeStamp(DateTime.now());
+            updated();
             return true;
         }
         return false;
+    }
+
+    /**
+     * Search for the path under this node.
+     *
+     * @param path - Tokenized Path array.
+     * @param index - Current index in the path array to search for.
+     * @return
+     */
+    @Override
+    public AbstractConfigNode find(String[] path, int index) {
+        String key = path[index];
+        if (getName().compareTo(key) == 0) {
+            if (index == path.length - 1) {
+                return this;
+            } else {
+                key = path[index + 1];
+                if (children.containsKey(key)) {
+                    AbstractConfigNode node = children.get(key);
+                    return node.find(path, index + 1);
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -128,7 +149,7 @@ public class ConfigPathNode extends AbstractConfigNode {
         if (children != null && !children.isEmpty()) {
             buff.append(":[");
             boolean first = true;
-            for(String key : children.keySet()) {
+            for (String key : children.keySet()) {
                 AbstractConfigNode node = children.get(key);
                 if (node != null) {
                     if (first) {

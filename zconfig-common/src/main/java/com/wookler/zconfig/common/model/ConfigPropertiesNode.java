@@ -62,4 +62,16 @@ public class ConfigPropertiesNode extends ConfigKeyValueNode {
     public void setName(String name) {
         super.setName(NODE_NAME);
     }
+
+    /**
+     * Settings aren't searchable hence method will always return null.
+     *
+     * @param path - Tokenized Path array.
+     * @param index - Current index in the path array to search for.
+     * @return - NULL
+     */
+    @Override
+    public AbstractConfigNode find(String[] path, int index) {
+        return null;
+    }
 }

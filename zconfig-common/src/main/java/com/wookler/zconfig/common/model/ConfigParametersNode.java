@@ -24,10 +24,12 @@
 
 package com.wookler.zconfig.common.model;
 
+import com.google.common.base.Strings;
+
 /**
  * Configuration node representing parameters to be specified for a path node.
  * Parameters are specified as key/value pairs enclosed in a {parameters} block.
- *
+ * <p>
  * Example:
  * JSON >>
  * <pre>
@@ -60,5 +62,33 @@ public class ConfigParametersNode extends ConfigKeyValueNode {
     @Override
     public void setName(String name) {
         super.setName(NODE_NAME);
+    }
+
+    /**
+     * Check if the path points to a configuration parameters. Will return a local
+     * instance of a configuration value node if attribute found..
+     *
+     * @param path  - Tokenized Path array.
+     * @param index - Current index in the path array to search for.
+     * @return - Local instance of a value node.
+     */
+    @Override
+    public AbstractConfigNode find(String[] path, int index) {
+        String key = path[index];
+        if (!Strings.isNullOrEmpty(key)) {
+            if (key.startsWith("#") && (index == path.length - 1)) {
+                key = key.substring(1);
+                if (Strings.isNullOrEmpty(key)) {
+                    return this;
+                } else if (hasKey(key)) {
+                    String value = getValue(key);
+                    ConfigValue cv = new ConfigValue();
+                    cv.setName(NODE_NAME);
+                    cv.setValue(value);
+                    return cv;
+                }
+            }
+        }
+        return null;
     }
 }
