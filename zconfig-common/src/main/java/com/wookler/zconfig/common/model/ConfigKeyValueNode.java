@@ -34,7 +34,7 @@ import java.util.Map;
 /**
  * Abstract Configuration node represents Key/Value pairs.
  */
-public abstract class ConfigKeyValueNode extends AbstractConfigNode {
+public abstract class ConfigKeyValueNode extends ConfigElementNode {
     /**
      * Map containing the defined parameters within a node definition.
      */
@@ -154,5 +154,15 @@ public abstract class ConfigKeyValueNode extends AbstractConfigNode {
     @Override
     public String toString() {
         return String.format("%s:[key/values=%s]", keyValues);
+    }
+
+    /**
+     * Update the state of this node.
+     *
+     * @param state - New state.
+     */
+    @Override
+    public void updateState(ENodeState state) {
+        getState().setState(state);
     }
 }

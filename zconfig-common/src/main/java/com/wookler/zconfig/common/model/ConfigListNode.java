@@ -24,6 +24,7 @@
 
 package com.wookler.zconfig.common.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 
@@ -38,7 +39,7 @@ import java.util.List;
  *
  * @param <T> - Element type
  */
-public abstract class ConfigListNode<T> extends AbstractConfigNode {
+public abstract class ConfigListNode<T> extends ConfigElementNode {
     private List<T> values;
 
     /**
@@ -110,6 +111,7 @@ public abstract class ConfigListNode<T> extends AbstractConfigNode {
      *
      * @return - Is empty?
      */
+    @JsonIgnore
     public boolean isEmpty() {
         return (values == null || values.isEmpty());
     }

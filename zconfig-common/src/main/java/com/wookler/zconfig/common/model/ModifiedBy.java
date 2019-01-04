@@ -26,6 +26,7 @@ package com.wookler.zconfig.common.model;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.wookler.zconfig.common.DateTimeUtils;
 import org.joda.time.DateTime;
 
 /**
@@ -57,7 +58,7 @@ public class ModifiedBy {
      * @param modifiedBy - Modified By user ID.
      */
     public void setModifiedBy(String modifiedBy) {
-        Preconditions.checkArgument(Strings.isNullOrEmpty(modifiedBy));
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(modifiedBy));
         this.modifiedBy = modifiedBy;
     }
 
@@ -78,5 +79,16 @@ public class ModifiedBy {
     public void setTimestamp(DateTime timestamp) {
         Preconditions.checkNotNull(timestamp);
         this.timestamp = timestamp;
+    }
+
+    /**
+     * Override the default toString method to print the user/timestamp.
+     *
+     * @return - To String
+     */
+    @Override
+    public String toString() {
+        return String.format("{user=%s, timestamp=%s}", modifiedBy,
+                             DateTimeUtils.toString(timestamp));
     }
 }

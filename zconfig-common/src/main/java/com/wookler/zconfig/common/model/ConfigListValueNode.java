@@ -78,4 +78,14 @@ public class ConfigListValueNode extends ConfigListNode<ConfigValue> {
         }
         return null;
     }
+
+    /**
+     * Update the state of this node.
+     *
+     * @param state - New state.
+     */
+    @Override
+    public void updateState(ENodeState state) {
+        getState().setState(state);
+    }
 }

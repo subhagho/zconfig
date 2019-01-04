@@ -24,6 +24,7 @@
 
 package com.wookler.zconfig.common.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.wookler.zconfig.common.GlobalConstants;
@@ -70,7 +71,6 @@ public class ConfigValue extends AbstractConfigNode
      */
     public void setValue(String value) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(value));
-        updated();
         this.value = value;
     }
 
@@ -81,6 +81,7 @@ public class ConfigValue extends AbstractConfigNode
      *
      * @return - Value parsed as boolean.
      */
+    @JsonIgnore
     public boolean getBooleanValue() {
         if (!Strings.isNullOrEmpty(value)) {
             return Boolean.parseBoolean(value);
@@ -95,6 +96,7 @@ public class ConfigValue extends AbstractConfigNode
      *
      * @return - Value parsed as short.
      */
+    @JsonIgnore
     public short getShortValue() {
         if (!Strings.isNullOrEmpty(value)) {
             return Short.parseShort(value);
@@ -109,6 +111,7 @@ public class ConfigValue extends AbstractConfigNode
      *
      * @return - Value parsed as integer.
      */
+    @JsonIgnore
     public int getIntValue() {
         if (!Strings.isNullOrEmpty(value)) {
             return Integer.parseInt(value);
@@ -123,6 +126,7 @@ public class ConfigValue extends AbstractConfigNode
      *
      * @return - Value parsed as long.
      */
+    @JsonIgnore
     public long getLongValue() {
         if (!Strings.isNullOrEmpty(value)) {
             return Long.parseLong(value);
@@ -137,6 +141,7 @@ public class ConfigValue extends AbstractConfigNode
      *
      * @return - Value parsed as float.
      */
+    @JsonIgnore
     public float getFloatValue() {
         if (!Strings.isNullOrEmpty(value)) {
             return Float.parseFloat(value);
@@ -151,6 +156,7 @@ public class ConfigValue extends AbstractConfigNode
      *
      * @return - Value parsed as double.
      */
+    @JsonIgnore
     public double getDoubleValue() {
         if (!Strings.isNullOrEmpty(value)) {
             return Double.parseDouble(value);
@@ -167,6 +173,7 @@ public class ConfigValue extends AbstractConfigNode
      *
      * @return - Value parsed as double.
      */
+    @JsonIgnore
     public DateTime getDateValue() {
         if (!Strings.isNullOrEmpty(value)) {
             DateTimeFormatter formatter =
@@ -185,6 +192,7 @@ public class ConfigValue extends AbstractConfigNode
      *
      * @return - Value parsed as double.
      */
+    @JsonIgnore
     public DateTime getDateValue(String format) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(format));
         if (!Strings.isNullOrEmpty(value)) {
@@ -204,6 +212,7 @@ public class ConfigValue extends AbstractConfigNode
      *
      * @return - Value parsed as double.
      */
+    @JsonIgnore
     public DateTime getDateTimeValue() {
         if (!Strings.isNullOrEmpty(value)) {
             DateTimeFormatter formatter =
@@ -229,4 +238,5 @@ public class ConfigValue extends AbstractConfigNode
         }
         return null;
     }
+
 }

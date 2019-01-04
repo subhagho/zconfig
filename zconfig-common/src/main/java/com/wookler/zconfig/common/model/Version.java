@@ -25,6 +25,8 @@
 package com.wookler.zconfig.common.model;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+import com.wookler.zconfig.common.ValueParseException;
 
 /**
  * Class represents an asset version.
@@ -83,6 +85,21 @@ public class Version {
     }
 
     /**
+     * Check version compatibility. Versions are assumed to be compatible if the
+     * majorVersion is the same.
+     *
+     * @param source - Source Version to compare with.
+     * @return - Is compatible?
+     */
+    public boolean isCompatible(Version source) {
+        Preconditions.checkArgument(source != null);
+        if (majorVersion == source.majorVersion) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Override the default toString to print the version info.
      *
      * @return - Version Info (majorVersion.minorVersion)
@@ -102,8 +119,31 @@ public class Version {
     public boolean equals(Object o) {
         if (o != null && o instanceof Version) {
             Version v = (Version) o;
-            return (v.majorVersion == majorVersion && v.minorVersion == minorVersion);
+            return (v.majorVersion == majorVersion &&
+                    v.minorVersion == minorVersion);
         }
         return super.equals(o);
+    }
+
+    /**
+     * Utility method to parse the Version object from the specified string value.
+     *
+     * @param value - String value of version (majorVersion.minorVersion)
+     * @return - Parsed Version object.
+     * @throws ValueParseException
+     */
+    public static final Version parse(String value) throws ValueParseException {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(value));
+        String[] parts = value.split("\\.");
+        if (parts == null || parts.length < 2) {
+            throw new ValueParseException(
+                    String.format("Error parsing Version from string. [value=%s]",
+                                  value));
+        }
+        Version version = new Version();
+        version.majorVersion = Integer.parseInt(parts[0]);
+        version.minorVersion = Integer.parseInt(parts[1]);
+
+        return version;
     }
 }

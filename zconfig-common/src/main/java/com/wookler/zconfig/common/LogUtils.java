@@ -25,6 +25,8 @@
 package com.wookler.zconfig.common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.joda.JodaModule;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -120,6 +122,9 @@ public class LogUtils {
             String mesg = "";
             if (source != null) {
                 ObjectMapper mapper = new ObjectMapper();
+                mapper.enable(SerializationFeature.INDENT_OUTPUT);
+                mapper.registerModule(new JodaModule());
+
                 mesg = mapper.writeValueAsString(source);
             }
             LOG(caller, mesg, LOGGER, level);

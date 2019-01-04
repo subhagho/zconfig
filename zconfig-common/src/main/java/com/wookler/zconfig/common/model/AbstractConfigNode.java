@@ -42,6 +42,7 @@ public abstract class AbstractConfigNode {
      * <p>
      * Note: Should be null only for the root configuration element.
      */
+    @JsonIgnore
     private AbstractConfigNode parent = null;
     /**
      * Name of this configuration node.
@@ -50,25 +51,7 @@ public abstract class AbstractConfigNode {
      */
     private String name;
 
-    /**
-     * Represents the local state of this configuration node instance.
-     */
-    @JsonIgnore
-    private NodeState state;
 
-    /**
-     * Node creation info.
-     */
-    private ModifiedBy createdBy;
-    /**
-     * Node updation info.
-     */
-    private ModifiedBy updatedBy;
-
-    /**
-     * Incremented version indicator.
-     */
-    private long nodeVersion = 0;
 
     /**
      * Get the name of this configuration node.
@@ -77,16 +60,6 @@ public abstract class AbstractConfigNode {
      */
     public String getName() {
         return name;
-    }
-
-    /**
-     * Default constructor - Will initialize the update indicators.
-     */
-    public AbstractConfigNode() {
-        state = new NodeState();
-        state.setState(ENodeState.Loading);
-
-        this.nodeVersion = 0;
     }
 
     /**
@@ -141,74 +114,6 @@ public abstract class AbstractConfigNode {
     }
 
     /**
-     * Get the state handle for this node.
-     *
-     * @return - Node state handle.
-     */
-    public NodeState getState() {
-        return state;
-    }
-
-    /**
-     * Get the node creation info.
-     *
-     * @return - Created By info.
-     */
-    public ModifiedBy getCreatedBy() {
-        return createdBy;
-    }
-
-    /**
-     * Set the node creation info.
-     *
-     * @param createdBy - Created timestamp.
-     */
-    public void setCreatedBy(ModifiedBy createdBy) {
-        Preconditions.checkArgument(createdBy != null);
-
-        this.createdBy = createdBy;
-    }
-
-    /**
-     * Get node last updation info.
-     *
-     * @return - Last updation info.
-     */
-    public ModifiedBy getUpdatedBy() {
-        return updatedBy;
-    }
-
-    /**
-     * Set the last updation info for this node.
-     *
-     * @param updatedBy - Last updated timestamp
-     */
-    public void setUpdatedBy(ModifiedBy updatedBy) {
-        Preconditions.checkArgument(updatedBy != null);
-
-        this.updatedBy = updatedBy;
-    }
-
-    /**
-     * Get the record version of this node.
-     *
-     * @return - Record version.
-     */
-    public long getNodeVersion() {
-        return nodeVersion;
-    }
-
-    /**
-     * Set the record version of this node.
-     *
-     * @param nodeVersion - Record version
-     */
-    public void setNodeVersion(long nodeVersion) {
-        Preconditions.checkArgument(nodeVersion >= 0);
-        this.nodeVersion = nodeVersion;
-    }
-
-    /**
      * Get the path of this node relative to the root node. Path is represented in the Unix
      * path format.
      *
@@ -233,46 +138,6 @@ public abstract class AbstractConfigNode {
     @Override
     public String toString() {
         return name;
-    }
-
-    /**
-     * Indicate this node has been updated.
-     */
-    protected void updated() {
-        if (state.isSynced()) {
-            this.nodeVersion++;
-            this.state.setState(ENodeState.Updated);
-        }
-    }
-
-    /**
-     * Mark this node as deleted.
-     */
-    protected void deleted() {
-        if (state.isSynced()) {
-            this.nodeVersion++;
-            this.state.setState(ENodeState.Deleted);
-        } else if (state.isUpdated()) {
-            this.state.setState(ENodeState.Deleted);
-        }
-    }
-
-    /**
-     * Mark this node is being loaded.
-     */
-    public void loading() {
-        if (state == null) {
-            state = new NodeState();
-        }
-        state.setState(ENodeState.Loading);
-    }
-
-    /**
-     * Mark this node has been synchronized.
-     */
-    public void synced() {
-        Preconditions.checkNotNull(state);
-        state.setState(ENodeState.Synced);
     }
 
     /**

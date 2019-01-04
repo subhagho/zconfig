@@ -29,10 +29,10 @@ import com.google.common.base.Preconditions;
 /**
  * Configuration node that represents an external configuration set to be included
  * under the current path.
- *
+ * <p>
  * Included configurations are expected to be complete configuration sets.
  */
-public abstract class ConfigIncludeNode extends AbstractConfigNode {
+public abstract class ConfigIncludeNode extends ConfigElementNode {
     /**
      * Path to the node that should be considered the root node when including under the current path.
      */
@@ -82,12 +82,25 @@ public abstract class ConfigIncludeNode extends AbstractConfigNode {
     /**
      * Delegate the call to the included node.
      *
-     * @param path - Tokenized Path array.
+     * @param path  - Tokenized Path array.
      * @param index - Current index in the path array to search for.
      * @return
      */
     @Override
     public AbstractConfigNode find(String[] path, int index) {
         return node.find(path, index);
+    }
+
+    /**
+     * Update the state for this node and the embedded node.
+     *
+     * @param state - New state.
+     */
+    @Override
+    public void updateState(ENodeState state) {
+        getState().setState(state);
+        if (node != null) {
+            node.updateState(state);
+        }
     }
 }

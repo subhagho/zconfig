@@ -31,9 +31,9 @@ public class GlobalConstants {
     /**
      * Default date format to parse/print dates.
      */
-    public static final String DEFAULT_DATE_FORMAT = "mm.dd.yyyy";
+    public static final String DEFAULT_DATE_FORMAT = "M.d.y";
     /**
      * Default data/time format to parse/print date/time.
      */
-    public static final String DEFAULT_DATETIME_FORMAT = String.format("%s HH:MM:SS", DEFAULT_DATE_FORMAT);
+    public static final String DEFAULT_DATETIME_FORMAT = String.format("%s H:m:s", DEFAULT_DATE_FORMAT);
 }

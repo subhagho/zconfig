@@ -27,13 +27,21 @@ package com.wookler.zconfig.common.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.wookler.zconfig.common.ConfigurationException;
 
+import java.io.File;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Configuration class that defines a configuration set.
  */
 public class Configuration {
+    /**
+     * Local instance ID of this configuration handle.
+     */
+    @JsonIgnore
+    private String instanceId;
     /**
      * Name of this configuration set. Must be globally unique within a configuration server instance.
      */
@@ -64,8 +72,18 @@ public class Configuration {
      * Default constructor
      */
     public Configuration() {
+        instanceId = UUID.randomUUID().toString();
         state = new NodeState();
         state.setState(ENodeState.Loading);
+    }
+
+    /**
+     * Get the local instance ID of this configuration.
+     *
+     * @return - Local instance ID
+     */
+    public String getInstanceId() {
+        return instanceId;
     }
 
     /**
@@ -226,21 +244,6 @@ public class Configuration {
     }
 
     /**
-     * Get the attributes, if any, for the specified node.
-     *
-     * @param node - Node to search attributes.
-     * @return - Attributes Node, else NULL.
-     */
-    public ConfigAttributesNode attributes(AbstractConfigNode node) {
-        Preconditions.checkArgument(node != null);
-        if (node instanceof ConfigPathNode) {
-            ConfigPathNode cp = (ConfigPathNode) node;
-            return cp.attributes();
-        }
-        return null;
-    }
-
-    /**
      * Get the properties, if any, for the specified node.
      *
      * @param node - Node to search properties.
@@ -319,5 +322,23 @@ public class Configuration {
             }
         }
         return null;
+    }
+
+    /**
+     * Get the path to the temp directory for this configuration instance.
+     *
+     * If temp directory doesn't exist, this call will create it.
+     *
+     * @return - File path to temp directory.
+     * @throws ConfigurationException
+     */
+    public synchronized File getInstancePath() throws ConfigurationException {
+        String tmp = System.getProperty("java.io.tmpdir");
+        String path = String.format("%s/%s", tmp, instanceId);
+        File fp = new File(path);
+        if (!fp.exists()) {
+            fp.mkdirs();
+        }
+        return fp;
     }
 }

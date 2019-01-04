@@ -32,14 +32,14 @@ import java.util.List;
 /**
  * Class represents a configuration node that is a list of configuration elements.
  */
-public class ConfigListElementNode extends ConfigListNode<AbstractConfigNode> {
+public class ConfigListElementNode extends ConfigListNode<ConfigElementNode> {
     /**
      * Override the add value method, set the parent of the node element being added to this node.
      *
      * @param value - Element value to add.
      */
     @Override
-    public void addValue(AbstractConfigNode value) {
+    public void addValue(ConfigElementNode value) {
         Preconditions.checkArgument(value != null);
         value.setParent(this);
         super.addValue(value);
@@ -51,11 +51,11 @@ public class ConfigListElementNode extends ConfigListNode<AbstractConfigNode> {
      * @param name - Name of node to find.
      * @return - Value node, else NULL.
      */
-    public AbstractConfigNode getElement(String name) {
+    public ConfigElementNode getElement(String name) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(name));
-        List<AbstractConfigNode> values = getValues();
+        List<ConfigElementNode> values = getValues();
         if (values != null && !values.isEmpty()) {
-            for (AbstractConfigNode value : values) {
+            for (ConfigElementNode value : values) {
                 if (value != null && value.getName().compareTo(name) == 0) {
                     return value;
                 }
@@ -79,8 +79,8 @@ public class ConfigListElementNode extends ConfigListNode<AbstractConfigNode> {
                 return this;
             } else if (!isEmpty()) {
                 index = index + 1;
-                List<AbstractConfigNode> nodes = getValues();
-                for (AbstractConfigNode node : nodes) {
+                List<ConfigElementNode> nodes = getValues();
+                for (ConfigElementNode node : nodes) {
                     AbstractConfigNode fn = node.find(path, index);
                     if (fn != null) {
                         return fn;
@@ -89,5 +89,22 @@ public class ConfigListElementNode extends ConfigListNode<AbstractConfigNode> {
             }
         }
         return null;
+    }
+
+    /**
+     * Update the state of this node and all the nodes in the list.
+     *
+     * @param state - New state.
+     */
+    @Override
+    public void updateState(ENodeState state) {
+        getState().setState(state);
+
+        List<ConfigElementNode> nodes = getValues();
+        if (nodes != null && !nodes.isEmpty()) {
+            for (ConfigElementNode node : nodes) {
+                node.updateState(state);
+            }
+        }
     }
 }

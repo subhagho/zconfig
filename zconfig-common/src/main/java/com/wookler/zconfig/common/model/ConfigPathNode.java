@@ -36,7 +36,7 @@ import java.util.Map;
  * <p>
  * Configuration path(s) can be represented using a (.) or (/) notation while referencing.
  */
-public class ConfigPathNode extends AbstractConfigNode {
+public class ConfigPathNode extends ConfigElementNode {
 
     /**
      * Map containing the child nodes.
@@ -128,20 +128,6 @@ public class ConfigPathNode extends AbstractConfigNode {
     }
 
     /**
-     * Get the attributes, if any for this path node.
-     *
-     * @return - Attributes node, else NULL.
-     */
-    public ConfigAttributesNode attributes() {
-        if (children != null &&
-                children.containsKey(ConfigAttributesNode.NODE_NAME)) {
-            return (ConfigAttributesNode) children
-                    .get(ConfigAttributesNode.NODE_NAME);
-        }
-        return null;
-    }
-
-    /**
      * Get the properties, if any for this path node.
      *
      * @return - Properties node, else NULL.
@@ -205,5 +191,24 @@ public class ConfigPathNode extends AbstractConfigNode {
             buff.append("]");
         }
         return buff.toString();
+    }
+
+    /**
+     * Update the state of this node and all the child nodes.
+     *
+     * @param state - New state.
+     */
+    @Override
+    public void updateState(ENodeState state) {
+        getState().setState(state);
+
+        if (children != null && !children.isEmpty()) {
+            for (String key : children.keySet()) {
+                AbstractConfigNode node = children.get(key);
+                if (node instanceof ConfigElementNode) {
+                    ((ConfigElementNode) node).updateState(state);
+                }
+            }
+        }
     }
 }

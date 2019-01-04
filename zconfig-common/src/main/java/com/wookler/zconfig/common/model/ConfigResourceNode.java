@@ -43,7 +43,7 @@ import java.net.URI;
  *     ...
  * }
  */
-public abstract class ConfigResourceNode extends AbstractConfigNode {
+public abstract class ConfigResourceNode extends ConfigElementNode {
     /**
      * Resource type of this node.
      */
@@ -105,5 +105,15 @@ public abstract class ConfigResourceNode extends AbstractConfigNode {
             return this;
         }
         return null;
+    }
+
+    /**
+     * Update the state of this node.
+     *
+     * @param state - New state.
+     */
+    @Override
+    public void updateState(ENodeState state) {
+        getState().setState(state);
     }
 }
