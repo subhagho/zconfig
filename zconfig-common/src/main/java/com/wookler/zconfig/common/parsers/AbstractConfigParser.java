@@ -57,11 +57,4 @@ public abstract class AbstractConfigParser {
     public abstract void parse(String name, Properties properties)
     throws ConfigurationException;
 
-    /**
-     * Write this instance of the configuration to the specified output location.
-     *
-     * @param path - Output location to write to.
-     * @throws ConfigurationException
-     */
-    public abstract void write(String path) throws ConfigurationException;
 }

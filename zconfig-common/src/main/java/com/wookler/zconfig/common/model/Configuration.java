@@ -334,7 +334,7 @@ public class Configuration {
      */
     public synchronized File getInstancePath() throws ConfigurationException {
         String tmp = System.getProperty("java.io.tmpdir");
-        String path = String.format("%s/%s", tmp, instanceId);
+        String path = String.format("%s/%s/%s", tmp, name, instanceId);
         File fp = new File(path);
         if (!fp.exists()) {
             fp.mkdirs();
