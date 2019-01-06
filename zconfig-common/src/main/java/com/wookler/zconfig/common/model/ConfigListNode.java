@@ -102,7 +102,20 @@ public abstract class ConfigListNode<T> extends ConfigElementNode {
         if (values != null && index < values.size()) {
             return values.get(index);
         }
-        throw new ArrayIndexOutOfBoundsException("Values is NULL or specified index is out of bounds.");
+        throw new ArrayIndexOutOfBoundsException(
+                "Values is NULL or specified index is out of bounds.");
+    }
+
+    /**
+     * Get the size of the List in this node.
+     *
+     * @return - List Size.
+     */
+    public int size() {
+        if (values != null) {
+            return values.size();
+        }
+        return 0;
     }
 
     /**

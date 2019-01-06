@@ -27,6 +27,7 @@ package com.wookler.zconfig.common.parsers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -205,7 +206,8 @@ public class JSONConfigParser extends AbstractConfigParser {
         if (nodes != null) {
             while (nodes.hasNext()) {
                 Map.Entry<String, JsonNode> nn = nodes.next();
-                if (nn.getKey().compareTo(JSONConfigConstants.CONFIG_HEADER_NODE) == 0) {
+                if (nn.getKey().compareTo(JSONConfigConstants.CONFIG_HEADER_NODE) ==
+                        0) {
                     continue;
                 }
                 parseConfiguration(nn.getKey(), nn.getValue());
@@ -256,7 +258,8 @@ public class JSONConfigParser extends AbstractConfigParser {
         if (nodes != null) {
             while (nodes.hasNext()) {
                 Map.Entry<String, JsonNode> nn = nodes.next();
-                if (nn.getKey().compareTo(JSONConfigConstants.CONFIG_NODE_VERSION) == 0) {
+                if (nn.getKey()
+                      .compareTo(JSONConfigConstants.CONFIG_NODE_VERSION) == 0) {
                     JsonNode n = nn.getValue();
                     if (n.getNodeType() != JsonNodeType.NUMBER) {
                         throw new ConfigurationException(String.format(
@@ -266,16 +269,22 @@ public class JSONConfigParser extends AbstractConfigParser {
                     }
                     ((ConfigElementNode) configNode).setNodeVersion(n.longValue());
                     isProcessed(n);
-                } else if (nn.getKey().compareTo(JSONConfigConstants.CONFIG_CREATED_BY) == 0) {
+                } else if (nn.getKey()
+                             .compareTo(JSONConfigConstants.CONFIG_CREATED_BY) ==
+                        0) {
                     ModifiedBy createdby =
-                            parseUpdateInfo(nn.getValue(), JSONConfigConstants.CONFIG_CREATED_BY);
+                            parseUpdateInfo(nn.getValue(),
+                                            JSONConfigConstants.CONFIG_CREATED_BY);
                     if (createdby != null) {
                         ((ConfigElementNode) configNode).setCreatedBy(createdby);
                         isProcessed(nn.getValue());
                     }
-                } else if (nn.getKey().compareTo(JSONConfigConstants.CONFIG_UPDATED_BY) == 0) {
+                } else if (nn.getKey()
+                             .compareTo(JSONConfigConstants.CONFIG_UPDATED_BY) ==
+                        0) {
                     ModifiedBy updatedBy =
-                            parseUpdateInfo(nn.getValue(), JSONConfigConstants.CONFIG_UPDATED_BY);
+                            parseUpdateInfo(nn.getValue(),
+                                            JSONConfigConstants.CONFIG_UPDATED_BY);
                     if (updatedBy != null) {
                         ((ConfigElementNode) configNode).setUpdatedBy(updatedBy);
                         isProcessed(nn.getValue());
@@ -326,40 +335,78 @@ public class JSONConfigParser extends AbstractConfigParser {
             }
             isProcessed(node);
         } else if (node.getNodeType() == JsonNodeType.ARRAY) {
-            // Check if array element types are consistent
-            JsonNodeType type = null;
-            Iterator<Map.Entry<String, JsonNode>> nodes = node.fields();
-            if (nodes != null) {
-                while (nodes.hasNext()) {
-                    Map.Entry<String, JsonNode> nn = nodes.next();
-                    if (type == null) {
-                        type = nn.getValue().getNodeType();
-                    } else {
-                        if (nn.getValue().getNodeType() != type) {
-                            throw new ConfigurationException(String.format(
-                                    "Invalid Array Element : [expected type=%s][actual type=%s]",
-                                    type.name(),
-                                    nn.getValue().getNodeType().name()));
-                        }
+            readArrayNode(name, parent, (ArrayNode) node);
+        }
+    }
+
+    /**
+     * Read and process the specified JSON Array node.
+     *
+     * @param name      - Name of the node.
+     * @param parent    - Parent Config Node.
+     * @param arrayNode - JSON Array node.
+     * @throws ConfigurationException
+     */
+    private void readArrayNode(String name, AbstractConfigNode parent,
+                               ArrayNode arrayNode) throws ConfigurationException {
+        // Check if array element types are consistent
+        JsonNodeType type = null;
+
+        if (arrayNode.size() > 0) {
+            for (int ii = 0; ii < arrayNode.size(); ii++) {
+                JsonNode nn = arrayNode.get(ii);
+                if (type == null) {
+                    type = nn.getNodeType();
+                } else {
+                    if (nn.getNodeType() != type) {
+                        throw new ConfigurationException(String.format(
+                                "Invalid Array Element : [expected type=%s][actual type=%s]",
+                                type.name(),
+                                nn.getNodeType().name()));
                     }
                 }
             }
-            if (type != null) {
-                if (type == JsonNodeType.STRING) {
-                    ConfigListValueNode nn = new ConfigListValueNode();
-                    setupNodeWithChildren(name, parent, nn, node, false);
-                } else if (type == JsonNodeType.OBJECT) {
-                    ConfigListElementNode nn = new ConfigListElementNode();
-                    setupNodeWithChildren(name, parent, nn, node, false);
-                } else {
-                    throw new ConfigurationException(String.format(
-                            "Unsupported Array element type. [type=%s]",
-                            type.name()));
-                }
+        }
+        if (type != null) {
+            if (type == JsonNodeType.STRING) {
+                ConfigListValueNode nn = new ConfigListValueNode();
+                parseArrayNodes(name, nn, parent, arrayNode);
+            } else if (type == JsonNodeType.OBJECT) {
+                ConfigListElementNode nn = new ConfigListElementNode();
+                parseArrayNodes(name, nn, parent, arrayNode);
+            } else {
+                throw new ConfigurationException(String.format(
+                        "Unsupported Array element type. [type=%s]",
+                        type.name()));
             }
-            isProcessed(node);
+        }
+        isProcessed(arrayNode);
+    }
+
+    /**
+     * Read the list elements for this Array Node.
+     *
+     * @param name      - List Node name.
+     * @param listNode  - Parent List Config Node.
+     * @param parent    - Parent Path node of the List.
+     * @param arrayNode - JSON Array node to read from.
+     * @param <T>       - Type
+     * @throws ConfigurationException
+     */
+    private <T> void parseArrayNodes(String name, ConfigListNode<T> listNode,
+                                     AbstractConfigNode parent,
+                                     ArrayNode arrayNode)
+    throws ConfigurationException {
+        setupNode(name, listNode, parent, arrayNode, false);
+        if (arrayNode.size() > 0) {
+            for (int ii = 0; ii < arrayNode.size(); ii++) {
+                JsonNode nn = arrayNode.get(ii);
+                String cname = String.valueOf(ii);
+                parseNode(cname, nn, listNode);
+            }
         }
     }
+
 
     /**
      * Setup the common node elements.
@@ -496,14 +543,16 @@ public class JSONConfigParser extends AbstractConfigParser {
             JsonNode header = node.get(JSONConfigConstants.CONFIG_HEADER_NODE);
             if (header == null) {
                 throw ConfigurationException
-                        .propertyNotFoundException(JSONConfigConstants.CONFIG_HEADER_NODE);
+                        .propertyNotFoundException(
+                                JSONConfigConstants.CONFIG_HEADER_NODE);
             }
             if (!isProcessed(header)) {
                 // Read the configuration name
                 JsonNode hname = header.get(JSONConfigConstants.CONFIG_HEADER_NAME);
                 if (hname == null) {
                     throw ConfigurationException
-                            .propertyNotFoundException(JSONConfigConstants.CONFIG_HEADER_NAME);
+                            .propertyNotFoundException(
+                                    JSONConfigConstants.CONFIG_HEADER_NAME);
                 }
                 String sname = hname.textValue();
                 // Configuration name in resource should match the expected configuration name.
@@ -513,10 +562,12 @@ public class JSONConfigParser extends AbstractConfigParser {
                             configuration.getName(), sname));
                 }
                 // Read the configuration version.
-                JsonNode vnode = header.get(JSONConfigConstants.CONFIG_HEADER_VERSION);
+                JsonNode vnode =
+                        header.get(JSONConfigConstants.CONFIG_HEADER_VERSION);
                 if (vnode == null) {
                     throw ConfigurationException
-                            .propertyNotFoundException(JSONConfigConstants.CONFIG_HEADER_VERSION);
+                            .propertyNotFoundException(
+                                    JSONConfigConstants.CONFIG_HEADER_VERSION);
                 }
                 String vstring = vnode.textValue();
                 Version cversion = Version.parse(vstring);
@@ -532,18 +583,22 @@ public class JSONConfigParser extends AbstractConfigParser {
                 JsonNode cnode = header.get(JSONConfigConstants.CONFIG_CREATED_BY);
                 if (cnode == null) {
                     throw ConfigurationException
-                            .propertyNotFoundException(JSONConfigConstants.CONFIG_CREATED_BY);
+                            .propertyNotFoundException(
+                                    JSONConfigConstants.CONFIG_CREATED_BY);
                 }
-                ModifiedBy createdBy = parseUpdateInfo(cnode, JSONConfigConstants.CONFIG_CREATED_BY);
+                ModifiedBy createdBy = parseUpdateInfo(cnode,
+                                                       JSONConfigConstants.CONFIG_CREATED_BY);
                 configuration.setCreatedBy(createdBy);
 
                 // Read the configuration Last updation info.
                 JsonNode unode = header.get(JSONConfigConstants.CONFIG_UPDATED_BY);
                 if (unode == null) {
                     throw ConfigurationException
-                            .propertyNotFoundException(JSONConfigConstants.CONFIG_UPDATED_BY);
+                            .propertyNotFoundException(
+                                    JSONConfigConstants.CONFIG_UPDATED_BY);
                 }
-                ModifiedBy updatedBy = parseUpdateInfo(unode, JSONConfigConstants.CONFIG_UPDATED_BY);
+                ModifiedBy updatedBy = parseUpdateInfo(unode,
+                                                       JSONConfigConstants.CONFIG_UPDATED_BY);
                 configuration.setUpdatedBy(updatedBy);
             }
         } catch (ValueParseException e) {
@@ -568,7 +623,8 @@ public class JSONConfigParser extends AbstractConfigParser {
         JsonNode jn = node.get(JSONConfigConstants.CONFIG_UPDATE_OWNER);
         if (jn == null) {
             throw ConfigurationException
-                    .propertyNotFoundException(JSONConfigConstants.CONFIG_UPDATE_OWNER);
+                    .propertyNotFoundException(
+                            JSONConfigConstants.CONFIG_UPDATE_OWNER);
         }
         String owner = jn.textValue();
         if (Strings.isNullOrEmpty(owner)) {
@@ -578,7 +634,8 @@ public class JSONConfigParser extends AbstractConfigParser {
         jn = node.get(JSONConfigConstants.CONFIG_UPDATE_TIMESTAMP);
         if (jn == null) {
             throw ConfigurationException
-                    .propertyNotFoundException(JSONConfigConstants.CONFIG_UPDATE_TIMESTAMP);
+                    .propertyNotFoundException(
+                            JSONConfigConstants.CONFIG_UPDATE_TIMESTAMP);
         }
         String timestamp = jn.textValue();
         if (Strings.isNullOrEmpty(timestamp)) {
