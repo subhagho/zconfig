@@ -30,6 +30,7 @@ package com.wookler.zconfig.common;
 public class JSONConfigConstants {
     public static final String CONFIG_HEADER_NODE = "header";
     public static final String CONFIG_HEADER_NAME = "name";
+    public static final String CONFIG_HEADER_DESC = "description";
     public static final String CONFIG_HEADER_VERSION = "version";
     public static final String CONFIG_UPDATE_OWNER = "user";
     public static final String CONFIG_UPDATE_TIMESTAMP = "timestamp";

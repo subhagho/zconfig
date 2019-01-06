@@ -114,8 +114,10 @@ public abstract class ConfigElementNode extends AbstractConfigNode {
      */
     @Override
     protected void updated() {
-        nodeVersion++;
-        super.updated();
+        if (getState().isSynced()) {
+            nodeVersion++;
+            super.updated();
+        }
     }
 
     /**

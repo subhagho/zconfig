@@ -1,6 +1,7 @@
 {
     "header": {
         "name": "test-config",
+        "description" : "This is a test JSON configuration file.",
         "version": "0.2",
         "createdBy": {
             "user": "subho",
@@ -52,9 +53,12 @@
                     "updatedBy": {
                         "user": "subho",
                         "timestamp": "01.02.2019 12:32:19"
-                    }
+                    },
+                    "string_1": "STRING_1",
+                    "string_2": "STRING_2"
                 },
                 {
+                    "description": "This is a test description",
                     "nodeVersion": 1,
                     "createdBy": {
                         "user": "subho",
@@ -74,7 +78,9 @@
                     "updatedBy": {
                         "user": "subho",
                         "timestamp": "01.02.2019 12:32:19"
-                    }
+                    },
+                    "string_1": "STRING_1",
+                    "string_2": "STRING_2"
                 },
                 {
                     "nodeVersion": 1,
@@ -85,10 +91,13 @@
                     "updatedBy": {
                         "user": "subho",
                         "timestamp": "01.02.2019 12:32:19"
-                    }
+                    },
+                    "string_1": "STRING_1",
+                    "string_2": "STRING_2"
                 }
             ],
             "node_2": {
+                "description": "This is a test description",
                 "nodeVersion": 1,
                 "createdBy": {
                     "user": "subho",

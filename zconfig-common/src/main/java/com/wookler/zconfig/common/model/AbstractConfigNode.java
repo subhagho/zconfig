@@ -36,7 +36,6 @@ public abstract class AbstractConfigNode {
     /**
      * Represents the local state of this configuration node instance.
      */
-    @JsonIgnore
     private NodeState state;
 
     /**
@@ -58,6 +57,10 @@ public abstract class AbstractConfigNode {
      */
     private String name;
 
+    /**
+     * Description of this configuration element.
+     */
+    private String description;
 
     /**
      * Get the state handle for this node.
@@ -75,6 +78,24 @@ public abstract class AbstractConfigNode {
      */
     public String getName() {
         return name;
+    }
+
+    /**
+     * Get the node description.
+     *
+     * @return - Node description.
+     */
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * Set the node description.
+     *
+     * @param description - Node description.
+     */
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     /**

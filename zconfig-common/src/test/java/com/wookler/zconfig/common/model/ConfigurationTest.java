@@ -24,6 +24,7 @@
 
 package com.wookler.zconfig.common.model;
 
+import com.google.common.base.Strings;
 import com.wookler.zconfig.common.parsers.JSONConfigParser;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -67,9 +68,63 @@ class ConfigurationTest {
     }
 
     @Test
+    void findProperties() {
+        try {
+            String path = "configuration.@";
+            AbstractConfigNode node = configuration.find(path);
+            assertNotNull(node);
+            assertTrue(node instanceof ConfigPropertiesNode);
+
+            path = "@PROP_1";
+            node = configuration.find(node, path);
+            assertTrue(node instanceof ConfigValue);
+            String param = ((ConfigValue) node).getValue();
+            assertFalse(Strings.isNullOrEmpty(param));
+            debug(getClass(),
+                  String.format("[path=%s] property value = %s", path, param));
+        } catch (Throwable e) {
+            error(getClass(), e);
+            fail(e);
+        }
+    }
+
+    @Test
+    void findParameters() {
+        try {
+            String path = "configuration.node_1.#";
+            AbstractConfigNode node = configuration.find(path);
+            assertNotNull(node);
+            assertTrue(node instanceof ConfigParametersNode);
+
+            path = "#PARAM_1";
+            node = configuration.find(node, path);
+            assertTrue(node instanceof ConfigValue);
+            String param = ((ConfigValue) node).getValue();
+            assertFalse(Strings.isNullOrEmpty(param));
+            debug(getClass(),
+                  String.format("[path=%s] parameter value = %s", path, param));
+        } catch (Throwable e) {
+            error(getClass(), e);
+            fail(e);
+        }
+    }
+
+    @Test
     void findForConfigNode() {
         try {
+            String path = "configuration.node_1.TEST_ELEMENT_LIST";
+            AbstractConfigNode node = configuration.find(path);
+            assertNotNull(node);
+            assertTrue(node instanceof ConfigListElementNode);
+            assertEquals(4, ((ConfigListElementNode) node).size());
 
+            path = "TEST_ELEMENT_LIST.2.string_2";
+            node = configuration.find(node, path);
+            assertNotNull(node);
+            assertTrue(node instanceof ConfigValue);
+            String value = ((ConfigValue) node).getValue();
+            assertFalse(Strings.isNullOrEmpty(value));
+            debug(getClass(), String.format("[path=%s][value=%s]", path, value));
         } catch (Throwable e) {
             error(getClass(), e);
             fail(e);

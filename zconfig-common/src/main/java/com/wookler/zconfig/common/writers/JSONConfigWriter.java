@@ -147,25 +147,33 @@ public class JSONConfigWriter extends AbstractConfigWriter {
     /**
      * Process the configuration node, based on the node type will call the appropriate method.
      *
-     * @param node   - Configuration node to process.
-     * @param parent - Parent JSON node.
+     * @param node           - Configuration node to process.
+     * @param parentJsonNode - Parent JSON node.
      * @throws ConfigurationException
      */
-    private void addConfigNode(AbstractConfigNode node, JsonNode parent)
+    private void addConfigNode(AbstractConfigNode node,
+                               JsonNode parentJsonNode)
     throws ConfigurationException {
-        if (node instanceof ConfigPathNode && (parent instanceof ObjectNode)) {
-            addConfigPathNode((ConfigPathNode) node, (ObjectNode) parent);
+        if (node instanceof ConfigPathNode) {
+            if (parentJsonNode instanceof ObjectNode) {
+                addConfigPathNode((ConfigPathNode) node,
+                                  (ObjectNode) parentJsonNode);
+            } else if (parentJsonNode instanceof ArrayNode) {
+                addConfigPathNode((ConfigPathNode) node,
+                                  (ArrayNode) parentJsonNode);
+            }
         } else if (node instanceof ConfigListElementNode &&
-                (parent instanceof ObjectNode)) {
-            addListNode((ConfigListElementNode) node, (ObjectNode) parent);
+                (parentJsonNode instanceof ObjectNode)) {
+            addListNode((ConfigListElementNode) node, (ObjectNode) parentJsonNode);
         } else if (node instanceof ConfigValue) {
-            addConfigValue((ConfigValue) node, parent);
+            addConfigValue((ConfigValue) node, parentJsonNode);
         } else if (node instanceof ConfigKeyValueNode &&
-                (parent instanceof ObjectNode)) {
-            addKeyValueNode((ConfigKeyValueNode) node, (ObjectNode) parent);
+                (parentJsonNode instanceof ObjectNode)) {
+            addKeyValueNode((ConfigKeyValueNode) node, (ObjectNode) parentJsonNode);
         } else if (node instanceof ConfigListValueNode &&
-                (parent instanceof ObjectNode)) {
-            ArrayNode valueList = ((ObjectNode) parent).putArray(node.getName());
+                (parentJsonNode instanceof ObjectNode)) {
+            ArrayNode valueList =
+                    ((ObjectNode) parentJsonNode).putArray(node.getName());
             List<ConfigValue> values = ((ConfigListValueNode) node).getValues();
             if (values != null && !values.isEmpty()) {
                 for (ConfigValue cv : values) {
@@ -212,11 +220,30 @@ public class JSONConfigWriter extends AbstractConfigWriter {
         }
         ObjectNode cnode = parent.putObject(node.getName());
         addNodeHeader(node, cnode);
+
         if (node.getChildren() != null) {
             Map<String, AbstractConfigNode> nodes = node.getChildren();
             if (!nodes.isEmpty()) {
                 for (String name : nodes.keySet()) {
                     addConfigNode(nodes.get(name), cnode);
+                }
+            }
+        }
+    }
+
+    private void addConfigPathNode(ConfigPathNode node, ArrayNode parent)
+    throws ConfigurationException {
+        if (Strings.isNullOrEmpty(node.getName())) {
+            throw ConfigurationException.propertyNotFoundException(
+                    JSONConfigConstants.CONFIG_HEADER_NAME);
+        }
+        ObjectNode onode = parent.addObject();
+        addNodeHeader(node, onode);
+        if (node.getChildren() != null) {
+            Map<String, AbstractConfigNode> nodes = node.getChildren();
+            if (!nodes.isEmpty()) {
+                for (String name : nodes.keySet()) {
+                    addConfigNode(nodes.get(name), onode);
                 }
             }
         }
@@ -255,8 +282,7 @@ public class JSONConfigWriter extends AbstractConfigWriter {
     throws ConfigurationException {
         if (node.getNodeType() == JsonNodeType.ARRAY) {
             ArrayNode array = (ArrayNode) node;
-            ObjectNode vnode = array.addObject();
-            vnode.put(value.getName(), value.getValue());
+            array.add(value.getValue());
         } else if (node.getNodeType() == JsonNodeType.OBJECT) {
             ObjectNode onode = (ObjectNode) node;
             onode.put(value.getName(), value.getValue());
@@ -286,6 +312,10 @@ public class JSONConfigWriter extends AbstractConfigWriter {
             addUpdateInfo(node.getUpdatedBy(),
                           JSONConfigConstants.CONFIG_UPDATED_BY,
                           jnode);
+        String desc = node.getDescription();
+        if (!Strings.isNullOrEmpty(desc)) {
+            jnode.put(JSONConfigConstants.CONFIG_HEADER_DESC, desc);
+        }
     }
 
     /**
@@ -313,6 +343,10 @@ public class JSONConfigWriter extends AbstractConfigWriter {
                       JSONConfigConstants.CONFIG_CREATED_BY, header);
         addUpdateInfo(configuration.getUpdatedBy(),
                       JSONConfigConstants.CONFIG_UPDATED_BY, header);
+        if (!Strings.isNullOrEmpty(configuration.getDescription())) {
+            header.put(JSONConfigConstants.CONFIG_HEADER_DESC,
+                       configuration.getDescription());
+        }
     }
 
     /**

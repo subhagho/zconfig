@@ -157,6 +157,11 @@ public class ConfigPathNode extends ConfigElementNode {
                 return this;
             } else {
                 key = path[index + 1];
+                if (key.startsWith("#")) {
+                    key = ConfigParametersNode.NODE_NAME;
+                } else if (key.startsWith("@")) {
+                    key = ConfigPropertiesNode.NODE_NAME;
+                }
                 if (children.containsKey(key)) {
                     AbstractConfigNode node = children.get(key);
                     return node.find(path, index + 1);

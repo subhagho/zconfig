@@ -47,6 +47,10 @@ public class Configuration {
      */
     private String name;
     /**
+     * Description of this configuration.
+     */
+    private String description;
+    /**
      * Version of this configuration instance.
      */
     private Version version;
@@ -103,6 +107,24 @@ public class Configuration {
     public void setName(String name) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(name));
         this.name = name;
+    }
+
+    /**
+     * Get the description of this configuration.
+     *
+     * @return - Configuration description.
+     */
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * Set the description of this configuration.
+     *
+     * @param description - Configuration description.
+     */
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     /**

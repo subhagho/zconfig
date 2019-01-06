@@ -297,6 +297,17 @@ public class JSONConfigParser extends AbstractConfigParser {
                         ((ConfigElementNode) configNode).setUpdatedBy(updatedBy);
                         isProcessed(nn.getValue());
                     }
+                } else if (nn.getKey()
+                             .compareTo(JSONConfigConstants.CONFIG_HEADER_DESC) ==
+                        0) {
+                    JsonNode n = nn.getValue();
+                    if (n.getNodeType() != JsonNodeType.STRING) {
+                        throw new ConfigurationException(String.format(
+                                "Invalid node value : [expected type=%s][actual type=%s]",
+                                JsonNodeType.STRING.name(),
+                                n.getNodeType().name()));
+                    }
+                    configNode.setDescription(n.textValue());
                 }
             }
         }
@@ -606,6 +617,14 @@ public class JSONConfigParser extends AbstractConfigParser {
                 ModifiedBy updatedBy = parseUpdateInfo(unode,
                                                        JSONConfigConstants.CONFIG_UPDATED_BY);
                 configuration.setUpdatedBy(updatedBy);
+
+                JsonNode dnode = header.get(JSONConfigConstants.CONFIG_HEADER_DESC);
+                if (dnode != null) {
+                    String desc = dnode.textValue();
+                    if (!Strings.isNullOrEmpty(desc)) {
+                        configuration.setDescription(desc);
+                    }
+                }
             }
         } catch (ValueParseException e) {
             throw new ConfigurationException(e);
