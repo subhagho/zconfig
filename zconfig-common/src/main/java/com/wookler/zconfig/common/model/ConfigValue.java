@@ -27,6 +27,7 @@ package com.wookler.zconfig.common.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.wookler.zconfig.common.ConfigurationException;
 import com.wookler.zconfig.common.GlobalConstants;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -226,7 +227,7 @@ public class ConfigValue extends AbstractConfigNode
     /**
      * Check if the current path element matches this node name, if so return this instance.
      *
-     * @param path - Tokenized Path array.
+     * @param path  - Tokenized Path array.
      * @param index - Current index in the path array to search for.
      * @return - This instance or NULL.
      */
@@ -239,4 +240,28 @@ public class ConfigValue extends AbstractConfigNode
         return null;
     }
 
+    /**
+     * Mark the configuration instance has been completely loaded.
+     *
+     * @throws ConfigurationException
+     */
+    @Override
+    public void loaded() throws ConfigurationException {
+        if (getState().hasError()) {
+            throw new ConfigurationException(String.format(
+                    "Cannot mark as loaded : Object state is in error. [state=%s]",
+                    getState().getState().name()));
+        }
+        updateState(ENodeState.Synced);
+    }
+
+    /**
+     * Update the node states recursively to the new state.
+     *
+     * @param state - New state.
+     */
+    @Override
+    public void updateState(ENodeState state) {
+        getState().setState(state);
+    }
 }

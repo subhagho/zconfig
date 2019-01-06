@@ -27,6 +27,7 @@ package com.wookler.zconfig.common.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.wookler.zconfig.common.ConfigurationException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -164,5 +165,20 @@ public abstract class ConfigKeyValueNode extends ConfigElementNode {
     @Override
     public void updateState(ENodeState state) {
         getState().setState(state);
+    }
+
+    /**
+     * Update the state of this node as Synced.
+     *
+     * @throws ConfigurationException
+     */
+    @Override
+    public void loaded() throws ConfigurationException {
+        if (getState().hasError()) {
+            throw new ConfigurationException(String.format(
+                    "Cannot mark as loaded : Object state is in error. [state=%s]",
+                    getState().getState().name()));
+        }
+        updateState(ENodeState.Synced);
     }
 }

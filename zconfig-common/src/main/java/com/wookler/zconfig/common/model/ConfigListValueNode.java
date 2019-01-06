@@ -26,6 +26,7 @@ package com.wookler.zconfig.common.model;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.wookler.zconfig.common.ConfigurationException;
 
 import java.util.List;
 
@@ -54,8 +55,7 @@ public class ConfigListValueNode extends ConfigListNode<ConfigValue> {
     }
 
     /**
-     *
-     * @param path - Tokenized Path array.
+     * @param path  - Tokenized Path array.
      * @param index - Current index in the path array to search for.
      * @return
      */
@@ -87,5 +87,26 @@ public class ConfigListValueNode extends ConfigListNode<ConfigValue> {
     @Override
     public void updateState(ENodeState state) {
         getState().setState(state);
+    }
+
+    /**
+     * Mark the configuration instance has been completely loaded.
+     *
+     * @throws ConfigurationException
+     */
+    @Override
+    public void loaded() throws ConfigurationException {
+        if (getState().hasError()) {
+            throw new ConfigurationException(String.format(
+                    "Cannot mark as loaded : Object state is in error. [state=%s]",
+                    getState().getState().name()));
+        }
+        updateState(ENodeState.Synced);
+        List<ConfigValue> values = getValues();
+        if (values != null && !values.isEmpty()) {
+            for (ConfigValue v : values) {
+                v.loaded();
+            }
+        }
     }
 }

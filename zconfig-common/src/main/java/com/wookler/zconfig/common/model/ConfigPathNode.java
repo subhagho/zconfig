@@ -27,6 +27,7 @@ package com.wookler.zconfig.common.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.wookler.zconfig.common.ConfigurationException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -208,6 +209,27 @@ public class ConfigPathNode extends ConfigElementNode {
                 if (node instanceof ConfigElementNode) {
                     ((ConfigElementNode) node).updateState(state);
                 }
+            }
+        }
+    }
+
+    /**
+     * Update the state of this node as Synced and for all the children.
+     *
+     * @throws ConfigurationException
+     */
+    @Override
+    public void loaded() throws ConfigurationException {
+        if (getState().hasError()) {
+            throw new ConfigurationException(String.format(
+                    "Cannot mark as loaded : Object state is in error. [state=%s]",
+                    getState().getState().name()));
+        }
+        updateState(ENodeState.Synced);
+        if (children != null && !children.isEmpty()) {
+            for (String key : children.keySet()) {
+                AbstractConfigNode node = children.get(key);
+                node.loaded();
             }
         }
     }

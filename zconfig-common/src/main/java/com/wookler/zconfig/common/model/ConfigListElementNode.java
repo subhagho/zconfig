@@ -26,6 +26,7 @@ package com.wookler.zconfig.common.model;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.wookler.zconfig.common.ConfigurationException;
 
 import java.util.List;
 
@@ -104,6 +105,27 @@ public class ConfigListElementNode extends ConfigListNode<ConfigElementNode> {
         if (nodes != null && !nodes.isEmpty()) {
             for (ConfigElementNode node : nodes) {
                 node.updateState(state);
+            }
+        }
+    }
+
+    /**
+     * Mark the configuration instance has been completely loaded.
+     *
+     * @throws ConfigurationException
+     */
+    @Override
+    public void loaded() throws ConfigurationException {
+        if (getState().hasError()) {
+            throw new ConfigurationException(String.format(
+                    "Cannot mark as loaded : Object state is in error. [state=%s]",
+                    getState().getState().name()));
+        }
+        updateState(ENodeState.Synced);
+        List<ConfigElementNode> values = getValues();
+        if (values != null && !values.isEmpty()) {
+            for (ConfigElementNode node : values) {
+                node.loaded();
             }
         }
     }

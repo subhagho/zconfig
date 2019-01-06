@@ -72,7 +72,12 @@ public abstract class ConfigListNode<T> extends ConfigElementNode {
         Preconditions.checkArgument(value != null);
         if (values == null) {
             values = new ArrayList<>();
+        } else {
+            for( T v : values) {
+
+            }
         }
+
         values.add(value);
         updated();
     }

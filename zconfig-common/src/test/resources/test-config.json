@@ -44,49 +44,47 @@
             },
             "TEST_ELEMENT_LIST": [
                 {
-                    "LIST_NODE_1": {
-                        "nodeVersion": 1,
-                        "createdBy": {
-                            "user": "subho",
-                            "timestamp": "12.31.2018 12:32:19"
-                        },
-                        "updatedBy": {
-                            "user": "subho",
-                            "timestamp": "01.02.2019 12:32:19"
-                        }
+                    "nodeVersion": 1,
+                    "createdBy": {
+                        "user": "subho",
+                        "timestamp": "12.31.2018 12:32:19"
                     },
-                    "LIST_NODE_2": {
-                        "nodeVersion": 1,
-                        "createdBy": {
-                            "user": "subho",
-                            "timestamp": "12.31.2018 12:32:19"
-                        },
-                        "updatedBy": {
-                            "user": "subho",
-                            "timestamp": "01.02.2019 12:32:19"
-                        }
+                    "updatedBy": {
+                        "user": "subho",
+                        "timestamp": "01.02.2019 12:32:19"
+                    }
+                },
+                {
+                    "nodeVersion": 1,
+                    "createdBy": {
+                        "user": "subho",
+                        "timestamp": "12.31.2018 12:32:19"
                     },
-                    "LIST_NODE_3": {
-                        "nodeVersion": 1,
-                        "createdBy": {
-                            "user": "subho",
-                            "timestamp": "12.31.2018 12:32:19"
-                        },
-                        "updatedBy": {
-                            "user": "subho",
-                            "timestamp": "01.02.2019 12:32:19"
-                        }
+                    "updatedBy": {
+                        "user": "subho",
+                        "timestamp": "01.02.2019 12:32:19"
+                    }
+                },
+                {
+                    "nodeVersion": 1,
+                    "createdBy": {
+                        "user": "subho",
+                        "timestamp": "12.31.2018 12:32:19"
                     },
-                    "LIST_NODE_4": {
-                        "nodeVersion": 1,
-                        "createdBy": {
-                            "user": "subho",
-                            "timestamp": "12.31.2018 12:32:19"
-                        },
-                        "updatedBy": {
-                            "user": "subho",
-                            "timestamp": "01.02.2019 12:32:19"
-                        }
+                    "updatedBy": {
+                        "user": "subho",
+                        "timestamp": "01.02.2019 12:32:19"
+                    }
+                },
+                {
+                    "nodeVersion": 1,
+                    "createdBy": {
+                        "user": "subho",
+                        "timestamp": "12.31.2018 12:32:19"
+                    },
+                    "updatedBy": {
+                        "user": "subho",
+                        "timestamp": "01.02.2019 12:32:19"
                     }
                 }
             ],
@@ -127,33 +125,14 @@
                             "timestamp": "01.02.2019 12:32:19"
                         },
                         "TEST_VALUE_LIST": [
-                            {
-                                "STRING_1": "TEST_STRING_1"
-                            },
-                            {
-                                "STRING_2": "TEST_STRING_2"
-                            },
-                            {
-                                "STRING_3": "TEST_STRING_3"
-                            },
-                            {
-                                "STRING_4": "TEST_STRING_4"
-                            },
-                            {
-                                "STRING_5": "TEST_STRING_5"
-                            },
-                            {
-                                "STRING_6": "TEST_STRING_6"
-                            },
-                            {
-                                "STRING_7": "TEST_STRING_7"
-                            },
-                            {
-                                "STRING_8": "TEST_STRING_8"
-                            },
-                            {
-                                "STRING_9": "TEST_STRING_9"
-                            }
+                            "TEST_STRING_1",
+                            "TEST_STRING_2",
+                            "TEST_STRING_3",
+                            "TEST_STRING_4",
+                            "TEST_STRING_5",
+                            "TEST_STRING_6",
+                            "TEST_STRING_7",
+                            "TEST_STRING_8"
                         ]
                     }
                 }

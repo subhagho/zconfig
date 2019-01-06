@@ -147,13 +147,21 @@ public class JSONConfigParser extends AbstractConfigParser {
 
             parse(name, version, rootNode);
 
+            // Mark the configuration has been loaded.
+            configuration.loaded();
 
         } catch (JsonProcessingException e) {
+            configuration.getState().setError(e);
             throw new ConfigurationException(e);
         } catch (IOException e) {
+            configuration.getState().setError(e);
             throw new ConfigurationException((e));
         } catch (ValueParseException e) {
+            configuration.getState().setError(e);
             throw new ConfigurationException(e);
+        } catch (ConfigurationException e) {
+            configuration.getState().setError(e);
+            throw e;
         }
     }
 
@@ -307,7 +315,6 @@ public class JSONConfigParser extends AbstractConfigParser {
         if (node.getNodeType() == JsonNodeType.OBJECT) {
             AbstractConfigNode nn = readObjectNode(name, node, parent);
             if (nn != null) {
-                addToParentNode(parent, nn);
                 isProcessed(node);
             } else {
                 throw new ConfigurationException("Error reading object node.");
@@ -320,8 +327,7 @@ public class JSONConfigParser extends AbstractConfigParser {
                 cv.setName(name);
                 cv.setParent(parent);
                 cv.setConfiguration(configuration);
-
-                parseNodeHeader(node, cv);
+                cv.setValue(node.textValue());
 
                 if (parent instanceof ConfigPathNode) {
                     ((ConfigPathNode) parent).addChildNode(cv);

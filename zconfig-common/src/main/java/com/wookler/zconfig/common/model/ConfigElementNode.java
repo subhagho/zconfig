@@ -28,11 +28,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 
 public abstract class ConfigElementNode extends AbstractConfigNode {
-    /**
-     * Represents the local state of this configuration node instance.
-     */
-    @JsonIgnore
-    private NodeState state;
 
     /**
      * Node creation info.
@@ -52,19 +47,7 @@ public abstract class ConfigElementNode extends AbstractConfigNode {
      * Default constructor - Will initialize the update indicators.
      */
     public ConfigElementNode() {
-        state = new NodeState();
-        state.setState(ENodeState.Loading);
-
         this.nodeVersion = 0;
-    }
-
-    /**
-     * Get the state handle for this node.
-     *
-     * @return - Node state handle.
-     */
-    public NodeState getState() {
-        return state;
     }
 
     /**
@@ -126,52 +109,23 @@ public abstract class ConfigElementNode extends AbstractConfigNode {
         this.nodeVersion = nodeVersion;
     }
 
-
     /**
      * Indicate this node has been updated.
      */
+    @Override
     protected void updated() {
-        if (state.isSynced()) {
-            this.nodeVersion++;
-            this.state.setState(ENodeState.Updated);
-        }
+        nodeVersion++;
+        super.updated();
     }
 
     /**
      * Mark this node as deleted.
      */
-    protected void deleted() {
-        if (state.isSynced()) {
-            this.nodeVersion++;
-            this.state.setState(ENodeState.Deleted);
-        } else if (state.isUpdated()) {
-            this.state.setState(ENodeState.Deleted);
-        }
+    @Override
+    protected boolean deleted() {
+        boolean ret = super.deleted();
+        if (ret)
+            nodeVersion++;
+        return ret;
     }
-
-    /**
-     * Mark this node is being loaded.
-     */
-    public void loading() {
-        if (state == null) {
-            state = new NodeState();
-        }
-        state.setState(ENodeState.Loading);
-    }
-
-    /**
-     * Mark this node has been synchronized.
-     */
-    public void synced() {
-        Preconditions.checkNotNull(state);
-        state.setState(ENodeState.Synced);
-    }
-
-
-    /**
-     * Update the node states recursively to the new state.
-     *
-     * @param state - New state.
-     */
-    public abstract void updateState(ENodeState state);
 }

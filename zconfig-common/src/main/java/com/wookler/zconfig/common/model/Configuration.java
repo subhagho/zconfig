@@ -191,6 +191,21 @@ public class Configuration {
     }
 
     /**
+     * Mark this configuration has been completely loaded.
+     *
+     * @throws ConfigurationException
+     */
+    public void loaded() throws ConfigurationException {
+        if (state.hasError()) {
+            throw new ConfigurationException("Configuration in error state.",
+                                             state.getError());
+        }
+        state.setState(ENodeState.Synced);
+        if (rootConfigNode != null)
+            rootConfigNode.loaded();
+    }
+
+    /**
      * Find the configuration node at the specified path under the specified node.
      * <p>
      * Path is specified as a (dot) notation with the following additions.
@@ -207,8 +222,8 @@ public class Configuration {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(path));
 
         String[] parts = path.split("\\.");
-        if (parts != null && parts.length > 0) {
-            node.find(parts, 0);
+        if (parts.length > 0) {
+            return node.find(parts, 0);
         }
         return null;
     }
@@ -244,6 +259,24 @@ public class Configuration {
     }
 
     /**
+     * Get the parameter value for the specified parameter name.
+     *
+     * @param node - Node to find the parameters under.
+     * @param name - Parameter name.
+     * @return - Parameter value or NULL
+     */
+    public String parameter(AbstractConfigNode node, String name) {
+        Preconditions.checkArgument(node != null);
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(name));
+
+        ConfigParametersNode pnode = parameters(node);
+        if (pnode != null) {
+            return pnode.getValue(name);
+        }
+        return null;
+    }
+
+    /**
      * Get the properties, if any, for the specified node.
      *
      * @param node - Node to search properties.
@@ -259,6 +292,24 @@ public class Configuration {
     }
 
     /**
+     * Get the property value for the specified parameter name.
+     *
+     * @param node - Node to find the property under.
+     * @param name - Property name.
+     * @return - Property value or NULL
+     */
+    public String property(AbstractConfigNode node, String name) {
+        Preconditions.checkArgument(node != null);
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(name));
+
+        ConfigPropertiesNode pnode = properties(node);
+        if (pnode != null) {
+            return pnode.getValue(name);
+        }
+        return null;
+    }
+
+    /**
      * Get all the defined properties till this node. Properties are defined in scope an can be overridden by
      * subsequent nodes. This method will return a set of properties defined till the root node in this nodes
      * ancestor path.
@@ -269,7 +320,7 @@ public class Configuration {
     public ConfigPropertiesNode resolvedProperties(AbstractConfigNode node) {
         Preconditions.checkArgument(node != null);
         node = findParentPath(node);
-        if (node != null && node instanceof ConfigPathNode) {
+        if (node instanceof ConfigPathNode) {
             ConfigPropertiesNode props = null;
             ConfigPathNode cp = (ConfigPathNode) node;
             ConfigPropertiesNode pn = cp.properties();
@@ -326,7 +377,7 @@ public class Configuration {
 
     /**
      * Get the path to the temp directory for this configuration instance.
-     *
+     * <p>
      * If temp directory doesn't exist, this call will create it.
      *
      * @return - File path to temp directory.

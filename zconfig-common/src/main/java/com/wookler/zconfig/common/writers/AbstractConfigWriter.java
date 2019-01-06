@@ -37,7 +37,8 @@ public abstract class AbstractConfigWriter {
      * Write this instance of the configuration to the specified output location.
      *
      * @param path - Output location to write to.
+     * @return - Return the path of the output file created.
      * @throws ConfigurationException
      */
-    public abstract void write(Configuration configuration, String path) throws ConfigurationException;
+    public abstract String write(Configuration configuration, String path) throws ConfigurationException;
 }

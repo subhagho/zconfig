@@ -60,10 +60,11 @@ public class JSONConfigWriter extends AbstractConfigWriter {
      *
      * @param configuration - Configuration handle to serialize.
      * @param path          - Output location to write to.
+     * @return - Return the path of the output file created.
      * @throws ConfigurationException
      */
     @Override
-    public void write(Configuration configuration, String path)
+    public String write(Configuration configuration, String path)
     throws ConfigurationException {
         File outdir = new File(path);
         if (!outdir.exists() || !outdir.isDirectory()) {
@@ -85,6 +86,8 @@ public class JSONConfigWriter extends AbstractConfigWriter {
         mapper.registerModule(new JodaModule());
 
         serializeToJson(configuration, outfile);
+
+        return outfile.getAbsolutePath();
     }
 
     /**

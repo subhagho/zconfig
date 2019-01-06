@@ -27,11 +27,18 @@ package com.wookler.zconfig.common.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.wookler.zconfig.common.ConfigurationException;
 
 /**
  * Abstract base node for defining configuration elements.
  */
 public abstract class AbstractConfigNode {
+    /**
+     * Represents the local state of this configuration node instance.
+     */
+    @JsonIgnore
+    private NodeState state;
+
     /**
      * Configuration instance this node belongs to.
      */
@@ -52,6 +59,14 @@ public abstract class AbstractConfigNode {
     private String name;
 
 
+    /**
+     * Get the state handle for this node.
+     *
+     * @return - Node state handle.
+     */
+    public NodeState getState() {
+        return state;
+    }
 
     /**
      * Get the name of this configuration node.
@@ -60,6 +75,14 @@ public abstract class AbstractConfigNode {
      */
     public String getName() {
         return name;
+    }
+
+    /**
+     * Default constructor - Initialize the state object.
+     */
+    public AbstractConfigNode() {
+        state = new NodeState();
+        state.setState(ENodeState.Loading);
     }
 
     /**
@@ -148,4 +171,61 @@ public abstract class AbstractConfigNode {
      * @return - Configuration Node found.
      */
     public abstract AbstractConfigNode find(String[] path, int index);
+
+
+    /**
+     * Indicate this node has been updated.
+     */
+    protected void updated() {
+        if (state.isSynced()) {
+            this.state.setState(ENodeState.Updated);
+        }
+    }
+
+    /**
+     * Mark this node as deleted.
+     */
+    protected boolean deleted() {
+        if (state.isSynced()) {
+            this.state.setState(ENodeState.Deleted);
+            return true;
+        } else if (state.isUpdated()) {
+            this.state.setState(ENodeState.Deleted);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Mark this node is being loaded.
+     */
+    public void loading() {
+        if (state == null) {
+            state = new NodeState();
+        }
+        state.setState(ENodeState.Loading);
+    }
+
+    /**
+     * Mark this node has been synchronized.
+     */
+    public void synced() {
+        Preconditions.checkNotNull(state);
+        state.setState(ENodeState.Synced);
+    }
+
+
+    /**
+     * Update the node states recursively to the new state.
+     *
+     * @param state - New state.
+     */
+    public abstract void updateState(ENodeState state);
+
+    /**
+     * Mark the configuration instance has been completely loaded.
+     *
+     * @throws ConfigurationException
+     */
+    public abstract void loaded() throws ConfigurationException;
 }

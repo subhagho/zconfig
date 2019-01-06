@@ -78,4 +78,16 @@ public abstract class AbstractState<T extends IStateEnum<T>> {
         this.state = state.getErrorState();
         this.error = error;
     }
+
+    /**
+     * Check if the state is in Error State.
+     *
+     * @return - In error state?
+     */
+    public boolean hasError() {
+        if (state != null && state == state.getErrorState()) {
+            return true;
+        }
+        return false;
+    }
 }

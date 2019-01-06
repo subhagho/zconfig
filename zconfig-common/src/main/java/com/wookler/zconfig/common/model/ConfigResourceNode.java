@@ -25,22 +25,23 @@
 package com.wookler.zconfig.common.model;
 
 import com.google.common.base.Preconditions;
+import com.wookler.zconfig.common.ConfigurationException;
 
 import java.net.URI;
 
 /**
  * Node denotes a resource URI. Resources specified will be downloaded (if required) and made accessible
  * via the configuration handle.
- *
+ * <p>
  * XML:
  * <resource name="name" URI="uri" type="type" />
- *
+ * <p>
  * JSON:
  * resource : {
- *     name : "name",
- *     URI : "uri",
- *     type : "type",
- *     ...
+ * name : "name",
+ * URI : "uri",
+ * type : "type",
+ * ...
  * }
  */
 public abstract class ConfigResourceNode extends ConfigElementNode {
@@ -115,5 +116,21 @@ public abstract class ConfigResourceNode extends ConfigElementNode {
     @Override
     public void updateState(ENodeState state) {
         getState().setState(state);
+    }
+
+
+    /**
+     * Mark the configuration instance has been completely loaded.
+     *
+     * @throws ConfigurationException
+     */
+    @Override
+    public void loaded() throws ConfigurationException {
+        if (getState().hasError()) {
+            throw new ConfigurationException(String.format(
+                    "Cannot mark as loaded : Object state is in error. [state=%s]",
+                    getState().getState().name()));
+        }
+        updateState(ENodeState.Synced);
     }
 }

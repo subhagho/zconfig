@@ -25,6 +25,7 @@
 package com.wookler.zconfig.common.model;
 
 import com.google.common.base.Preconditions;
+import com.wookler.zconfig.common.ConfigurationException;
 
 import java.io.File;
 
@@ -69,4 +70,5 @@ public class ConfigResourceFile extends ConfigResourceNode {
     public void setType(EResourceType type) {
         super.setType(EResourceType.FILE);
     }
+
 }

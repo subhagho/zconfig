@@ -24,6 +24,7 @@
 
 package com.wookler.zconfig.common.writers;
 
+import com.google.common.base.Strings;
 import com.wookler.zconfig.common.model.Configuration;
 import com.wookler.zconfig.common.parsers.JSONConfigParser;
 import org.junit.jupiter.api.BeforeAll;
@@ -72,7 +73,13 @@ class JSONConfigWriterTest {
             assertNotNull(configuration);
 
             JSONConfigWriter writer = new JSONConfigWriter();
-            writer.write(configuration, TEMP_OUTDIR);
+            String outfile = writer.write(configuration, TEMP_OUTDIR);
+            assertFalse(Strings.isNullOrEmpty(outfile));
+
+            File outf = new File(outfile);
+            assertTrue(outf.exists());
+            debug(getClass(), String.format("Created configuration : file=%s",
+                                            outf.getAbsolutePath()));
         } catch (Throwable e) {
             error(getClass(), e);
             fail(e);
