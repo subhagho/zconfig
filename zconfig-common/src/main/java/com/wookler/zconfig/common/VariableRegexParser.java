@@ -36,6 +36,12 @@ public class VariableRegexParser {
     private static final String VAR_REGEX = "\\$\\{(.*?)\\}";
     private static final Pattern VAR_PATTERN = Pattern.compile(VAR_REGEX);
 
+    /**
+     * Check if the input string has any variables defined.
+     *
+     * @param value - Input string.
+     * @return - Has variable?
+     */
     public static boolean hasVarable(String value) {
         Matcher matcher = VAR_PATTERN.matcher(value);
         if (matcher.find()) {
@@ -44,6 +50,12 @@ public class VariableRegexParser {
         return false;
     }
 
+    /**
+     * Get the list of variables defined in the input string.
+     *
+     * @param value - Input string.
+     * @return - List of variables or NULL if none defined.
+     */
     public static List<String> getVariables(String value) {
         Matcher matcher = VAR_PATTERN.matcher(value);
         List<String> vars = new ArrayList<>();

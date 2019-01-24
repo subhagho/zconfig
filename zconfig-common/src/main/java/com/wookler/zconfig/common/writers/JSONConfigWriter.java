@@ -32,6 +32,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.wookler.zconfig.common.ConfigurationException;
 import com.wookler.zconfig.common.DateTimeUtils;
@@ -66,6 +67,9 @@ public class JSONConfigWriter extends AbstractConfigWriter {
     @Override
     public String write(Configuration configuration, String path)
     throws ConfigurationException {
+        Preconditions.checkArgument(configuration != null);
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(path));
+
         File outdir = new File(path);
         if (!outdir.exists() || !outdir.isDirectory()) {
             throw new ConfigurationException(String.format(

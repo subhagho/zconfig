@@ -24,6 +24,7 @@
 
 package com.wookler.zconfig.common.parsers;
 
+import com.wookler.zconfig.common.ConfigProviderFactory;
 import com.wookler.zconfig.common.model.Configuration;
 import org.junit.jupiter.api.Test;
 
@@ -40,7 +41,11 @@ class JSONConfigParserTest {
     @Test
     void parse() {
         try {
-            JSONConfigParser parser = new JSONConfigParser();
+            JSONConfigParser parser =
+                    (JSONConfigParser) ConfigProviderFactory.parser(
+                            ConfigProviderFactory.EConfigType.JSON);
+            assertNotNull(parser);
+
             Properties properties = new Properties();
             properties.load(new FileInputStream(JSON_FILE));
 

@@ -25,6 +25,7 @@
 package com.wookler.zconfig.common.writers;
 
 import com.google.common.base.Strings;
+import com.wookler.zconfig.common.ConfigProviderFactory;
 import com.wookler.zconfig.common.model.Configuration;
 import com.wookler.zconfig.common.parsers.JSONConfigParser;
 import org.junit.jupiter.api.BeforeAll;
@@ -56,7 +57,10 @@ class JSONConfigWriterTest {
             }
         }
 
-        JSONConfigParser parser = new JSONConfigParser();
+        JSONConfigParser parser = (JSONConfigParser) ConfigProviderFactory.parser(
+                ConfigProviderFactory.EConfigType.JSON);
+        assertNotNull(parser);
+
         Properties properties = new Properties();
         properties.load(new FileInputStream(JSON_FILE));
 
@@ -72,7 +76,11 @@ class JSONConfigWriterTest {
         try {
             assertNotNull(configuration);
 
-            JSONConfigWriter writer = new JSONConfigWriter();
+            JSONConfigWriter writer =
+                    (JSONConfigWriter) ConfigProviderFactory.writer(
+                            ConfigProviderFactory.EConfigType.JSON);
+            assertNotNull(writer);
+
             String outfile = writer.write(configuration, TEMP_OUTDIR);
             assertFalse(Strings.isNullOrEmpty(outfile));
 
