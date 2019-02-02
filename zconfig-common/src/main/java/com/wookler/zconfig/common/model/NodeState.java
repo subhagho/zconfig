@@ -24,6 +24,7 @@
 
 package com.wookler.zconfig.common.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.wookler.zconfig.common.AbstractState;
 
 /**
@@ -36,6 +37,7 @@ public class NodeState extends AbstractState<ENodeState> {
      *
      * @return - Is new?
      */
+    @JsonIgnore
     public boolean isNew() {
         return (getState() == ENodeState.New);
     }
@@ -45,6 +47,7 @@ public class NodeState extends AbstractState<ENodeState> {
      *
      * @return - Is Synced?
      */
+    @JsonIgnore
     public boolean isSynced() {
         return (getState() == ENodeState.Synced);
     }
@@ -54,6 +57,7 @@ public class NodeState extends AbstractState<ENodeState> {
      *
      * @return - Is updated?
      */
+    @JsonIgnore
     public boolean isUpdated() {
         return (getState() == ENodeState.Updated);
     }
@@ -63,6 +67,7 @@ public class NodeState extends AbstractState<ENodeState> {
      *
      * @return - Is loading?
      */
+    @JsonIgnore
     public boolean isLoading() {
         return (getState() == ENodeState.Loading);
     }
@@ -72,6 +77,7 @@ public class NodeState extends AbstractState<ENodeState> {
      *
      * @return - Is deleted?
      */
+    @JsonIgnore
     public boolean isDeleted() {
         return (getState() == ENodeState.Deleted);
     }

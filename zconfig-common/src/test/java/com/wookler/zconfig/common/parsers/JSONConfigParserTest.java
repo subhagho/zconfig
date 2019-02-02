@@ -24,8 +24,12 @@
 
 package com.wookler.zconfig.common.parsers;
 
+import com.google.common.base.Strings;
 import com.wookler.zconfig.common.ConfigProviderFactory;
+import com.wookler.zconfig.common.ConfigTestConstants;
 import com.wookler.zconfig.common.model.Configuration;
+import com.wookler.zconfig.common.model.Version;
+import com.wookler.zconfig.common.readers.ConfigFileReader;
 import org.junit.jupiter.api.Test;
 
 import java.io.FileInputStream;
@@ -38,6 +42,7 @@ class JSONConfigParserTest {
     private static final String JSON_FILE =
             "src/test/resources/test-config.properties";
 
+
     @Test
     void parse() {
         try {
@@ -49,11 +54,21 @@ class JSONConfigParserTest {
             Properties properties = new Properties();
             properties.load(new FileInputStream(JSON_FILE));
 
-            parser.parse("test-config", properties);
-            Configuration configuration = parser.getConfiguration();
-            assertNotNull(configuration);
+            String filename = properties.getProperty(ConfigTestConstants.PROP_CONFIG_FILE);
+            assertFalse(Strings.isNullOrEmpty(filename));
+            String vs = properties.getProperty(ConfigTestConstants.PROP_CONFIG_VERSION);
+            assertFalse(Strings.isNullOrEmpty(vs));
+            Version version = Version.parse(vs);
+            assertNotNull(version);
 
-            debug(getClass(), configuration);
+            try (ConfigFileReader reader = new ConfigFileReader(filename)) {
+
+                parser.parse("test-config", reader, version);
+                Configuration configuration = parser.getConfiguration();
+                assertNotNull(configuration);
+
+                debug(getClass(), configuration);
+            }
         } catch (Throwable t) {
             error(getClass(), t);
         }

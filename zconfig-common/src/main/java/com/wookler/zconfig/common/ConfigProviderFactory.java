@@ -27,7 +27,7 @@ package com.wookler.zconfig.common;
 import com.wookler.zconfig.common.parsers.AbstractConfigParser;
 import com.wookler.zconfig.common.parsers.JSONConfigParser;
 import com.wookler.zconfig.common.writers.AbstractConfigWriter;
-import com.wookler.zconfig.common.writers.JSONConfigWriter;
+import com.wookler.zconfig.common.writers.JSONFileConfigWriter;
 
 /**
  * Factory class to provide config parser and config reader instances.
@@ -73,7 +73,7 @@ public class ConfigProviderFactory {
     public static final AbstractConfigWriter writer(EConfigType type) {
         switch (type) {
             case JSON:
-                return new JSONConfigWriter();
+                return new JSONFileConfigWriter();
             case XML:
                 return null;
             default:

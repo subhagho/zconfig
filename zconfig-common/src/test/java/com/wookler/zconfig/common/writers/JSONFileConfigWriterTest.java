@@ -26,8 +26,11 @@ package com.wookler.zconfig.common.writers;
 
 import com.google.common.base.Strings;
 import com.wookler.zconfig.common.ConfigProviderFactory;
+import com.wookler.zconfig.common.ConfigTestConstants;
 import com.wookler.zconfig.common.model.Configuration;
+import com.wookler.zconfig.common.model.Version;
 import com.wookler.zconfig.common.parsers.JSONConfigParser;
+import com.wookler.zconfig.common.readers.ConfigFileReader;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -39,7 +42,7 @@ import static com.wookler.zconfig.common.LogUtils.debug;
 import static com.wookler.zconfig.common.LogUtils.error;
 import static org.junit.jupiter.api.Assertions.*;
 
-class JSONConfigWriterTest {
+class JSONFileConfigWriterTest {
     private static final String JSON_FILE =
             "src/test/resources/test-config.properties";
     private static final String TEMP_OUTDIR = "/tmp/zconfig/test/output";
@@ -57,18 +60,27 @@ class JSONConfigWriterTest {
             }
         }
 
-        JSONConfigParser parser = (JSONConfigParser) ConfigProviderFactory.parser(
-                ConfigProviderFactory.EConfigType.JSON);
+        JSONConfigParser parser =
+                (JSONConfigParser) ConfigProviderFactory.parser(
+                        ConfigProviderFactory.EConfigType.JSON);
         assertNotNull(parser);
 
         Properties properties = new Properties();
         properties.load(new FileInputStream(JSON_FILE));
 
-        parser.parse("test-config", properties);
-        configuration = parser.getConfiguration();
-        assertNotNull(configuration);
+        String filename = properties.getProperty(ConfigTestConstants.PROP_CONFIG_FILE);
+        assertFalse(Strings.isNullOrEmpty(filename));
+        String vs = properties.getProperty(ConfigTestConstants.PROP_CONFIG_VERSION);
+        assertFalse(Strings.isNullOrEmpty(vs));
+        Version version = Version.parse(vs);
+        assertNotNull(version);
 
-        debug(JSONConfigWriterTest.class, configuration);
+        try (ConfigFileReader reader = new ConfigFileReader(filename)) {
+
+            parser.parse("test-config", reader, version);
+            configuration = parser.getConfiguration();
+            assertNotNull(configuration);
+        }
     }
 
     @Test
@@ -76,8 +88,8 @@ class JSONConfigWriterTest {
         try {
             assertNotNull(configuration);
 
-            JSONConfigWriter writer =
-                    (JSONConfigWriter) ConfigProviderFactory.writer(
+            JSONFileConfigWriter writer =
+                    (JSONFileConfigWriter) ConfigProviderFactory.writer(
                             ConfigProviderFactory.EConfigType.JSON);
             assertNotNull(writer);
 

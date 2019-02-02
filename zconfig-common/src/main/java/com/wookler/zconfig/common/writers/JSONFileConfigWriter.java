@@ -49,7 +49,7 @@ import java.util.Map;
 /**
  * Configuration writer implementation that writes the specified configuration to JSON format output.
  */
-public class JSONConfigWriter extends AbstractConfigWriter {
+public class JSONFileConfigWriter extends AbstractConfigWriter {
     /**
      * JSON Object Mapper instance.
      */

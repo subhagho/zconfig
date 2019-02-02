@@ -54,6 +54,7 @@ public class ConfigListValueNode extends ConfigListNode<ConfigValue> {
         return null;
     }
 
+
     /**
      * @param path  - Tokenized Path array.
      * @param index - Current index in the path array to search for.

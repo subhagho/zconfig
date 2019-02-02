@@ -26,6 +26,8 @@ package com.wookler.zconfig.common.parsers;
 
 import com.wookler.zconfig.common.ConfigurationException;
 import com.wookler.zconfig.common.model.Configuration;
+import com.wookler.zconfig.common.model.Version;
+import com.wookler.zconfig.common.readers.AbstractConfigReader;
 
 import java.util.Properties;
 
@@ -50,11 +52,13 @@ public abstract class AbstractConfigParser {
     /**
      * Parse and load the configuration instance using the specified properties.
      *
-     * @param name       - Configuration name being loaded.
-     * @param properties - Initialization properties.
+     * @param name    - Configuration name being loaded.
+     * @param reader  - Configuration reader handle to read input from.
+     * @param version - Configuration version to load.
      * @throws ConfigurationException
      */
-    public abstract void parse(String name, Properties properties)
+    public abstract void parse(String name, AbstractConfigReader reader,
+                               Version version)
     throws ConfigurationException;
 
 }

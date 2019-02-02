@@ -25,7 +25,10 @@
 package com.wookler.zconfig.common.model;
 
 import com.google.common.base.Strings;
+import com.wookler.zconfig.common.ConfigProviderFactory;
+import com.wookler.zconfig.common.ConfigTestConstants;
 import com.wookler.zconfig.common.parsers.JSONConfigParser;
+import com.wookler.zconfig.common.readers.ConfigFileReader;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -42,15 +45,28 @@ class ConfigurationTest {
 
     @BeforeAll
     static void init() throws Exception {
-        JSONConfigParser parser = new JSONConfigParser();
+        JSONConfigParser parser =
+                (JSONConfigParser) ConfigProviderFactory.parser(
+                        ConfigProviderFactory.EConfigType.JSON);
+        assertNotNull(parser);
+
         Properties properties = new Properties();
         properties.load(new FileInputStream(JSON_FILE));
 
-        parser.parse("test-config", properties);
-        configuration = parser.getConfiguration();
-        assertNotNull(configuration);
+        String filename = properties.getProperty(
+                ConfigTestConstants.PROP_CONFIG_FILE);
+        assertFalse(Strings.isNullOrEmpty(filename));
+        String vs = properties.getProperty(ConfigTestConstants.PROP_CONFIG_VERSION);
+        assertFalse(Strings.isNullOrEmpty(vs));
+        Version version = Version.parse(vs);
+        assertNotNull(version);
 
-        debug(ConfigurationTest.class, configuration);
+        try (ConfigFileReader reader = new ConfigFileReader(filename)) {
+
+            parser.parse("test-config", reader, version);
+            configuration = parser.getConfiguration();
+            assertNotNull(configuration);
+        }
     }
 
     @Test
@@ -61,6 +77,23 @@ class ConfigurationTest {
             assertNotNull(node);
             assertTrue(node instanceof ConfigListElementNode);
             assertEquals(4, ((ConfigListElementNode) node).size());
+        } catch (Throwable e) {
+            error(getClass(), e);
+            fail(e);
+        }
+    }
+
+    @Test
+    void update() {
+        try {
+            String path = "configuration.node_1.node_2.node_3.node_4.TEST_VALUE_LIST";
+            AbstractConfigNode node = configuration.find(path);
+            assertNotNull(node);
+            assertTrue(node instanceof ConfigListValueNode);
+
+            ConfigListValueNode nl = (ConfigListValueNode) node;
+            assertEquals(8, nl.size());
+
         } catch (Throwable e) {
             error(getClass(), e);
             fail(e);

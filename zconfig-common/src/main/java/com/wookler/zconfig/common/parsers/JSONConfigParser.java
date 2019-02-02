@@ -36,6 +36,7 @@ import com.wookler.zconfig.common.DateTimeUtils;
 import com.wookler.zconfig.common.JSONConfigConstants;
 import com.wookler.zconfig.common.ValueParseException;
 import com.wookler.zconfig.common.model.*;
+import com.wookler.zconfig.common.readers.AbstractConfigReader;
 import org.joda.time.DateTime;
 
 import java.io.File;
@@ -49,9 +50,6 @@ import java.util.Properties;
  * Configuration Parser implementation that reads the configuration from a JSON file.
  */
 public class JSONConfigParser extends AbstractConfigParser {
-    public static final String PROP_CONFIG_FILE = "config.file";
-    public static final String PROP_CONFIG_VERSION = "config.version";
-
 
     private Map<Integer, JsonNode> processedNodes = null;
 
@@ -107,43 +105,30 @@ public class JSONConfigParser extends AbstractConfigParser {
      *     }
      * </pre>
      *
-     * @param name       - Configuration name being loaded.
-     * @param properties - Initialization properties. (property: "config.file", "config.version")
+     * @param name    - Configuration name being loaded.
+     * @param reader  - Configuration reader handle to read input from.
+     * @param version - Configuration version to load.
      * @throws ConfigurationException
      */
     @Override
-    public void parse(String name, Properties properties)
+    public void parse(String name, AbstractConfigReader reader,
+                      Version version)
     throws ConfigurationException {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(name));
-        Preconditions.checkArgument(properties != null);
+        Preconditions.checkArgument(reader != null);
+        Preconditions.checkArgument(version != null);
 
         if (processedNodes == null) {
             processedNodes = new HashMap<>();
         }
 
-        String filename = properties.getProperty(PROP_CONFIG_FILE);
-        if (Strings.isNullOrEmpty(filename)) {
-            throw new ConfigurationException(String.format(
-                    "Invalid Initialization Properties : Missing property [property=%s]",
-                    PROP_CONFIG_FILE));
-        }
-        String vstring = properties.getProperty(PROP_CONFIG_VERSION);
-        if (Strings.isNullOrEmpty(vstring)) {
-            throw new ConfigurationException(String.format(
-                    "Invalid Initialization Properties : Missing property [property=%s]",
-                    PROP_CONFIG_VERSION));
-        }
         try {
-            Version version = Version.parse(vstring);
-
-            File file = new File(filename);
-            if (!file.exists()) {
-                throw new ConfigurationException(String.format(
-                        "Invalid Initialization Properties : Configuration file not found. [file=%s]",
-                        file.getAbsolutePath()));
+            if (!reader.isOpen()) {
+                reader.open();
             }
+            
             ObjectMapper mapper = new ObjectMapper();
-            JsonNode rootNode = mapper.readTree(file);
+            JsonNode rootNode = mapper.readTree(reader.getInputStream());
 
             parse(name, version, rootNode);
 
@@ -151,16 +136,16 @@ public class JSONConfigParser extends AbstractConfigParser {
             configuration.loaded();
 
         } catch (JsonProcessingException e) {
-            configuration.getState().setError(e);
+            if (configuration != null)
+                configuration.getState().setError(e);
             throw new ConfigurationException(e);
         } catch (IOException e) {
-            configuration.getState().setError(e);
+            if (configuration != null)
+                configuration.getState().setError(e);
             throw new ConfigurationException((e));
-        } catch (ValueParseException e) {
-            configuration.getState().setError(e);
-            throw new ConfigurationException(e);
         } catch (ConfigurationException e) {
-            configuration.getState().setError(e);
+            if (configuration != null)
+                configuration.getState().setError(e);
             throw e;
         }
     }
