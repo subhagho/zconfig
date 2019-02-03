@@ -42,7 +42,7 @@ class VariableRegexParserTest {
     void hasVarable() {
         try {
             String value = "This is a ${test} ${value}";
-            assertTrue(VariableRegexParser.hasVarable(value));
+            assertTrue(VariableRegexParser.hasVariable(value));
         } catch (Throwable t) {
             error(getClass(), t, LOG);
             fail(t);

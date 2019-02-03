@@ -84,6 +84,7 @@ public class ConfigURLReader extends AbstractConfigReader {
                 URLConnection conn = remoteURL.openConnection();
                 inputStream = new BufferedReader(
                         new InputStreamReader(conn.getInputStream()));
+                state.setState(EReaderState.Open);
             } catch (IOException e) {
                 state.setError(e);
                 throw new ConfigurationException(e);

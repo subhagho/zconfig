@@ -31,16 +31,15 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.wookler.zconfig.common.ConfigurationException;
-import com.wookler.zconfig.common.DateTimeUtils;
-import com.wookler.zconfig.common.JSONConfigConstants;
-import com.wookler.zconfig.common.ValueParseException;
+import com.wookler.zconfig.common.*;
 import com.wookler.zconfig.common.model.*;
 import com.wookler.zconfig.common.readers.AbstractConfigReader;
+import com.wookler.zconfig.common.readers.EReaderType;
 import org.joda.time.DateTime;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -126,15 +125,14 @@ public class JSONConfigParser extends AbstractConfigParser {
             if (!reader.isOpen()) {
                 reader.open();
             }
-            
+
             ObjectMapper mapper = new ObjectMapper();
             JsonNode rootNode = mapper.readTree(reader.getInputStream());
 
             parse(name, version, rootNode);
 
-            // Mark the configuration has been loaded.
-            configuration.loaded();
-
+            // Call the load finish handler.
+            doPostLoad();
         } catch (JsonProcessingException e) {
             if (configuration != null)
                 configuration.getState().setError(e);
@@ -518,12 +516,129 @@ public class JSONConfigParser extends AbstractConfigParser {
             ConfigParametersNode pn = new ConfigParametersNode();
             setupNodeWithChildren(name, parent, pn, node, false);
             nn = pn;
+        } else if (name.compareTo(ConfigIncludeNode.NODE_NAME) == 0) {
+            ConfigIncludeNode pn = new ConfigIncludeNode();
+            setupIncludeNode(name, pn, parent, node);
+            nn = pn;
         } else {
             ConfigPathNode pn = new ConfigPathNode();
             setupNodeWithChildren(name, parent, pn, node, true);
             nn = pn;
         }
         return nn;
+    }
+
+    private void setupIncludeNode(String name, ConfigIncludeNode node,
+                                  AbstractConfigNode parent,
+                                  JsonNode jsonNode) throws ConfigurationException {
+        setupNode(name, node, parent, jsonNode, false);
+        Iterator<Map.Entry<String, JsonNode>> nnodes = jsonNode.fields();
+        if (nnodes != null) {
+            while (nnodes.hasNext()) {
+                Map.Entry<String, JsonNode> sn = nnodes.next();
+                if (isProcessed(sn.getValue())) {
+                    continue;
+                }
+                String nname = sn.getKey();
+                JsonNode cnode = sn.getValue();
+                if (nname.compareTo(ConfigIncludeNode.NODE_TYPE) == 0) {
+                    if (cnode.getNodeType() == JsonNodeType.STRING) {
+                        String nt = cnode.textValue();
+                        if (!Strings.isNullOrEmpty(nt)) {
+                            EReaderType rt = EReaderType.parse(nt);
+                            node.setReaderType(rt);
+                        } else {
+                            throw new ConfigurationException(
+                                    "Invalid node value : Value is NULL/Empty");
+                        }
+                    } else {
+                        throw new ConfigurationException(String.format(
+                                "Invalid node type : [expected=%s][actual=%s]",
+                                JsonNodeType.STRING.name(),
+                                cnode.getNodeType().name()));
+                    }
+                } else if (nname.compareToIgnoreCase(ConfigIncludeNode.NODE_PATH) ==
+                        0) {
+                    if (cnode.getNodeType() == JsonNodeType.STRING) {
+                        String path = cnode.textValue();
+                        if (!Strings.isNullOrEmpty(path)) {
+                            node.setPath(path);
+                        } else {
+                            throw new ConfigurationException(
+                                    "Invalid node value : Value is NULL/Empty");
+                        }
+                    } else {
+                        throw new ConfigurationException(String.format(
+                                "Invalid node type : [expected=%s][actual=%s]",
+                                JsonNodeType.STRING.name(),
+                                cnode.getNodeType().name()));
+                    }
+                } else if (
+                        nname.compareToIgnoreCase(ConfigIncludeNode.NODE_VERSION) ==
+                                0) {
+                    if (cnode.getNodeType() == JsonNodeType.STRING) {
+                        String version = cnode.textValue();
+                        if (!Strings.isNullOrEmpty(version)) {
+                            try {
+                                node.setVersion(Version.parse(version));
+                            } catch (ValueParseException e) {
+                                throw new ConfigurationException(e);
+                            }
+                        } else {
+                            throw new ConfigurationException(
+                                    "Invalid node value : Value is NULL/Empty");
+                        }
+                    } else {
+                        throw new ConfigurationException(String.format(
+                                "Invalid node type : [expected=%s][actual=%s]",
+                                JsonNodeType.STRING.name(),
+                                cnode.getNodeType().name()));
+                    }
+                } else if (
+                        nname.compareToIgnoreCase(
+                                ConfigIncludeNode.NODE_CONFIG_NAME) ==
+                                0) {
+                    if (cnode.getNodeType() == JsonNodeType.STRING) {
+                        String configName = cnode.textValue();
+                        if (!Strings.isNullOrEmpty(configName)) {
+                            node.setConfigName(configName);
+                        } else {
+                            throw new ConfigurationException(
+                                    "Invalid node value : Value is NULL/Empty");
+                        }
+                    } else {
+                        throw new ConfigurationException(String.format(
+                                "Invalid node type : [expected=%s][actual=%s]",
+                                JsonNodeType.STRING.name(),
+                                cnode.getNodeType().name()));
+                    }
+                }
+            }
+            URI uri = node.getURI();
+            if (uri == null) {
+                throw new ConfigurationException(
+                        "Error getting URI for include node.");
+            }
+            AbstractConfigReader reader = ConfigProviderFactory.reader(uri);
+            if (reader == null) {
+                throw new ConfigurationException(
+                        String.format("Error getting reader instance : [URI=%s]",
+                                      uri.toString()));
+            }
+            JSONConfigParser nparser = new JSONConfigParser();
+            nparser.parse(node.getConfigName(), reader, node.getVersion());
+            if (nparser.configuration != null) {
+                node.setNode(nparser.configuration.getRootConfigNode());
+                nparser.configuration.getRootConfigNode().setParent(node);
+            } else {
+                throw new ConfigurationException(String.format(
+                        "Error loading included configuration. [URI=%s]",
+                        uri.toString()));
+            }
+        } else {
+            throw new ConfigurationException(
+                    "Invalid include definition : No include configuration specified.");
+        }
     }
 
     /**

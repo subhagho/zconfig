@@ -35,5 +35,15 @@ public class GlobalConstants {
     /**
      * Default data/time format to parse/print date/time.
      */
-    public static final String DEFAULT_DATETIME_FORMAT = String.format("%s H:m:s", DEFAULT_DATE_FORMAT);
+    public static final String DEFAULT_DATETIME_FORMAT =
+            String.format("%s H:m:s", DEFAULT_DATE_FORMAT);
+
+    /**
+     * URI Scheme constant for file.
+     */
+    public static final String URI_SCHEME_FILE = "file";
+    /**
+     * URI Scheme constant for HTTP.
+     */
+    public static final String URI_SCHEME_HTTP = "http";
 }

@@ -42,7 +42,7 @@ public class VariableRegexParser {
      * @param value - Input string.
      * @return - Has variable?
      */
-    public static boolean hasVarable(String value) {
+    public static boolean hasVariable(String value) {
         Matcher matcher = VAR_PATTERN.matcher(value);
         if (matcher.find()) {
             return true;

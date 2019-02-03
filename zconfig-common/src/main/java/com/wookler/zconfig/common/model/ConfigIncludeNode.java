@@ -25,6 +25,12 @@
 package com.wookler.zconfig.common.model;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+import com.wookler.zconfig.common.ConfigurationException;
+import com.wookler.zconfig.common.readers.EReaderType;
+
+import java.io.File;
+import java.net.URI;
 
 /**
  * Configuration node that represents an external configuration set to be included
@@ -32,32 +38,85 @@ import com.google.common.base.Preconditions;
  * <p>
  * Included configurations are expected to be complete configuration sets.
  */
-public abstract class ConfigIncludeNode extends ConfigElementNode {
+public class ConfigIncludeNode extends ConfigElementNode {
     /**
-     * Path to the node that should be considered the root node when including under the current path.
+     * Include node name.
      */
-    private String rootNodePath;
+    public static final String NODE_NAME = "include";
+    /**
+     * Node specifying the Reader Type.
+     */
+    public static final String NODE_TYPE = "type";
+    /**
+     * Node specifying the resource path.
+     */
+    public static final String NODE_PATH = "path";
+    /**
+     * Node specifying the configuration version.
+     */
+    public static final String NODE_VERSION = "version";
+    /**
+     * Node specifying the configuration name.
+     */
+    public static final String NODE_CONFIG_NAME = "configName";
+
+    /**
+     * Name of this configuration.
+     */
+    private String configName;
+    /**
+     * Path (URL/File) of the configuration.
+     */
+    private String path;
+
     /**
      * The included child node.
      */
     private ConfigPathNode node;
+    /**
+     * Reader type to use for loading the configuration
+     */
+    private EReaderType readerType;
 
     /**
-     * Get the root node path.
-     *
-     * @return - Root node path.
+     * The configuration version to load.
      */
-    public String getRootNodePath() {
-        return rootNodePath;
+    private Version version;
+
+    /**
+     * Get the name of this configuration.
+     *
+     * @return - Configuration name.
+     */
+    public String getConfigName() {
+        return configName;
     }
 
     /**
-     * Set the root node path.
+     * Get the name of this configuration.
      *
-     * @param rootNodePath - Root node path.
+     * @param configName - Configuration name.
      */
-    public void setRootNodePath(String rootNodePath) {
-        this.rootNodePath = rootNodePath;
+    public void setConfigName(String configName) {
+        this.configName = configName;
+    }
+
+    /**
+     * Get the path of the configuration source.
+     *
+     * @return - Source Path.
+     */
+    public String getPath() {
+        return path;
+    }
+
+    /**
+     * Set the path of the configuration source.
+     *
+     * @param path - Source Path.
+     */
+    public void setPath(String path) {
+        this.path = path;
     }
 
     /**
@@ -77,6 +136,42 @@ public abstract class ConfigIncludeNode extends ConfigElementNode {
     public void setNode(ConfigPathNode node) {
         Preconditions.checkArgument(node != null);
         this.node = node;
+    }
+
+    /**
+     * Get the reader type specified for this included configuration.
+     *
+     * @return - Reader type.
+     */
+    public EReaderType getReaderType() {
+        return readerType;
+    }
+
+    /**
+     * Set the reader type specified for this included configuration.
+     *
+     * @param readerType - Reader type.
+     */
+    public void setReaderType(EReaderType readerType) {
+        this.readerType = readerType;
+    }
+
+    /**
+     * Get the configuration version.
+     *
+     * @return - Version
+     */
+    public Version getVersion() {
+        return version;
+    }
+
+    /**
+     * Set the configuration version.
+     *
+     * @param version - Version
+     */
+    public void setVersion(Version version) {
+        this.version = version;
     }
 
     /**
@@ -101,6 +196,45 @@ public abstract class ConfigIncludeNode extends ConfigElementNode {
         getState().setState(state);
         if (node != null) {
             node.updateState(state);
+        }
+    }
+
+    /**
+     * Get the URI for this reader type/path.
+     *
+     * @return - Parsed URI.
+     * @throws ConfigurationException
+     */
+    public URI getURI() throws ConfigurationException {
+        if (readerType != null && !Strings.isNullOrEmpty(path)) {
+            String pp = path;
+            if (readerType == EReaderType.File) {
+                File file = new File(pp);
+                pp = "/" + file.getAbsolutePath();
+            }
+            String uriString = String.format("%s://%s",
+                                             EReaderType.getURIScheme(readerType),
+                                             pp);
+            return URI.create(uriString);
+        }
+        return null;
+    }
+
+    /**
+     * Mark the configuration instance has been completely loaded.
+     *
+     * @throws ConfigurationException
+     */
+    @Override
+    public void loaded() throws ConfigurationException {
+        if (getState().hasError()) {
+            throw new ConfigurationException(String.format(
+                    "Cannot mark as loaded : Object state is in error. [state=%s]",
+                    getState().getState().name()));
+        }
+        updateState(ENodeState.Synced);
+        if (node != null) {
+            node.loaded();
         }
     }
 }

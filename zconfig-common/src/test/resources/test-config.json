@@ -38,7 +38,7 @@
                 "timestamp": "01.02.2019 12:32:19"
             },
             "parameters": {
-                "PARAM_1": "TEST_PARAM_1",
+                "PARAM_1": "This is a replacement test. ${PROP_1}",
                 "PARAM_2": "TEST_PARAM_2",
                 "PARAM_3": "TEST_PARAM_3",
                 "PARAM_4": "TEST_PARAM_4"
@@ -125,6 +125,11 @@
                     },
                     "node_4": {
                         "nodeVersion": 1,
+                        "properties": {
+                            "PROP_1": "OVERRIDE_PROP_1",
+                            "PROP_2": "TEST_PROP_2",
+                            "PROP_3": "TEST_PROP_3"
+                        },
                         "createdBy": {
                             "user": "subho",
                             "timestamp": "12.31.2018 12:32:19"
@@ -138,7 +143,7 @@
                             "TEST_STRING_2",
                             "TEST_STRING_3",
                             "TEST_STRING_4",
-                            "TEST_STRING_5",
+                            "Test override property. ${PROP_1}",
                             "TEST_STRING_6",
                             "TEST_STRING_7",
                             "TEST_STRING_8"

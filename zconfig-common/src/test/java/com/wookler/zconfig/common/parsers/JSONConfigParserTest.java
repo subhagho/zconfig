@@ -30,6 +30,7 @@ import com.wookler.zconfig.common.ConfigTestConstants;
 import com.wookler.zconfig.common.model.Configuration;
 import com.wookler.zconfig.common.model.Version;
 import com.wookler.zconfig.common.readers.ConfigFileReader;
+import com.wookler.zconfig.common.readers.ConfigURLReader;
 import org.junit.jupiter.api.Test;
 
 import java.io.FileInputStream;
@@ -39,12 +40,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import static com.wookler.zconfig.common.LogUtils.*;
 
 class JSONConfigParserTest {
-    private static final String JSON_FILE =
+    private static final String BASIC_PROPS_FILE =
             "src/test/resources/test-config.properties";
-
+    private static final String INCLUDED_PROPS_FILE =
+            "src/test/resources/test-config-include.properties";
 
     @Test
-    void parse() {
+    void parseFromFile() {
         try {
             JSONConfigParser parser =
                     (JSONConfigParser) ConfigProviderFactory.parser(
@@ -52,7 +54,7 @@ class JSONConfigParserTest {
             assertNotNull(parser);
 
             Properties properties = new Properties();
-            properties.load(new FileInputStream(JSON_FILE));
+            properties.load(new FileInputStream(BASIC_PROPS_FILE));
 
             String filename = properties.getProperty(ConfigTestConstants.PROP_CONFIG_FILE);
             assertFalse(Strings.isNullOrEmpty(filename));
@@ -71,6 +73,71 @@ class JSONConfigParserTest {
             }
         } catch (Throwable t) {
             error(getClass(), t);
+            fail(t);
+        }
+    }
+
+    @Test
+    void parseFromURL() {
+        try {
+            JSONConfigParser parser =
+                    (JSONConfigParser) ConfigProviderFactory.parser(
+                            ConfigProviderFactory.EConfigType.JSON);
+            assertNotNull(parser);
+
+            Properties properties = new Properties();
+            properties.load(new FileInputStream(BASIC_PROPS_FILE));
+
+            String url = properties.getProperty(ConfigTestConstants.PROP_CONFIG_URL);
+            assertFalse(Strings.isNullOrEmpty(url));
+            String vs = properties.getProperty(ConfigTestConstants.PROP_CONFIG_VERSION);
+            assertFalse(Strings.isNullOrEmpty(vs));
+            Version version = Version.parse(vs);
+            assertNotNull(version);
+
+            try (ConfigURLReader reader = new ConfigURLReader(url)) {
+
+                parser.parse("test-config", reader, version);
+                Configuration configuration = parser.getConfiguration();
+                assertNotNull(configuration);
+
+                debug(getClass(), configuration);
+            }
+        } catch (Throwable t) {
+            error(getClass(), t);
+            fail(t);
+        }
+    }
+
+    @Test
+    void parseFromFileWithInclude() {
+        try {
+            JSONConfigParser parser =
+                    (JSONConfigParser) ConfigProviderFactory.parser(
+                            ConfigProviderFactory.EConfigType.JSON);
+            assertNotNull(parser);
+
+            Properties properties = new Properties();
+            properties.load(new FileInputStream(INCLUDED_PROPS_FILE));
+
+            String filename = properties.getProperty(ConfigTestConstants.PROP_CONFIG_FILE);
+            assertFalse(Strings.isNullOrEmpty(filename));
+            String vs = properties.getProperty(ConfigTestConstants.PROP_CONFIG_VERSION);
+            assertFalse(Strings.isNullOrEmpty(vs));
+            Version version = Version.parse(vs);
+            assertNotNull(version);
+
+            try (ConfigFileReader reader = new ConfigFileReader(filename)) {
+
+                parser.parse("test-config-include", reader, version);
+                Configuration configuration = parser.getConfiguration();
+                assertNotNull(configuration);
+
+                debug(getClass(), configuration);
+            }
+        } catch (Throwable t) {
+            error(getClass(), t);
+            fail(t);
         }
     }
 }

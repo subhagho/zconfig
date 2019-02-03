@@ -24,12 +24,15 @@
 
 package com.wookler.zconfig.common.parsers;
 
+import com.google.common.base.Strings;
 import com.wookler.zconfig.common.ConfigurationException;
-import com.wookler.zconfig.common.model.Configuration;
-import com.wookler.zconfig.common.model.Version;
+import com.wookler.zconfig.common.VariableRegexParser;
+import com.wookler.zconfig.common.model.*;
 import com.wookler.zconfig.common.readers.AbstractConfigReader;
 
-import java.util.Properties;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Abstract base class for defining configuration parsers.
@@ -47,6 +50,118 @@ public abstract class AbstractConfigParser {
      */
     public Configuration getConfiguration() {
         return configuration;
+    }
+
+    /**
+     * Method to be called post loading of the configuration.
+     * <p>
+     * This method updates property values if required.
+     *
+     * @throws ConfigurationException
+     */
+    protected void doPostLoad() throws ConfigurationException {
+        ConfigPathNode node = configuration.getRootConfigNode();
+        if (node != null) {
+            Map<String, String> properties = new HashMap<>();
+            nodePostLoad(node, properties);
+        }
+        // Mark the configuration has been loaded.
+        configuration.loaded();
+    }
+
+    /**
+     * Replace variable values with the scoped property sets.
+     *
+     * @param node - Node to preform replacement on.
+     * @param inputProps - Input Property set.
+     * @throws ConfigurationException
+     */
+    private void nodePostLoad(AbstractConfigNode node,
+                              Map<String, String> inputProps)
+    throws ConfigurationException {
+        Map<String, String> properties = new HashMap<>(inputProps);
+        if (node instanceof ConfigPathNode) {
+            // Get defined properties, if any.
+            ConfigPathNode cp = (ConfigPathNode) node;
+            ConfigPropertiesNode props = cp.properties();
+            if (props != null) {
+                Map<String, String> pp = props.getKeyValues();
+                if (pp != null && !pp.isEmpty()) {
+                    properties.putAll(pp);
+                }
+            }
+
+            // Do property replacement for all child nodes.
+            Map<String, AbstractConfigNode> nodes = cp.getChildren();
+            if (nodes != null && !nodes.isEmpty()) {
+                for (String key : nodes.keySet()) {
+                    nodePostLoad(nodes.get(key), properties);
+                }
+            }
+        } else if (node instanceof ConfigParametersNode) {
+            // Check parameter value replacement.
+            ConfigParametersNode params = (ConfigParametersNode) node;
+            Map<String, String> pp = params.getKeyValues();
+            for (String key : pp.keySet()) {
+                String value = pp.get(key);
+                if (!Strings.isNullOrEmpty(value)) {
+                    String nValue = replaceVariables(value, properties);
+                    if (value.compareTo(nValue) != 0) {
+                        params.addKeyValue(key, nValue);
+                    }
+                }
+            }
+        } else if (node instanceof ConfigListElementNode) {
+            ConfigListElementNode le = (ConfigListElementNode) node;
+            List<ConfigElementNode> nodes = le.getValues();
+            if (nodes != null && !nodes.isEmpty()) {
+                for (ConfigElementNode nn : nodes) {
+                    nodePostLoad(nn, properties);
+                }
+            }
+        } else if (node instanceof ConfigListValueNode) {
+            ConfigListValueNode le = (ConfigListValueNode) node;
+            List<ConfigValue> nodes = le.getValues();
+            if (nodes != null && !nodes.isEmpty()) {
+                for (ConfigValue nn : nodes) {
+                    nodePostLoad(nn, properties);
+                }
+            }
+        } else if (node instanceof ConfigValue) {
+            ConfigValue cv = (ConfigValue) node;
+            String value = cv.getValue();
+            if (!Strings.isNullOrEmpty(value)) {
+                String nValue = replaceVariables(value, properties);
+                if (value.compareTo(nValue) != 0) {
+                    cv.setValue(nValue);
+                }
+            }
+        }
+    }
+
+    /**
+     * Replace all the variables, if any, defined in the value string with the property values specified.
+     *
+     * @param value      - Value String to replace variables in.
+     * @param properties - Property Map to lookup variable values.
+     * @return - Replaced String
+     */
+    private String replaceVariables(String value, Map<String, String> properties) {
+        if (!Strings.isNullOrEmpty(value)) {
+            if (VariableRegexParser.hasVariable(value)) {
+                List<String> vars = VariableRegexParser.getVariables(value);
+                if (vars != null && !vars.isEmpty()) {
+                    for (String var : vars) {
+                        String vv = properties.get(var);
+                        if (!Strings.isNullOrEmpty(vv)) {
+                            String rv = String.format("\\$\\{%s\\}", var);
+                            value = value.replaceAll(rv, vv);
+                        }
+                    }
+                }
+            }
+        }
+        return value;
     }
 
     /**
