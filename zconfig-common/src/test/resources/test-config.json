@@ -1,7 +1,7 @@
 {
     "header": {
         "name": "test-config",
-        "description" : "This is a test JSON configuration file.",
+        "description": "This is a test JSON configuration file.",
         "version": "0.2",
         "createdBy": {
             "user": "subho",
@@ -106,6 +106,17 @@
                 "updatedBy": {
                     "user": "subho",
                     "timestamp": "01.02.2019 12:32:19"
+                },
+                "nodeName": "Test Node",
+                "values": {
+                    "longValue": "998739",
+                    "doubleValue": "99834.93948"
+                },
+                "parameters": {
+                    "PARAM_1": "This is a replacement test. ${PROP_1}",
+                    "PARAM_2": "TEST_PARAM_2",
+                    "PARAM_3": "TEST_PARAM_3",
+                    "PARAM_4": "TEST_PARAM_4"
                 },
                 "node_3": {
                     "nodeVersion": 1,

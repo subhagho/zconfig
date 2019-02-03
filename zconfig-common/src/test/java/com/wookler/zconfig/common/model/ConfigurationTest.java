@@ -39,7 +39,7 @@ import static com.wookler.zconfig.common.LogUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ConfigurationTest {
-    private static final String JSON_FILE =
+    private static final String BASE_PROPS_FILE =
             "src/test/resources/test-config.properties";
     private static Configuration configuration = null;
 
@@ -51,7 +51,7 @@ class ConfigurationTest {
         assertNotNull(parser);
 
         Properties properties = new Properties();
-        properties.load(new FileInputStream(JSON_FILE));
+        properties.load(new FileInputStream(BASE_PROPS_FILE));
 
         String filename = properties.getProperty(
                 ConfigTestConstants.PROP_CONFIG_FILE);
