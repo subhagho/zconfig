@@ -85,7 +85,7 @@ public class ConfigPropertiesNode extends ConfigKeyValueNode {
                     return this;
                 } else if (hasKey(key)) {
                     String value = getValue(key);
-                    ConfigValue cv = new ConfigValue();
+                    ConfigValueNode cv = new ConfigValueNode();
                     cv.setName(NODE_NAME);
                     cv.setValue(value);
                     return cv;

@@ -110,8 +110,8 @@ class ConfigurationTest {
 
             path = "@PROP_1";
             node = configuration.find(node, path);
-            assertTrue(node instanceof ConfigValue);
-            String param = ((ConfigValue) node).getValue();
+            assertTrue(node instanceof ConfigValueNode);
+            String param = ((ConfigValueNode) node).getValue();
             assertFalse(Strings.isNullOrEmpty(param));
             debug(getClass(),
                   String.format("[path=%s] property value = %s", path, param));
@@ -131,8 +131,8 @@ class ConfigurationTest {
 
             path = "#PARAM_1";
             node = configuration.find(node, path);
-            assertTrue(node instanceof ConfigValue);
-            String param = ((ConfigValue) node).getValue();
+            assertTrue(node instanceof ConfigValueNode);
+            String param = ((ConfigValueNode) node).getValue();
             assertFalse(Strings.isNullOrEmpty(param));
             debug(getClass(),
                   String.format("[path=%s] parameter value = %s", path, param));
@@ -154,8 +154,8 @@ class ConfigurationTest {
             path = "TEST_ELEMENT_LIST.2.string_2";
             node = configuration.find(node, path);
             assertNotNull(node);
-            assertTrue(node instanceof ConfigValue);
-            String value = ((ConfigValue) node).getValue();
+            assertTrue(node instanceof ConfigValueNode);
+            String value = ((ConfigValueNode) node).getValue();
             assertFalse(Strings.isNullOrEmpty(value));
             debug(getClass(), String.format("[path=%s][value=%s]", path, value));
         } catch (Throwable e) {

@@ -38,26 +38,19 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD })
 public @interface ConfigParam {
     /**
-     * Get the configuration element name. By default it maps to defined
+     * Get the configuration parameter name. By default it maps to defined
      * parameters. For mapping to attributes prefix the name with @.
      *
      * @return - Mapping element name.
      */
-    String name();
+    String name() default "";
 
     /**
-     * Is this element required, will raise an exception if element is not found
-     * in the configuration. By default all elements are assumed to be required
+     * Is this parameter required, will raise an exception if element is not found
+     * in the configuration. By default all elements are assumed not to be required
      * unless specified.
      *
      * @return - Is mandatory?
      */
-    boolean required() default true;
-
-    /**
-     * This field refers to a nested configuration definitions?
-     *
-     * @return - Is nested?
-     */
-    boolean nested() default false;
+    boolean required() default false;
 }

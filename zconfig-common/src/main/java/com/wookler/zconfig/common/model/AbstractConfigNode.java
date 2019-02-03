@@ -185,6 +185,20 @@ public abstract class AbstractConfigNode {
     }
 
     /**
+     * Find the specified path under this configuration node.
+     *
+     * @param path - Dot separated path.
+     * @return - Node at path
+     */
+    public AbstractConfigNode find(String path) {
+        String[] parts = path.split("\\.");
+        if (parts != null && parts.length > 0) {
+            return find(parts, 0);
+        }
+        return null;
+    }
+
+    /**
      * Find a configuration node specified by the path/index.
      *
      * @param path  - Tokenized Path array.

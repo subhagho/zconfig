@@ -33,7 +33,7 @@ import java.util.List;
 /**
  * Class represent a configuration node of type list with String values.
  */
-public class ConfigListValueNode extends ConfigListNode<ConfigValue> {
+public class ConfigListValueNode extends ConfigListNode<ConfigValueNode> {
 
     /**
      * Find the value node in the list with the specified name.
@@ -41,11 +41,11 @@ public class ConfigListValueNode extends ConfigListNode<ConfigValue> {
      * @param name - Name of node to find.
      * @return - Value node, else NULL.
      */
-    public ConfigValue getValue(String name) {
+    public ConfigValueNode getValue(String name) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(name));
-        List<ConfigValue> values = getValues();
+        List<ConfigValueNode> values = getValues();
         if (values != null && !values.isEmpty()) {
-            for (ConfigValue value : values) {
+            for (ConfigValueNode value : values) {
                 if (value != null && value.getName().compareTo(name) == 0) {
                     return value;
                 }
@@ -68,7 +68,7 @@ public class ConfigListValueNode extends ConfigListNode<ConfigValue> {
                 return this;
             } else if (!isEmpty()) {
                 index = index + 1;
-                List<ConfigValue> nodes = getValues();
+                List<ConfigValueNode> nodes = getValues();
                 for (AbstractConfigNode node : nodes) {
                     AbstractConfigNode fn = node.find(path, index);
                     if (fn != null) {
@@ -103,9 +103,9 @@ public class ConfigListValueNode extends ConfigListNode<ConfigValue> {
                     getState().getState().name()));
         }
         updateState(ENodeState.Synced);
-        List<ConfigValue> values = getValues();
+        List<ConfigValueNode> values = getValues();
         if (values != null && !values.isEmpty()) {
-            for (ConfigValue v : values) {
+            for (ConfigValueNode v : values) {
                 v.loaded();
             }
         }

@@ -37,13 +37,11 @@ import com.wookler.zconfig.common.readers.AbstractConfigReader;
 import com.wookler.zconfig.common.readers.EReaderType;
 import org.joda.time.DateTime;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * Configuration Parser implementation that reads the configuration from a JSON file.
@@ -317,7 +315,7 @@ public class JSONConfigParser extends AbstractConfigParser {
             if (parent instanceof ConfigKeyValueNode) {
                 ((ConfigKeyValueNode) parent).addKeyValue(name, node.textValue());
             } else {
-                ConfigValue cv = new ConfigValue();
+                ConfigValueNode cv = new ConfigValueNode();
                 cv.setName(name);
                 cv.setParent(parent);
                 cv.setConfiguration(configuration);

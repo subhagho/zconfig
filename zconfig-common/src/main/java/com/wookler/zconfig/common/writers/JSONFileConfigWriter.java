@@ -169,8 +169,8 @@ public class JSONFileConfigWriter extends AbstractConfigWriter {
         } else if (node instanceof ConfigListElementNode &&
                 (parentJsonNode instanceof ObjectNode)) {
             addListNode((ConfigListElementNode) node, (ObjectNode) parentJsonNode);
-        } else if (node instanceof ConfigValue) {
-            addConfigValue((ConfigValue) node, parentJsonNode);
+        } else if (node instanceof ConfigValueNode) {
+            addConfigValue((ConfigValueNode) node, parentJsonNode);
         } else if (node instanceof ConfigKeyValueNode &&
                 (parentJsonNode instanceof ObjectNode)) {
             addKeyValueNode((ConfigKeyValueNode) node, (ObjectNode) parentJsonNode);
@@ -178,9 +178,9 @@ public class JSONFileConfigWriter extends AbstractConfigWriter {
                 (parentJsonNode instanceof ObjectNode)) {
             ArrayNode valueList =
                     ((ObjectNode) parentJsonNode).putArray(node.getName());
-            List<ConfigValue> values = ((ConfigListValueNode) node).getValues();
+            List<ConfigValueNode> values = ((ConfigListValueNode) node).getValues();
             if (values != null && !values.isEmpty()) {
-                for (ConfigValue cv : values) {
+                for (ConfigValueNode cv : values) {
                     addConfigValue(cv, valueList);
                 }
             }
@@ -282,7 +282,7 @@ public class JSONFileConfigWriter extends AbstractConfigWriter {
      * @param node  - Parent JSON node.
      * @throws ConfigurationException
      */
-    private void addConfigValue(ConfigValue value, JsonNode node)
+    private void addConfigValue(ConfigValueNode value, JsonNode node)
     throws ConfigurationException {
         if (node.getNodeType() == JsonNodeType.ARRAY) {
             ArrayNode array = (ArrayNode) node;

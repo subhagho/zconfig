@@ -48,7 +48,7 @@ import org.joda.time.format.DateTimeFormatter;
  *     <name value="value"/>
  * </pre>
  */
-public class ConfigValue extends AbstractConfigNode
+public class ConfigValueNode extends AbstractConfigNode
         implements IConfigValue<String> {
     /**
      * Configuration value element.

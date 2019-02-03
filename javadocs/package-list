@@ -3,4 +3,5 @@ com.wookler.zconfig.common.model
 com.wookler.zconfig.common.model.annotations
 com.wookler.zconfig.common.parsers
 com.wookler.zconfig.common.readers
+com.wookler.zconfig.common.utils
 com.wookler.zconfig.common.writers

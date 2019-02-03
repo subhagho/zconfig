@@ -121,14 +121,14 @@ public abstract class AbstractConfigParser {
             }
         } else if (node instanceof ConfigListValueNode) {
             ConfigListValueNode le = (ConfigListValueNode) node;
-            List<ConfigValue> nodes = le.getValues();
+            List<ConfigValueNode> nodes = le.getValues();
             if (nodes != null && !nodes.isEmpty()) {
-                for (ConfigValue nn : nodes) {
+                for (ConfigValueNode nn : nodes) {
                     nodePostLoad(nn, properties);
                 }
             }
-        } else if (node instanceof ConfigValue) {
-            ConfigValue cv = (ConfigValue) node;
+        } else if (node instanceof ConfigValueNode) {
+            ConfigValueNode cv = (ConfigValueNode) node;
             String value = cv.getValue();
             if (!Strings.isNullOrEmpty(value)) {
                 String nValue = replaceVariables(value, properties);
