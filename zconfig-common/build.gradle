@@ -1,3 +1,10 @@
+plugins {
+    id 'java'
+}
+
+group 'com.wookler'
+version '1.0-SNAPSHOT'
+
 dependencies {
     /* Jackson Dependencies */
     // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core
@@ -8,6 +15,6 @@ dependencies {
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.9.8'
     // https://mvnrepository.com/artifact/com.fasterxml.jackson.datatype/jackson-datatype-joda
     compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-joda', version: '2.9.8'
-
-
+    // https://mvnrepository.com/artifact/commons-io/commons-io
+    compile group: 'commons-io', name: 'commons-io', version: '2.6'
 }

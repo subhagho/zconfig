@@ -1,0 +1,14 @@
+plugins {
+    id 'java'
+}
+
+group 'com.wookler'
+version '1.0-SNAPSHOT'
+
+dependencies {
+    compile project(":zconfig-common")
+    // https://mvnrepository.com/artifact/org.apache.curator/curator-framework
+    compile group: 'org.apache.curator', name: 'curator-framework', version: '4.1.0'
+    // https://mvnrepository.com/artifact/org.apache.curator/curator-recipes
+    compile group: 'org.apache.curator', name: 'curator-recipes', version: '4.1.0'
+}

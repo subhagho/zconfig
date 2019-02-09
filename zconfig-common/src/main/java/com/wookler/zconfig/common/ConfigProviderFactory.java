@@ -25,6 +25,7 @@
 package com.wookler.zconfig.common;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.wookler.zconfig.common.parsers.AbstractConfigParser;
 import com.wookler.zconfig.common.parsers.JSONConfigParser;
 import com.wookler.zconfig.common.readers.AbstractConfigReader;
@@ -33,7 +34,9 @@ import com.wookler.zconfig.common.readers.ConfigURLReader;
 import com.wookler.zconfig.common.readers.EReaderType;
 import com.wookler.zconfig.common.writers.AbstractConfigWriter;
 import com.wookler.zconfig.common.writers.JSONFileConfigWriter;
+import org.apache.commons.io.FilenameUtils;
 
+import javax.annotation.Nonnull;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -55,7 +58,45 @@ public class ConfigProviderFactory {
         /**
          * XML configuration file.
          */
-        XML
+        XML;
+
+        /**
+         * Get the config type based on passed string.
+         *
+         * @param value - String value to parse.
+         * @return - Config Type or NULL.
+         */
+        public static EConfigType parse(String value) {
+            if (!Strings.isNullOrEmpty(value)) {
+                value = value.trim().toUpperCase();
+                if (value.compareTo(JSON.name()) == 0) {
+                    return JSON;
+                } else if (value.compareTo(XML.name()) == 0) {
+                    return XML;
+                }
+            }
+            return null;
+        }
+    }
+
+    /**
+     * Method will try to get the configuration parser based on the extension of the
+     * specified configuration file name.
+     *
+     * @param filename - Configuration filename.
+     * @return - Configuration Parser instance.
+     */
+    public static final AbstractConfigParser parser(@Nonnull String filename) {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(filename));
+
+        String ext = FilenameUtils.getExtension(filename);
+        if (!Strings.isNullOrEmpty(ext)) {
+            EConfigType type = EConfigType.parse(ext);
+            if (type != null) {
+                return parser(type);
+            }
+        }
+        return null;
     }
 
     /**
