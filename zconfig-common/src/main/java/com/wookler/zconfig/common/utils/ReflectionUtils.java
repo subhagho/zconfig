@@ -33,11 +33,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.base.Strings;
 import com.wookler.zconfig.common.ConfigurationException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
 
 import com.google.common.base.Preconditions;
+
+import javax.annotation.Nonnull;
 
 /**
  * Utility functions to help with Getting/Setting Object/Field values using Reflection.
@@ -48,12 +51,39 @@ import com.google.common.base.Preconditions;
  */
 public class ReflectionUtils {
     /**
+     * Find the field with the specified name in this type or a parent type.
+     *
+     * @param type - Class to find the field in.
+     * @param name - Field name.
+     * @return - Found Field or NULL
+     */
+    public static final Field findField(@Nonnull Class<?> type,
+                                        @Nonnull String name) {
+        Preconditions.checkArgument(type != null);
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(name));
+
+        Field[] fields = type.getDeclaredFields();
+        if (fields != null && fields.length > 0) {
+            for (Field field : fields) {
+                if (field.getName().compareTo(name) == 0) {
+                    return field;
+                }
+            }
+        }
+        Class<?> parent = type.getSuperclass();
+        if (parent != null && !parent.equals(Object.class)) {
+            return findField(parent, name);
+        }
+        return null;
+    }
+
+    /**
      * Recursively get all the declared fields for a type.
      *
      * @param type - Type to fetch fields for.
      * @return - Array of all defined fields.
      */
-    public static final Field[] getAllFields(Class<?> type) {
+    public static final Field[] getAllFields(@Nonnull Class<?> type) {
         Preconditions.checkArgument(type != null);
         List<Field> fields = new ArrayList<>();
         getFields(type, fields);
@@ -95,7 +125,11 @@ public class ReflectionUtils {
      * @return - String value.
      * @throws Exception
      */
-    public static String strinfigy(Object o, Field field) throws Exception {
+    public static String strinfigy(@Nonnull Object o, @Nonnull Field field)
+    throws Exception {
+        Preconditions.checkArgument(o != null);
+        Preconditions.checkArgument(field != null);
+
         Object v = getFieldValue(o, field);
         if (v != null) {
             return String.valueOf(v);
@@ -112,7 +146,11 @@ public class ReflectionUtils {
      * @return - Field value.
      * @throws Exception
      */
-    public static Object getFieldValue(Object o, Field field) throws Exception {
+    public static Object getFieldValue(@Nonnull Object o, @Nonnull Field field)
+    throws Exception {
+        Preconditions.checkArgument(o != null);
+        Preconditions.checkArgument(field != null);
+
         String method = "get" + StringUtils.capitalize(field.getName());
 
         Method m = MethodUtils.getAccessibleMethod(o.getClass(), method);
@@ -142,7 +180,7 @@ public class ReflectionUtils {
      * @param field - Field to check type for.
      * @return - Can convert to String?
      */
-    public static boolean canStringify(Field field) {
+    public static boolean canStringify(@Nonnull Field field) {
         Preconditions.checkArgument(field != null);
         if (field.isEnumConstant() || field.getType().isEnum())
             return true;
@@ -163,8 +201,13 @@ public class ReflectionUtils {
      * @param f      - Field to set value for.
      * @throws Exception
      */
-    public static final void setPrimitiveValue(String value, Object source,
-                                               Field f) throws Exception {
+    public static final void setPrimitiveValue(@Nonnull String value,
+                                               @Nonnull Object source,
+                                               @Nonnull Field f) throws Exception {
+        Preconditions.checkArgument(source != null);
+        Preconditions.checkArgument(f != null);
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(value));
+
         Class<?> type = f.getType();
         if (type.equals(boolean.class) || type.equals(Boolean.class)) {
             setBooleanValue(source, f, value);
@@ -194,10 +237,14 @@ public class ReflectionUtils {
      * @throws ConfigurationException
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public static final Object setValueFromString(String value, Object source,
-                                                  Field f) throws
-                                                           ConfigurationException {
-        Preconditions.checkArgument(!StringUtils.isEmpty(value));
+    public static final Object setValueFromString(@Nonnull String value,
+                                                  @Nonnull Object source,
+                                                  @Nonnull Field f) throws
+                                                                    ConfigurationException {
+        Preconditions.checkArgument(source != null);
+        Preconditions.checkArgument(f != null);
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(value));
+
         try {
             Object retV = value;
             Class<?> type = f.getType();
@@ -250,8 +297,13 @@ public class ReflectionUtils {
      * @param value - Value to set to.
      * @throws Exception
      */
-    public static void setObjectValue(Object o, Field f, Object value)
+    public static void setObjectValue(@Nonnull Object o, @Nonnull Field f,
+                                      @Nonnull Object value)
     throws Exception {
+        Preconditions.checkArgument(o != null);
+        Preconditions.checkArgument(f != null);
+        Preconditions.checkArgument(value != null);
+
         String method = "set" + StringUtils.capitalize(f.getName());
         Method m = MethodUtils.getAccessibleMethod(o.getClass(), method,
                                                    f.getType());
@@ -277,8 +329,13 @@ public class ReflectionUtils {
      * @param value - Value to set.
      * @throws Exception
      */
-    public static void setStringValue(Object o, Field f, String value)
+    public static void setStringValue(@Nonnull Object o, @Nonnull Field f,
+                                      @Nonnull String value)
     throws Exception {
+        Preconditions.checkArgument(o != null);
+        Preconditions.checkArgument(f != null);
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(value));
+
         setObjectValue(o, f, value);
     }
 
@@ -290,8 +347,13 @@ public class ReflectionUtils {
      * @param value - Value to set.
      * @throws Exception
      */
-    public static void setBooleanValue(Object o, Field f, String value)
+    public static void setBooleanValue(@Nonnull Object o, @Nonnull Field f,
+                                       @Nonnull String value)
     throws Exception {
+        Preconditions.checkArgument(o != null);
+        Preconditions.checkArgument(f != null);
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(value));
+
         boolean bv = Boolean.valueOf(value);
         setObjectValue(o, f, bv);
     }
@@ -304,8 +366,13 @@ public class ReflectionUtils {
      * @param value - Value to set.
      * @throws Exception
      */
-    public static void setShortValue(Object o, Field f, String value)
+    public static void setShortValue(@Nonnull Object o, @Nonnull Field f,
+                                     @Nonnull String value)
     throws Exception {
+        Preconditions.checkArgument(o != null);
+        Preconditions.checkArgument(f != null);
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(value));
+
         short sv = Short.parseShort(value);
         setObjectValue(o, f, sv);
     }
@@ -318,8 +385,13 @@ public class ReflectionUtils {
      * @param value - Value to set.
      * @throws Exception
      */
-    public static void setIntValue(Object o, Field f, String value)
+    public static void setIntValue(@Nonnull Object o, @Nonnull Field f,
+                                   @Nonnull String value)
     throws Exception {
+        Preconditions.checkArgument(o != null);
+        Preconditions.checkArgument(f != null);
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(value));
+
         int iv = Integer.parseInt(value);
         setObjectValue(o, f, iv);
     }
@@ -332,8 +404,13 @@ public class ReflectionUtils {
      * @param value - Value to set.
      * @throws Exception
      */
-    public static void setLongValue(Object o, Field f, String value)
+    public static void setLongValue(@Nonnull Object o, @Nonnull Field f,
+                                    @Nonnull String value)
     throws Exception {
+        Preconditions.checkArgument(o != null);
+        Preconditions.checkArgument(f != null);
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(value));
+
         long lv = Long.parseLong(value);
         setObjectValue(o, f, lv);
     }
@@ -346,8 +423,13 @@ public class ReflectionUtils {
      * @param value - Value to set.
      * @throws Exception
      */
-    public static void setFloatValue(Object o, Field f, String value)
+    public static void setFloatValue(@Nonnull Object o, @Nonnull Field f,
+                                     @Nonnull String value)
     throws Exception {
+        Preconditions.checkArgument(o != null);
+        Preconditions.checkArgument(f != null);
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(value));
+
         float fv = Float.parseFloat(value);
         setObjectValue(o, f, fv);
     }
@@ -360,8 +442,13 @@ public class ReflectionUtils {
      * @param value - Value to set.
      * @throws Exception
      */
-    public static void setDoubleValue(Object o, Field f, String value)
+    public static void setDoubleValue(@Nonnull Object o, @Nonnull Field f,
+                                      @Nonnull String value)
     throws Exception {
+        Preconditions.checkArgument(o != null);
+        Preconditions.checkArgument(f != null);
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(value));
+
         double dv = Double.parseDouble(value);
         setObjectValue(o, f, dv);
     }
@@ -374,8 +461,13 @@ public class ReflectionUtils {
      * @param value - Value to set.
      * @throws Exception
      */
-    public static void setCharValue(Object o, Field f, String value)
+    public static void setCharValue(@Nonnull Object o, @Nonnull Field f,
+                                    @Nonnull String value)
     throws Exception {
+        Preconditions.checkArgument(o != null);
+        Preconditions.checkArgument(f != null);
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(value));
+
         char cv = value.charAt(0);
         setObjectValue(o, f, cv);
     }
@@ -386,7 +478,7 @@ public class ReflectionUtils {
      * @param field - Field to check primitive for.
      * @return - Is primitive?
      */
-    public static final boolean isPrimitiveTypeOrClass(Field field) {
+    public static final boolean isPrimitiveTypeOrClass(@Nonnull Field field) {
         Class<?> type = field.getType();
         return isPrimitiveTypeOrClass(type);
     }
@@ -397,7 +489,7 @@ public class ReflectionUtils {
      * @param field - Field to check primitive for.
      * @return - Is primitive?
      */
-    public static final boolean isPrimitiveTypeOrClass(Class<?> type) {
+    public static final boolean isPrimitiveTypeOrClass(@Nonnull Class<?> type) {
         if (type.isPrimitive())
             return true;
         else if (type.equals(Boolean.class) || type.equals(Short.class)
@@ -415,7 +507,7 @@ public class ReflectionUtils {
      * @param field - Field to check primitive/String for.
      * @return - Is primitive or String?
      */
-    public static final boolean isPrimitiveTypeOrString(Field field) {
+    public static final boolean isPrimitiveTypeOrString(@Nonnull Field field) {
         Class<?> type = field.getType();
         return isPrimitiveTypeOrString(type);
     }
@@ -426,7 +518,7 @@ public class ReflectionUtils {
      * @param field - Field to check primitive/String for.
      * @return - Is primitive or String?
      */
-    public static final boolean isPrimitiveTypeOrString(Class<?> type) {
+    public static final boolean isPrimitiveTypeOrString(@Nonnull Class<?> type) {
         if (isPrimitiveTypeOrClass(type)) {
             return true;
         }
@@ -443,8 +535,8 @@ public class ReflectionUtils {
      * @param type   - Inherited type
      * @return - Is Ancestor type?
      */
-    public static final boolean isSuperType(Class<?> parent,
-                                            Class<?> type) {
+    public static final boolean isSuperType(@Nonnull Class<?> parent,
+                                            @Nonnull Class<?> type) {
         Preconditions.checkArgument(parent != null);
         Preconditions.checkArgument(type != null);
         if (parent.equals(type)) {
@@ -467,7 +559,8 @@ public class ReflectionUtils {
      * @param type - Type implementing expected interface.
      * @return - Implements Interface?
      */
-    public static final boolean implementsInterface(Class<?> intf, Class<?> type) {
+    public static final boolean implementsInterface(@Nonnull Class<?> intf,
+                                                    @Nonnull Class<?> type) {
         Preconditions.checkArgument(intf != null);
         Preconditions.checkArgument(type != null);
 
@@ -496,7 +589,7 @@ public class ReflectionUtils {
      * @return - Parameterized type.
      * @throws Exception
      */
-    public static final Class<?> getGenericListType(Field field)
+    public static final Class<?> getGenericListType(@Nonnull Field field)
     throws Exception {
         Preconditions.checkArgument(field != null);
         Preconditions
@@ -513,7 +606,7 @@ public class ReflectionUtils {
      * @return - Parameterized type.
      * @throws Exception
      */
-    public static final Class<?> getGenericSetType(Field field)
+    public static final Class<?> getGenericSetType(@Nonnull Field field)
     throws Exception {
         Preconditions.checkArgument(field != null);
         Preconditions

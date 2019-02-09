@@ -37,11 +37,12 @@ import org.junit.jupiter.api.Test;
 
 import java.io.FileInputStream;
 import java.util.Properties;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static com.wookler.zconfig.common.LogUtils.*;
 
-class ConfigurationAnnotationHandlerTest {
+class ConfigurationAnnotationProcessorTest {
     private static final String BASE_PROPS_FILE =
             "src/test/resources/test-config.properties";
     private static Configuration configuration = null;
@@ -56,6 +57,8 @@ class ConfigurationAnnotationHandlerTest {
         private long longValue;
         @ConfigValue(name = "values.doubleValue", required = true)
         private double doubleValue;
+        @ConfigValue(name = "node_3.node_4.TEST_LONG_LIST")
+        private Set<Long> longListSet;
 
         public String getNodeName() {
             return nodeName;
@@ -89,6 +92,14 @@ class ConfigurationAnnotationHandlerTest {
             this.doubleValue = doubleValue;
         }
 
+        public Set<Long> getLongListSet() {
+            return longListSet;
+        }
+
+        public void setLongListSet(Set<Long> longListSet) {
+            this.longListSet = longListSet;
+        }
+
         @Override
         public String toString() {
             return "ConfigAnnotationsTest{" +
@@ -96,6 +107,7 @@ class ConfigurationAnnotationHandlerTest {
                     ", paramValue='" + paramValue + '\'' +
                     ", longValue=" + longValue +
                     ", doubleValue=" + doubleValue +
+                    ", longListSet=" + longListSet +
                     '}';
         }
     }
@@ -131,7 +143,7 @@ class ConfigurationAnnotationHandlerTest {
         try {
             assertNotNull(configuration);
             ConfigAnnotationsTest value = new ConfigAnnotationsTest();
-            value = ConfigurationAnnotationHandler
+            value = ConfigurationAnnotationProcessor
                     .readConfigAnnotations(ConfigAnnotationsTest.class,
                                            configuration, value);
             debug(getClass(), value.toString());
