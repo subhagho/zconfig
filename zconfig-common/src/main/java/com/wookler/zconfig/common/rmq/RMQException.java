@@ -22,7 +22,7 @@
  *
  */
 
-package com.wookler.zconfig.client.rmq;
+package com.wookler.zconfig.common.rmq;
 
 /**
  * Exception instance used to raise error with regards to RabbitMQ clients.

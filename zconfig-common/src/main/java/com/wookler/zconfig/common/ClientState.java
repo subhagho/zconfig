@@ -17,16 +17,14 @@
  * under the License.
  *
  * Copyright (c) $year
- * Date: 10/2/19 7:55 PM
+ * Date: 10/2/19 8:59 PM
  * Subho Ghosh (subho dot ghosh at outlook.com)
  *
  */
 
-package com.wookler.zconfig.client;
+package com.wookler.zconfig.common;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.wookler.zconfig.common.AbstractState;
-import com.wookler.zconfig.common.StateException;
 
 /**
  * State instance used for managing client states.

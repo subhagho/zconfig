@@ -43,10 +43,31 @@ import java.util.UUID;
  * Singleton class to define and expose environment settings.
  */
 public class ZConfigClientEnv {
+    /**
+     * Configuration name for ZConfig Client configurations.
+     */
+    public static final String CONFIG_NAME = "zconfig-client";
+
+    /**
+     * Parsed configuration handle.
+     */
     private Configuration configuration;
+    /**
+     * Client instance handle.
+     */
     private ZConfigClientInstance instance;
+    /**
+     * Client instance state.
+     */
     private EnvState state = new EnvState();
 
+    /**
+     * Initialize this client environment from the specified configuration file and version.
+     *
+     * @param configfile - Configuration file path.
+     * @param version    - Configuration version (expected)
+     * @throws ConfigurationException
+     */
     private void init(String configfile, Version version)
     throws ConfigurationException {
         try {
@@ -63,6 +84,14 @@ public class ZConfigClientEnv {
         }
     }
 
+    /**
+     * Initialize this client environment from the specified configuration file and version.
+     *
+     * @param configfile - Configuration file path.
+     * @param type       - Configuration file type (in-case file type cannot be deciphered).
+     * @param version    - Configuration version (expected)
+     * @throws ConfigurationException
+     */
     private void init(String configfile, ConfigProviderFactory.EConfigType type,
                       Version version)
     throws ConfigurationException {
@@ -80,6 +109,15 @@ public class ZConfigClientEnv {
         }
     }
 
+    /**
+     * Initialize this client environment from the specified configuration file and version
+     * using the configuration parser.
+     *
+     * @param parser     - Configuration parser to use.
+     * @param configfile - Configuration file path.
+     * @param version    - Configuration version (expected)
+     * @throws ConfigurationException
+     */
     private void init(AbstractConfigParser parser, String configfile,
                       Version version)
     throws ConfigurationException {
@@ -88,7 +126,7 @@ public class ZConfigClientEnv {
                     "Initializing Client Environment : With Configuration file [%s]...",
                     configfile));
             Path path = Paths.get(configfile);
-            parser.parse(configfile, ConfigProviderFactory.reader(path.toUri()),
+            parser.parse(CONFIG_NAME, ConfigProviderFactory.reader(path.toUri()),
                          version);
             configuration = parser.getConfiguration();
             if (configuration == null) {
@@ -119,24 +157,52 @@ public class ZConfigClientEnv {
         }
     }
 
+    /**
+     * Disposed this client environment instance.
+     */
     private void dispose() {
         state.dispose();
     }
 
+    /**
+     * Get the state of this client environment.
+     *
+     * @return - Current state.
+     */
     public EEnvState getState() {
         return state.getState();
     }
 
+    /**
+     * Get configuration loaded for this client environment.
+     *
+     * @return - Configuration handle.
+     */
     public Configuration getConfiguration() {
         return configuration;
     }
 
+    /**
+     * Get the instance header for this client.
+     *
+     * @return - Client instance header.
+     */
     public ZConfigClientInstance getInstance() {
         return instance;
     }
 
+    /**
+     * Client environment singleton.
+     */
     private static final ZConfigClientEnv __ENV__ = new ZConfigClientEnv();
 
+    /**
+     * Setup the client environment using the passed configuration file.
+     *
+     * @param configfile - Configuration file (path) to read from.
+     * @param version    - Configuration version (expected)
+     * @throws ConfigurationException
+     */
     public static void setup(@Nonnull String configfile, @Nonnull String version)
     throws ConfigurationException {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(configfile));
@@ -153,6 +219,16 @@ public class ZConfigClientEnv {
         }
     }
 
+    /**
+     * Setup the client environment using the passed configuration file.
+     * Method to be used in-case the configuration type cannot be deciphered using
+     * the file extension.
+     *
+     * @param configfile - Configuration file (path) to read from.
+     * @param type       - Configuration type.
+     * @param version    - Configuration version (expected)
+     * @throws ConfigurationException
+     */
     public static void setup(@Nonnull String configfile,
                              @Nonnull ConfigProviderFactory.EConfigType type,
                              @Nonnull String version)
@@ -172,12 +248,21 @@ public class ZConfigClientEnv {
         }
     }
 
+    /**
+     * Shutdown this client environment.
+     */
     public static void shutdown() {
         synchronized (__ENV__) {
             __ENV__.dispose();
         }
     }
 
+    /**
+     * Get a handle to the client environment singleton.
+     *
+     * @return - Client Environment handle.
+     * @throws ZConfigClientException
+     */
     public static ZConfigClientEnv get() throws ZConfigClientException {
         try {
             __ENV__.state.checkState(EEnvState.Initialized);

@@ -22,14 +22,14 @@
  *
  */
 
-package com.wookler.zconfig.client.rmq;
+package com.wookler.zconfig.common.rmq;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import com.wookler.zconfig.client.ClientState;
-import com.wookler.zconfig.client.EClientState;
+import com.wookler.zconfig.common.ClientState;
+import com.wookler.zconfig.common.EClientState;
 import com.wookler.zconfig.common.ConfigurationAnnotationProcessor;
 import com.wookler.zconfig.common.ConfigurationException;
 import com.wookler.zconfig.common.IConfigurable;
@@ -169,5 +169,68 @@ public class RMQConnectionFactory implements IConfigurable, Closeable {
         if (connectionFactory != null) {
             connectionFactory = null;
         }
+    }
+
+    /**
+     * Get the Virtual Host for this connection factory.
+     *
+     * @return - RabbitMQ Virtual Host
+     */
+    public String getVirtualHost() {
+        return virtualHost;
+    }
+
+    /**
+     * Set the Virtual Host for this connection factory.
+     *
+     * @param virtualHost - RabbitMQ Virtual Host
+     */
+    public void setVirtualHost(String virtualHost) {
+        this.virtualHost = virtualHost;
+    }
+
+    /**
+     * Get the RabbitMQ Server hostname.
+     *
+     * @return - RabbitMQ Server hostname
+     */
+    public String getHostname() {
+        return hostname;
+    }
+
+    /**
+     * Set the RabbitMQ Server hostname.
+     *
+     * @param hostname - RabbitMQ Server hostname
+     */
+    public void setHostname(String hostname) {
+        this.hostname = hostname;
+    }
+
+    /**
+     * Get the RabbitMQ Server port.
+     *
+     * @return - RabbitMQ Server port
+     */
+    public int getPort() {
+        return port;
+    }
+
+    /**
+     * Set the RabbitMQ Server port.
+     *
+     * @param port - RabbitMQ Server port
+     */
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    /**
+     * Get the state of this Connection factory.
+     *
+     * @return - Connection factory state.
+     */
+    public EClientState getState() {
+        return state.getState();
     }
 }

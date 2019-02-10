@@ -1,6 +1,4 @@
 
 dependencies {
     compile project(":zconfig-common")
-    // https://mvnrepository.com/artifact/com.rabbitmq/amqp-client
-    compile group: 'com.rabbitmq', name: 'amqp-client', version: '5.6.0'
 }

@@ -17,41 +17,59 @@
  * under the License.
  *
  * Copyright (c) $year
- * Date: 10/2/19 8:17 PM
+ * Date: 10/2/19 9:06 PM
  * Subho Ghosh (subho dot ghosh at outlook.com)
  *
  */
 
-package com.wookler.zconfig.client.rmq;
+package com.wookler.zconfig.common.rmq;
 
-import com.wookler.zconfig.client.ZConfigClientEnv;
+import com.wookler.zconfig.common.ConfigProviderFactory;
+import com.wookler.zconfig.common.ConfigurationException;
 import com.wookler.zconfig.common.LogUtils;
+import com.wookler.zconfig.common.model.Configuration;
+import com.wookler.zconfig.common.model.Version;
+import com.wookler.zconfig.common.parsers.AbstractConfigParser;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class RMQConnectionFactoryTest {
     private static final String CONFIG_FILE =
-            "src/main/resources/zconfig-client.json";
+            "src/test/resources/zconfig-client.json";
     private static final String CONFIG_VERSION = "0.0";
+    private static final String CONFIG_NAME = "zconfig-client";
+    private static Configuration configuration;
 
     @BeforeAll
     static void setup() throws Exception {
-        ZConfigClientEnv.setup(CONFIG_FILE, CONFIG_VERSION);
+        AbstractConfigParser parser = ConfigProviderFactory.parser(CONFIG_FILE);
+        if (parser == null) {
+            throw new ConfigurationException(String.format(
+                    "Cannot get configuration parser instance. [file=%s]",
+                    CONFIG_FILE));
+        }
+        Path path = Paths.get(CONFIG_FILE);
+        parser.parse(CONFIG_NAME, ConfigProviderFactory.reader(path.toUri()),
+                     Version.parse(CONFIG_VERSION));
+        configuration = parser.getConfiguration();
     }
 
     @AfterAll
     static void dispose() throws Exception {
-        ZConfigClientEnv.shutdown();
+
     }
 
     @Test
     void open() {
         try {
             RMQConnectionFactory factory = new RMQConnectionFactory();
-            factory.configure(ZConfigClientEnv.get().getConfiguration());
+            factory.configure(configuration);
             factory.open("guest", "guest");
         } catch (Exception e) {
             LogUtils.error(getClass(), e);

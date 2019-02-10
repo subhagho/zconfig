@@ -17,14 +17,12 @@
  * under the License.
  *
  * Copyright (c) $year
- * Date: 10/2/19 7:52 PM
+ * Date: 10/2/19 8:59 PM
  * Subho Ghosh (subho dot ghosh at outlook.com)
  *
  */
 
-package com.wookler.zconfig.client;
-
-import com.wookler.zconfig.common.IStateEnum;
+package com.wookler.zconfig.common;
 
 /**
  * State enum to be used for exposing client handle states.

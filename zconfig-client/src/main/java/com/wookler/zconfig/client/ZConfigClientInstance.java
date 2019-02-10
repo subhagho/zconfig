@@ -24,8 +24,8 @@
 
 package com.wookler.zconfig.client;
 
-import com.wookler.zconfig.common.model.annotations.ConfigParam;
 import com.wookler.zconfig.common.model.annotations.ConfigPath;
+import com.wookler.zconfig.common.model.annotations.ConfigValue;
 import org.joda.time.DateTime;
 
 /**
@@ -40,7 +40,7 @@ public class ZConfigClientInstance {
     /**
      * Client name (or service name).
      */
-    @ConfigParam(name = "name", required = true)
+    @ConfigValue(name = "name", required = true)
     private String name;
     /**
      * Client hostname.
