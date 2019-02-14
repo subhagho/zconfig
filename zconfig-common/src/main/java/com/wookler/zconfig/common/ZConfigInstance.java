@@ -17,147 +17,127 @@
  * under the License.
  *
  * Copyright (c) $year
- * Date: 9/2/19 10:12 PM
+ * Date: 13/2/19 10:55 AM
  * Subho Ghosh (subho dot ghosh at outlook.com)
  *
  */
 
-package com.wookler.zconfig.core;
+package com.wookler.zconfig.common;
 
+import com.wookler.zconfig.common.model.annotations.ConfigValue;
 import org.joda.time.DateTime;
 
 /**
- * Class represents a service instance of the Configuration Server.
+ * Abstract base class for defining a client/server instance.
  */
 public class ZConfigInstance {
     /**
-     * Unique instance ID.
+     * Unique client instance ID.
      */
     private String id;
     /**
-     * Service name (if clustered, all nodes will have the same name).
+     * Client name (or service name).
      */
+    @ConfigValue(name = "name", required = true)
     private String name;
     /**
-     * Hostname of the server this instance is running on.
+     * Client hostname.
      */
     private String hostname;
     /**
-     * IP Address of the server this instance is running on.
+     * Client IP Address String.
      */
     private String ip;
     /**
-     * Port this instance is listening on.
-     */
-    private int port;
-    /**
-     * Timestamp this service was started.
+     * Client instance start timestamp.
      */
     private DateTime startTime;
 
     /**
-     * Get the unique instance ID.
+     * Get the unique client ID.
      *
-     * @return - Unique instance ID.
+     * @return - Unique Client ID.
      */
     public String getId() {
         return id;
     }
 
     /**
-     * Set the unique instance ID.
+     * Set the unique client ID.
      *
-     * @param id - Unique instance ID.
+     * @param id - Unique Client ID.
      */
     public void setId(String id) {
         this.id = id;
     }
 
     /**
-     * Get the service name.
+     * Get the client name.
      *
-     * @return - Service name.
+     * @return - Client name.
      */
     public String getName() {
         return name;
     }
 
     /**
-     * Set the service name.
+     * Set the client name.
      *
-     * @param name - Service name.
+     * @param name - Client name.
      */
     public void setName(String name) {
         this.name = name;
     }
 
     /**
-     * Get the hostname of this server.
+     * Get the client hostname.
      *
-     * @return - Server hostname.
+     * @return - Client hostname
      */
     public String getHostname() {
         return hostname;
     }
 
     /**
-     * Set the hostname of this server.
+     * Set the client hostname.
      *
-     * @param hostname - Server hostname.
+     * @param hostname - Client hostname
      */
     public void setHostname(String hostname) {
         this.hostname = hostname;
     }
 
     /**
-     * Get the IP Address string for this server.
+     * Get the Client IP Address (String)
      *
-     * @return - IP Address string.
+     * @return - IP Address String.
      */
     public String getIp() {
         return ip;
     }
 
     /**
-     * Set the IP Address string for this server.
+     * Set the Client IP Address (String)
      *
-     * @param ip - IP Address string.
+     * @param ip - IP Address String.
      */
     public void setIp(String ip) {
         this.ip = ip;
     }
 
     /**
-     * Get the port this service is listening on.
+     * Get the client instance start timestamp.
      *
-     * @return - Server Port
-     */
-    public int getPort() {
-        return port;
-    }
-
-    /**
-     * Get the port this service is listening on.
-     *
-     * @param port - Server Port
-     */
-    public void setPort(int port) {
-        this.port = port;
-    }
-
-    /**
-     * Get the timestamp this service was started.
-     *
-     * @return - Service start timestamp.
+     * @return - Instance Start timestamp.
      */
     public DateTime getStartTime() {
         return startTime;
     }
 
     /**
-     * Set the timestamp this service was started.
+     * Get the client instance start timestamp.
      *
-     * @param startTime - Service start timestamp.
+     * @param startTime - Instance Start timestamp.
      */
     public void setStartTime(DateTime startTime) {
         this.startTime = startTime;

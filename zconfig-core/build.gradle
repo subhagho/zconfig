@@ -5,4 +5,6 @@ dependencies {
     compile group: 'org.apache.curator', name: 'curator-framework', version: '4.1.0'
     // https://mvnrepository.com/artifact/org.apache.curator/curator-recipes
     compile group: 'org.apache.curator', name: 'curator-recipes', version: '4.1.0'
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-security
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: '2.1.2.RELEASE'
 }

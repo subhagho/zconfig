@@ -27,7 +27,6 @@ package com.wookler.zconfig.client;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.wookler.zconfig.common.*;
-import com.wookler.zconfig.common.model.Configuration;
 import com.wookler.zconfig.common.model.Version;
 import com.wookler.zconfig.common.parsers.AbstractConfigParser;
 import com.wookler.zconfig.common.utils.NetUtils;
@@ -35,78 +34,27 @@ import org.joda.time.DateTime;
 
 import javax.annotation.Nonnull;
 import java.net.InetAddress;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.UUID;
 
 /**
  * Singleton class to define and expose environment settings.
  */
-public class ZConfigClientEnv {
+public class ZConfigClientEnv extends ZConfigEnv {
     /**
      * Configuration name for ZConfig Client configurations.
      */
     public static final String CONFIG_NAME = "zconfig-client";
 
     /**
-     * Parsed configuration handle.
-     */
-    private Configuration configuration;
-    /**
      * Client instance handle.
      */
     private ZConfigClientInstance instance;
-    /**
-     * Client instance state.
-     */
-    private EnvState state = new EnvState();
 
     /**
-     * Initialize this client environment from the specified configuration file and version.
-     *
-     * @param configfile - Configuration file path.
-     * @param version    - Configuration version (expected)
-     * @throws ConfigurationException
+     * Default constructor - Sets the name of the config.
      */
-    private void init(String configfile, Version version)
-    throws ConfigurationException {
-        try {
-            AbstractConfigParser parser = ConfigProviderFactory.parser(configfile);
-            if (parser == null) {
-                throw new ConfigurationException(String.format(
-                        "Cannot get configuration parser instance. [file=%s]",
-                        configfile));
-            }
-            init(parser, configfile, version);
-        } catch (Exception e) {
-            state.setError(e);
-            throw new ConfigurationException(e);
-        }
-    }
-
-    /**
-     * Initialize this client environment from the specified configuration file and version.
-     *
-     * @param configfile - Configuration file path.
-     * @param type       - Configuration file type (in-case file type cannot be deciphered).
-     * @param version    - Configuration version (expected)
-     * @throws ConfigurationException
-     */
-    private void init(String configfile, ConfigProviderFactory.EConfigType type,
-                      Version version)
-    throws ConfigurationException {
-        try {
-            AbstractConfigParser parser = ConfigProviderFactory.parser(type);
-            if (parser == null) {
-                throw new ConfigurationException(String.format(
-                        "Cannot get configuration parser instance. [file=%s]",
-                        configfile));
-            }
-            init(parser, configfile, version);
-        } catch (Exception e) {
-            state.setError(e);
-            throw new ConfigurationException(e);
-        }
+    public ZConfigClientEnv() {
+        super(CONFIG_NAME);
     }
 
     /**
@@ -118,68 +66,23 @@ public class ZConfigClientEnv {
      * @param version    - Configuration version (expected)
      * @throws ConfigurationException
      */
-    private void init(AbstractConfigParser parser, String configfile,
-                      Version version)
+    @Override
+    protected void init(AbstractConfigParser parser, String configfile,
+                        Version version)
     throws ConfigurationException {
         try {
-            LogUtils.info(getClass(), String.format(
-                    "Initializing Client Environment : With Configuration file [%s]...",
-                    configfile));
-            Path path = Paths.get(configfile);
-            parser.parse(CONFIG_NAME, ConfigProviderFactory.reader(path.toUri()),
-                         version);
-            configuration = parser.getConfiguration();
-            if (configuration == null) {
-                throw new ConfigurationException(String.format(
-                        "Error parsing configuration : NULL configuration read. [file=%s]",
-                        configfile));
-            }
+            super.init(parser, configfile, version);
             instance = new ZConfigClientInstance();
-            instance.setId(UUID.randomUUID().toString());
-            instance.setStartTime(DateTime.now());
-            ConfigurationAnnotationProcessor
-                    .readConfigAnnotations(ZConfigClientInstance.class,
-                                           configuration,
-                                           instance);
-            InetAddress addr = NetUtils.getIpAddress();
-            if (addr != null) {
-                instance.setIp(addr.getHostAddress());
-                instance.setHostname(addr.getCanonicalHostName());
-            }
+            setupInstance(ZConfigClientInstance.class, instance);
             LogUtils.debug(getClass(), instance);
 
 
-            state.setState(EEnvState.Initialized);
+            updateState(EEnvState.Initialized);
             LogUtils.info(getClass(),
                           "Client environment successfully initialized...");
         } catch (Exception e) {
             throw new ConfigurationException(e);
         }
-    }
-
-    /**
-     * Disposed this client environment instance.
-     */
-    private void dispose() {
-        state.dispose();
-    }
-
-    /**
-     * Get the state of this client environment.
-     *
-     * @return - Current state.
-     */
-    public EEnvState getState() {
-        return state.getState();
-    }
-
-    /**
-     * Get configuration loaded for this client environment.
-     *
-     * @return - Configuration handle.
-     */
-    public Configuration getConfiguration() {
-        return configuration;
     }
 
     /**
@@ -210,7 +113,7 @@ public class ZConfigClientEnv {
 
         synchronized (__ENV__) {
             try {
-                if (__ENV__.state.getState() != EEnvState.Initialized) {
+                if (__ENV__.getState() != EEnvState.Initialized) {
                     __ENV__.init(configfile, Version.parse(version));
                 }
             } catch (ValueParseException e) {
@@ -239,7 +142,7 @@ public class ZConfigClientEnv {
 
         synchronized (__ENV__) {
             try {
-                if (__ENV__.state.getState() != EEnvState.Initialized) {
+                if (__ENV__.getState() != EEnvState.Initialized) {
                     __ENV__.init(configfile, type, Version.parse(version));
                 }
             } catch (ValueParseException e) {
@@ -265,7 +168,7 @@ public class ZConfigClientEnv {
      */
     public static ZConfigClientEnv get() throws ZConfigClientException {
         try {
-            __ENV__.state.checkState(EEnvState.Initialized);
+            __ENV__.checkState(EEnvState.Initialized);
             return __ENV__;
         } catch (StateException e) {
             throw new ZConfigClientException(e);

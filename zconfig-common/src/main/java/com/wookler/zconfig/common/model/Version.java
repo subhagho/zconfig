@@ -28,12 +28,16 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.wookler.zconfig.common.ValueParseException;
 
+import javax.annotation.Nonnull;
+
 /**
  * Class represents an asset version.
  * <p>
  * Version: {Major Version, Minor Version}
  */
 public class Version {
+    public static final int MATCH_ALL_MARKER = -9999;
+
     /**
      * Major version number - changes in major version numbers are assumed to break
      * backward compatibility.
@@ -91,7 +95,7 @@ public class Version {
      * @param source - Source Version to compare with.
      * @return - Is compatible?
      */
-    public boolean isCompatible(Version source) {
+    public boolean isCompatible(@Nonnull Version source) {
         Preconditions.checkArgument(source != null);
         if (majorVersion == source.majorVersion) {
             return true;
@@ -119,8 +123,12 @@ public class Version {
     public boolean equals(Object o) {
         if (o != null && o instanceof Version) {
             Version v = (Version) o;
-            return (v.majorVersion == majorVersion &&
-                    v.minorVersion == minorVersion);
+            if (this.minorVersion == MATCH_ALL_MARKER ||
+                    v.minorVersion == MATCH_ALL_MARKER) {
+                return (v.majorVersion == this.majorVersion);
+            } else
+                return (v.majorVersion == majorVersion &&
+                        v.minorVersion == minorVersion);
         }
         return super.equals(o);
     }
@@ -132,7 +140,8 @@ public class Version {
      * @return - Parsed Version object.
      * @throws ValueParseException
      */
-    public static final Version parse(String value) throws ValueParseException {
+    public static final Version parse(@Nonnull String value)
+    throws ValueParseException {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(value));
         String[] parts = value.split("\\.");
         if (parts == null || parts.length < 2) {
@@ -142,7 +151,10 @@ public class Version {
         }
         Version version = new Version();
         version.majorVersion = Integer.parseInt(parts[0]);
-        version.minorVersion = Integer.parseInt(parts[1]);
+        if (parts[1].trim().compareTo("*") == 0) {
+            version.minorVersion = MATCH_ALL_MARKER;
+        } else
+            version.minorVersion = Integer.parseInt(parts[1]);
 
         return version;
     }
