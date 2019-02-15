@@ -33,7 +33,6 @@ import java.util.Enumeration;
  * Network related utility function.
  *
  * @author Subho Ghosh (subho dot ghosh at outlook.com)
- * @created 25/08/14
  */
 public class NetUtils {
     public static enum EAddressType {

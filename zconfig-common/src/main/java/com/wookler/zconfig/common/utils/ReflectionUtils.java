@@ -486,7 +486,7 @@ public class ReflectionUtils {
     /**
      * Check if the specified type is a primitive or primitive type class.
      *
-     * @param field - Field to check primitive for.
+     * @param type - Field to check primitive for.
      * @return - Is primitive?
      */
     public static final boolean isPrimitiveTypeOrClass(@Nonnull Class<?> type) {
@@ -515,7 +515,7 @@ public class ReflectionUtils {
     /**
      * Check if the specified type is a primitive or primitive type class or String.
      *
-     * @param field - Field to check primitive/String for.
+     * @param type - Field to check primitive/String for.
      * @return - Is primitive or String?
      */
     public static final boolean isPrimitiveTypeOrString(@Nonnull Class<?> type) {

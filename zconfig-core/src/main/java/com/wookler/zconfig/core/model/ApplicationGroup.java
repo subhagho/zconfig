@@ -24,6 +24,8 @@
 
 package com.wookler.zconfig.core.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.wookler.zconfig.common.Context;
@@ -31,11 +33,18 @@ import com.wookler.zconfig.common.utils.IUniqueIDGenerator;
 import com.wookler.zconfig.core.utils.EntityUtils;
 import org.springframework.lang.NonNull;
 
+import javax.annotation.Nonnull;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Class represent a logical grouping of applications where the
  * configurations/access/updates are managed together.
  */
-public class ApplicationGroup extends PersistedEntity<String, ApplicationGroup> {
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY,
+              property = "@class")
+public class ApplicationGroup extends BaseEntity<String, ApplicationGroup>
+        implements IZkNode {
 
     /**
      * Name of this application group.
@@ -46,10 +55,13 @@ public class ApplicationGroup extends PersistedEntity<String, ApplicationGroup> 
      */
     private String description;
     /**
-     * Owner of this application group.
+     * Channel name to publish updates to.
      */
-    private ModifiedBy<String> owner;
-
+    private String channelName;
+    /**
+     * Application Group properties.
+     */
+    private Map<String, String> properties;
 
     /**
      * Get the Application Group name.
@@ -92,23 +104,83 @@ public class ApplicationGroup extends PersistedEntity<String, ApplicationGroup> 
     }
 
     /**
-     * Get the Application Group owner.
+     * Get the channel name to publish updates to.
      *
-     * @return - Group Owner
+     * @return - Update channel name.
      */
-    public ModifiedBy<String> getOwner() {
-        return owner;
+    public String getChannelName() {
+        return channelName;
     }
 
     /**
-     * Set the Application Group owner.
+     * Set the channel name to publish updates to.
      *
-     * @param owner - Group Owner
+     * @param channelName - Update channel name.
      */
-    public void setOwner(@NonNull ModifiedBy<String> owner) {
-        Preconditions.checkArgument(owner != null);
+    public void setChannelName(@Nonnull String channelName) {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(channelName));
+        this.channelName = channelName;
+    }
 
-        this.owner = owner;
+    /**
+     * Get the application group properties.
+     *
+     * @return - Application Group properties.
+     */
+    public Map<String, String> getProperties() {
+        return properties;
+    }
+
+    /**
+     * Set the application group properties.
+     *
+     * @param properties - Application Group properties.
+     */
+    public void setProperties(Map<String, String> properties) {
+        this.properties = properties;
+    }
+
+    /**
+     * Get the property value for the specified key.
+     *
+     * @param key - Property Key.
+     * @return - Property Value, if found else NULL.
+     */
+    public String getProperty(String key) {
+        if (properties != null) {
+            return properties.get(key);
+        }
+        return null;
+    }
+
+    /**
+     * Add/Update a property value.
+     *
+     * @param key   - Property Key.
+     * @param value - Property Value
+     * @return - Property Value
+     */
+    public String addProperty(@Nonnull String key, @Nonnull String value) {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(key));
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(value));
+        if (properties == null) {
+            properties = new HashMap<>();
+        }
+        properties.put(key, value);
+        return value;
+    }
+
+    /**
+     * Remove the specified property by key.
+     *
+     * @param key - Property key.
+     * @return - Is removed?
+     */
+    public boolean removeProperty(String key) {
+        if (properties != null) {
+            return !Strings.isNullOrEmpty(properties.remove(key));
+        }
+        return false;
     }
 
     /**
@@ -145,9 +217,10 @@ public class ApplicationGroup extends PersistedEntity<String, ApplicationGroup> 
                     "Invalid source entity : [expected id=%s][actual id=%s]",
                     getId(), source.getId()));
         }
+        super.copyChanges(source);
         this.name = source.name;
         this.description = source.description;
-        this.owner = source.owner.clone();
+        this.channelName = source.channelName;
     }
 
     /**
@@ -184,5 +257,27 @@ public class ApplicationGroup extends PersistedEntity<String, ApplicationGroup> 
             throw new EntityException(
                     "Missing mandatory argument : Unique ID Generator not specified.");
         }
+    }
+
+    /**
+     * Get the path name of this node.
+     *
+     * @return - Path node name.
+     */
+    @Override
+    @JsonIgnore
+    public String getPath() {
+        return name;
+    }
+
+    /**
+     * Get the absolute path of this node element.
+     *
+     * @return - Absolute Path.
+     */
+    @Override
+    @JsonIgnore
+    public String getAbsolutePath() {
+        return String.format("/%s", getPath());
     }
 }
