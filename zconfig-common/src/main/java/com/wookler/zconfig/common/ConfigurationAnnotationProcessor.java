@@ -114,6 +114,29 @@ public class ConfigurationAnnotationProcessor {
                     if (Strings.isNullOrEmpty(name)) {
                         name = field.getName();
                     }
+                    if (name.contains("@")) {
+                        String[] parts = name.split("@");
+                        if (parts.length == 2) {
+                            String path = parts[0];
+                            String nname = parts[1];
+                            if (Strings.isNullOrEmpty(path)) {
+                                name = nname;
+                            } else {
+                                node = node.find(path);
+                                if (node == null) {
+                                    throw new ConfigurationException(
+                                            String.format(
+                                                    "Invalid ConfigParam : path not found. [name=%s]",
+                                                    name));
+                                }
+                                name = nname;
+                            }
+                        } else {
+                            throw new ConfigurationException(
+                                    String.format("Invalid ConfigParam : [name=%s]",
+                                                  name));
+                        }
+                    }
                     String value = null;
                     if (node instanceof ConfigPathNode) {
                         ConfigPathNode pathNode = (ConfigPathNode) node;

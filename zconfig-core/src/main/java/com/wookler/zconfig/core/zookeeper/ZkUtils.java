@@ -24,20 +24,40 @@
 
 package com.wookler.zconfig.core.zookeeper;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.wookler.zconfig.common.LogUtils;
+import com.wookler.zconfig.common.model.Version;
 import com.wookler.zconfig.core.ZConfigCoreEnv;
 import com.wookler.zconfig.core.ZConfigCoreInstance;
+import com.wookler.zconfig.core.model.Application;
+import com.wookler.zconfig.core.model.ApplicationGroup;
+import com.wookler.zconfig.core.model.ZkConfigNode;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.recipes.locks.InterProcessMutex;
+import org.apache.curator.retry.ExponentialBackoffRetry;
+import org.apache.curator.retry.RetryOneTime;
+
+import javax.annotation.Nonnull;
 
 /**
  * Helper class for ZooKeeper.
  */
 public class ZkUtils {
+    /**
+     * Default path for creating configuration locks.
+     */
     private static final String ZK_LOCK_PATH = "__LOCKS__";
+    /**
+     * Default retry sleep interval.
+     */
+    private static final int DEFAULT_RETRY_SLEEP = 1000;
+    /**
+     * ZooKeeper Root path for this server.
+     */
+    private static final String SERVER_ROOT_PATH = "/zconfig-sever";
 
     /**
      * Get a new instance of the Curator Client. Method will start() the client.
@@ -54,15 +74,23 @@ public class ZkUtils {
                         "ZooKeeper Connection configuration not set.");
             }
             RetryPolicy retryPolicy = null;
-            if (!Strings.isNullOrEmpty(config.getConnectionString())) {
-                Class<?> type = Class.forName(config.getConnectionString());
-                Object obj = type.newInstance();
-                if (!(obj instanceof RetryPolicy)) {
-                    throw new ZkException(
-                            String.format("Invalid Retry Policy : [class=%s]",
-                                          type.getCanonicalName()));
+            if (!Strings.isNullOrEmpty(config.getRetryClass())) {
+                LogUtils.debug(ZkUtils.class,
+                               String.format("Using Retry implemenation : %s",
+                                             config.getRetryClass()));
+                Class<?> type = Class.forName(config.getRetryClass());
+                if (type.equals(ExponentialBackoffRetry.class)) {
+                    if (config.getSleepTime() <= 0 || config.getMaxRetries() < 0) {
+                        throw new ZkException(String.format(
+                                "Missing Retry Parameter(s) : [type=%s]",
+                                config.getRetryClass()));
+                    }
+                    retryPolicy = new ExponentialBackoffRetry(config.getSleepTime(),
+                                                              config.getMaxRetries());
                 }
-                retryPolicy = (RetryPolicy) obj;
+            }
+            if (retryPolicy == null) {
+                retryPolicy = new RetryOneTime(DEFAULT_RETRY_SLEEP);
             }
             CuratorFramework client = CuratorFrameworkFactory
                     .newClient(config.getConnectionString(), retryPolicy);
@@ -88,8 +116,19 @@ public class ZkUtils {
                         "ZooKeeper Connection configuration not set.");
             }
             String rp = config.getRootPath();
-            ZConfigCoreInstance instance = ZConfigCoreEnv.get().getInstance();
-            return String.format("%s/%s", rp, instance.getName());
+            if (!Strings.isNullOrEmpty(rp)) {
+                if (!rp.startsWith("/")) {
+                    rp = String.format("/%s", rp);
+                }
+                ZConfigCoreInstance instance = ZConfigCoreEnv.get().getInstance();
+                return String
+                        .format("%s%s/%s", SERVER_ROOT_PATH, rp,
+                                instance.getName());
+            } else {
+                ZConfigCoreInstance instance = ZConfigCoreEnv.get().getInstance();
+                return String
+                        .format("%s/%s", SERVER_ROOT_PATH, instance.getName());
+            }
         } catch (Exception e) {
             throw new ZkException(e);
         }
@@ -103,9 +142,11 @@ public class ZkUtils {
      * @return - Lock instance.
      * @throws ZkException
      */
-    public static final InterProcessMutex getZkLock(CuratorFramework client,
-                                                    String name)
+    public static final InterProcessMutex getZkLock(
+            @Nonnull CuratorFramework client,
+            @Nonnull String name)
     throws ZkException {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(name));
         String path =
                 String.format("%s/%s/%s", getServerRootPath(), ZK_LOCK_PATH, name);
 
@@ -113,5 +154,56 @@ public class ZkUtils {
                        String.format("Getting ZK Lock : [lock=%s]...", path));
 
         return new InterProcessMutex(client, path);
+    }
+
+    /**
+     * Get the distributed lock instance for the specified Application Group.
+     *
+     * @param client - Curator Framework client handle.
+     * @param group  - Application Group to Lock.
+     * @return - Lock instance.
+     * @throws ZkException
+     */
+    public static final InterProcessMutex getZkLock(
+            @Nonnull CuratorFramework client,
+            @Nonnull ApplicationGroup group)
+    throws ZkException {
+        String path = group.getAbsolutePath();
+        return getZkLock(client, path);
+    }
+
+    /**
+     * Get the distributed lock instance for the specified Application.
+     *
+     * @param client      - Curator Framework client handle.
+     * @param application - Application to Lock.
+     * @return - Lock instance.
+     * @throws ZkException
+     */
+    public static final InterProcessMutex getZkLock(
+            @Nonnull CuratorFramework client,
+            @Nonnull Application application)
+    throws ZkException {
+        String path = application.getAbsolutePath();
+        return getZkLock(client, path);
+    }
+
+    /**
+     * Get the distributed lock instance for the specified Application.
+     *
+     * @param client        - Curator Framework client handle.
+     * @param configuration - Configuration node to Lock.
+     * @param version       - Configuration version to lock for.
+     * @return - Lock instance.
+     * @throws ZkException
+     */
+    public static final InterProcessMutex getZkLock(
+            @Nonnull CuratorFramework client,
+            @Nonnull ZkConfigNode configuration,
+            @Nonnull Version version)
+    throws ZkException {
+        String path = String.format("%s/%d", configuration.getAbsolutePath(),
+                                    version.getMajorVersion());
+        return getZkLock(client, path);
     }
 }

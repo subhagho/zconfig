@@ -41,17 +41,17 @@ public class ZkConnectionConfig {
     /**
      * Retry type - Implementation class.
      */
-    @ConfigParam(name = "retry.@type")
+    @ConfigParam(name = "retry@type")
     private String retryClass;
     /**
      * Retry sleep time.
      */
-    @ConfigParam(name = "retry.@sleepTime")
+    @ConfigParam(name = "retry@sleepTime")
     private int sleepTime;
     /**
      * Retry max attempts.
      */
-    @ConfigParam(name = "retry.@retries")
+    @ConfigParam(name = "retry@retries")
     private int maxRetries;
 
     /**

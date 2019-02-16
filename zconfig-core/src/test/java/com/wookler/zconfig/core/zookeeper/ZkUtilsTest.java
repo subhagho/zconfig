@@ -25,10 +25,9 @@
 package com.wookler.zconfig.core.zookeeper;
 
 import com.wookler.zconfig.common.LogUtils;
-import com.wookler.zconfig.common.model.Version;
 import com.wookler.zconfig.core.ZConfigCoreEnv;
 import org.apache.curator.framework.CuratorFramework;
-import org.apache.curator.retry.ExponentialBackoffRetry;
+import org.apache.curator.utils.ZKPaths;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -54,19 +53,25 @@ class ZkUtilsTest {
     @Test
     void getZkClient() {
         try {
-            CuratorFramework client = ZkUtils.getZkClient();
-            assertNotNull(client);
-            String id = UUID.randomUUID().toString();
-            String path = String.format("%s/_TEST_%s", ZkUtils.getServerRootPath(),
-                                        id);
-            String p = client.create().forPath(path, id.getBytes());
-            LogUtils.debug(getClass(),
-                           String.format("Create path response = [%s]", p));
-            byte[] data = client.getData().forPath(path);
-            assertNotNull(data);
-            assertTrue(data.length > 0);
-            String nid = new String(data);
-            assertEquals(id, nid);
+            try (CuratorFramework client = ZkUtils.getZkClient()) {
+                assertNotNull(client);
+                String id = UUID.randomUUID().toString();
+                String path =
+                        String.format("/_TEST_%s", id);
+                LogUtils.debug(getClass(), String.format("Root Path = [%s]",
+                                                         ZkUtils.getServerRootPath()));
+                String p = ZKPaths.makePath(ZkUtils.getServerRootPath(), path);
+                p = client.create().creatingParentsIfNeeded().forPath(p);
+                client.setData().forPath(p, id.getBytes());
+
+                LogUtils.debug(getClass(),
+                               String.format("Create path response = [%s]", p));
+                byte[] data = client.getData().forPath(p);
+                assertNotNull(data);
+                assertTrue(data.length > 0);
+                String nid = new String(data);
+                assertEquals(id, nid);
+            }
         } catch (Throwable t) {
             LogUtils.error(getClass(), t);
             fail(t.getLocalizedMessage());
