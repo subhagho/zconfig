@@ -41,7 +41,7 @@ import javax.annotation.Nonnull;
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY,
               property = "@class")
-public class ZkConfigurationNode extends BaseEntity<String, ZkConfigurationNode>
+public class ZkConfigNode extends BaseEntity<String, ZkConfigNode>
         implements IZkNode {
     /**
      * Name of this application group.
@@ -165,7 +165,7 @@ public class ZkConfigurationNode extends BaseEntity<String, ZkConfigurationNode>
      * @return - (<0 key < source.key) (0 key == source.key) (>0 key > source.key)
      */
     @Override
-    public int compareKey(PersistedEntity<String, ZkConfigurationNode> source) {
+    public int compareKey(PersistedEntity<String, ZkConfigNode> source) {
         return getId().compareTo(source.getId());
     }
 
@@ -186,18 +186,8 @@ public class ZkConfigurationNode extends BaseEntity<String, ZkConfigurationNode>
      * @throws EntityException
      */
     @Override
-    public void copyChanges(ZkConfigurationNode source) throws EntityException {
-        if (compareKey(source) == 0) {
-            throw new EntityException(String.format(
-                    "Invalid source entity : [expected id=%s][actual id=%s]",
-                    getId(), source.getId()));
-        }
-        super.copyChanges(source);
-        this.name = source.name;
-        this.description = source.description;
-        this.application = source.application;
-        this.lowestVersion = source.lowestVersion;
-        this.currentVersion = source.currentVersion;
+    public void copyChanges(ZkConfigNode source) throws EntityException {
+        EntityUtils.copyChanges(source, this);
     }
 
     /**
@@ -208,7 +198,7 @@ public class ZkConfigurationNode extends BaseEntity<String, ZkConfigurationNode>
      * @throws EntityException
      */
     @Override
-    public ZkConfigurationNode clone(Object... params) throws EntityException {
+    public ZkConfigNode clone(Object... params) throws EntityException {
         if (params != null && params.length > 0) {
             Object obj = params[0];
             if (obj instanceof IUniqueIDGenerator) {
@@ -221,7 +211,7 @@ public class ZkConfigurationNode extends BaseEntity<String, ZkConfigurationNode>
                 }
                 String id = idgen.generateStringId(ctx);
                 Preconditions.checkState(!Strings.isNullOrEmpty(id));
-                ZkConfigurationNode node = new ZkConfigurationNode();
+                ZkConfigNode node = new ZkConfigNode();
                 node.setId(id);
                 node.copyChanges(this);
 
@@ -256,5 +246,19 @@ public class ZkConfigurationNode extends BaseEntity<String, ZkConfigurationNode>
     @JsonIgnore
     public String getAbsolutePath() {
         return String.format("%s/%s", application.getAbsolutePath(), getPath());
+    }
+
+    /**
+     * Get the absolute path of this config node element appended with the
+     * requested version.
+     *
+     * @param version - Configuration Version
+     * @return - Absolute Path.
+     */
+    public String getAbsolutePath(@Nonnull Version version) {
+        Preconditions.checkArgument(version.compare(lowestVersion) >= 0);
+        Preconditions.checkArgument(version.compare(currentVersion) <= 0);
+
+        return String.format("%s/%d", getAbsolutePath(), version.getMajorVersion());
     }
 }

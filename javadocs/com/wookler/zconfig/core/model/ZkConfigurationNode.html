@@ -105,7 +105,7 @@ var activeTableTab = "activeTableTab";
 <li><a href="../../../../../com/wookler/zconfig/core/model/BaseEntity.html" title="class in com.wookler.zconfig.core.model">com.wookler.zconfig.core.model.BaseEntity</a>&lt;java.lang.String,<a href="../../../../../com/wookler/zconfig/core/model/ZkConfigurationNode.html" title="class in com.wookler.zconfig.core.model">ZkConfigurationNode</a>&gt;</li>
 <li>
 <ul class="inheritance">
-<li>com.wookler.zconfig.core.model.ZkConfigurationNode</li>
+<li>com.wookler.zconfig.core.model.ZkConfigNode</li>
 </ul>
 </li>
 </ul>
@@ -175,7 +175,7 @@ implements <a href="../../../../../com/wookler/zconfig/core/model/IZkNode.html" 
 </tr>
 <tr id="i2" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/wookler/zconfig/core/model/ZkConfigurationNode.html#copyChanges-com.wookler.zconfig.core.model.ZkConfigurationNode-">copyChanges</a></span>(<a href="../../../../../com/wookler/zconfig/core/model/ZkConfigurationNode.html" title="class in com.wookler.zconfig.core.model">ZkConfigurationNode</a>&nbsp;source)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/wookler/zconfig/core/model/ZkConfigurationNode.html#copyChanges-com.wookler.zconfig.core.model.ZkConfigNode-">copyChanges</a></span>(<a href="../../../../../com/wookler/zconfig/core/model/ZkConfigurationNode.html" title="class in com.wookler.zconfig.core.model">ZkConfigurationNode</a>&nbsp;source)</code>
 <div class="block">Copy the attribute values from the passed source entity to the current.</div>
 </td>
 </tr>
@@ -235,7 +235,7 @@ implements <a href="../../../../../com/wookler/zconfig/core/model/IZkNode.html" 
 </tr>
 <tr id="i12" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/wookler/zconfig/core/model/ZkConfigurationNode.html#setCurrentVersion-com.wookler.zconfig.common.model.Version-">setCurrentVersion</a></span>(<a href="../../../../../com/wookler/zconfig/common/model/Version.html" title="class in com.wookler.zconfig.common.model">Version</a>&nbsp;currentVersion)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../com/wookler/zconfig/core/model/ZkConfigurationNode.html#setCurrentVersion-com.wookler.zconfig.common.model.Version-">setCurrentVersion</a></span>(<a href="../../../../../com/wookler/zconfig/common/model/Version.html" title="class in com.wookler.zconfig.common.model">Version</a>&nbsp;version)</code>
 <div class="block">Set the current (latest) version for this configuration.</div>
 </td>
 </tr>
@@ -421,11 +421,11 @@ implements <a href="../../../../../com/wookler/zconfig/core/model/IZkNode.html" 
 <li class="blockList">
 <h4>setCurrentVersion</h4>
 <pre>public&nbsp;void&nbsp;setCurrentVersion(@Nonnull
-                              <a href="../../../../../com/wookler/zconfig/common/model/Version.html" title="class in com.wookler.zconfig.common.model">Version</a>&nbsp;currentVersion)</pre>
+                              <a href="../../../../../com/wookler/zconfig/common/model/Version.html" title="class in com.wookler.zconfig.common.model">Version</a>&nbsp;version)</pre>
 <div class="block">Set the current (latest) version for this configuration.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>currentVersion</code> - - Current/Latest version.</dd>
+<dd><code>version</code> - - Current/Latest version.</dd>
 </dl>
 </li>
 </ul>
@@ -492,7 +492,7 @@ implements <a href="../../../../../com/wookler/zconfig/core/model/IZkNode.html" 
 </dl>
 </li>
 </ul>
-<a name="copyChanges-com.wookler.zconfig.core.model.ZkConfigurationNode-">
+<a name="copyChanges-com.wookler.zconfig.core.model.ZkConfigNode-">
 <!--   -->
 </a>
 <ul class="blockList">

@@ -24,12 +24,22 @@
 
 package com.wookler.zconfig.core.utils;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.wookler.zconfig.common.utils.ReflectionUtils;
+import com.wookler.zconfig.core.model.EntityException;
+import com.wookler.zconfig.core.model.ICopiable;
+import com.wookler.zconfig.core.model.PersistedEntity;
+
+import javax.annotation.Nonnull;
+import java.lang.reflect.Field;
 
 /**
  * Utility methods for use with entities.
  */
 public class EntityUtils {
+    private static final String FIELD_ID = "id";
+
     /**
      * Generate a hash code based on the passed string value.
      *
@@ -39,5 +49,76 @@ public class EntityUtils {
     public static int getStringHashCode(String value) {
         final int prime = 31;
         return (prime * (Strings.isNullOrEmpty(value) ? 0 : value.hashCode()));
+    }
+
+    /**
+     * Copy the attribute changes from the source entity to the target.
+     *
+     * @param source - Source entity to copy changes from.
+     * @param target - Target entity to copy changes to.
+     * @param <T>    - Entity Type.
+     * @return - Updated Target entity.
+     * @throws EntityException
+     */
+    public static <T extends ICopiable> T copyChanges(@Nonnull T source,
+                                                      @Nonnull T target)
+    throws EntityException {
+        Preconditions.checkArgument(
+                ReflectionUtils.isSuperType(target.getClass(), source.getClass()));
+        try {
+            Field[] fields = ReflectionUtils.getAllFields(source.getClass());
+            if (fields != null && fields.length > 0) {
+                for (Field field : fields) {
+                    if (field.getName().compareTo(FIELD_ID) == 0) {
+                        Object sid = ReflectionUtils.getFieldValue(source, field);
+                        Object tid = ReflectionUtils.getFieldValue(target, field);
+                        if (tid == null) {
+                            ReflectionUtils.setObjectValue(target, field, sid);
+                        } else {
+                            continue;
+                        }
+                    }
+                    copyField(field, source, target);
+                }
+            }
+            return target;
+        } catch (Exception e) {
+            throw new EntityException(e);
+        }
+    }
+
+    /**
+     * Copy the field value from the source to the target.
+     *
+     * @param field  - Field value to copy.
+     * @param source - Source entity.
+     * @param target - Target entity.
+     * @param <T>    - Copiable Type
+     * @throws EntityException
+     */
+    private static <T extends ICopiable> void copyField(Field field,
+                                                        @Nonnull T source,
+                                                        @Nonnull T target)
+    throws EntityException {
+        try {
+            Object value = ReflectionUtils.getFieldValue(source, field);
+            if (value == null) {
+                ReflectionUtils.setObjectValue(target, field, null);
+            } else {
+                Class<?> ftype = field.getType();
+                if (ReflectionUtils.implementsInterface(ICopiable.class, ftype)) {
+                    Object tvalue = ReflectionUtils.getFieldValue(target, field);
+                    if (tvalue == null) {
+                        tvalue = ftype.newInstance();
+                        ReflectionUtils.setObjectValue(target, field, tvalue);
+                    }
+                    copyChanges((ICopiable) value, (ICopiable) tvalue);
+                } else {
+                    ReflectionUtils.setObjectValue(target, field, value);
+                }
+            }
+        } catch (Exception e) {
+            throw new EntityException(e);
+        }
     }
 }

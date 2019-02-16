@@ -24,6 +24,8 @@
 
 package com.wookler.zconfig.core.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * Interface to be implemented by all ZooKeeper node elements.
  */
@@ -40,6 +42,7 @@ public interface IZkNode {
      *
      * @return - Path node name.
      */
+    @JsonIgnore
     public String getPath();
 
     /**
@@ -47,5 +50,6 @@ public interface IZkNode {
      *
      * @return - Absolute Path.
      */
+    @JsonIgnore
     public String getAbsolutePath();
 }

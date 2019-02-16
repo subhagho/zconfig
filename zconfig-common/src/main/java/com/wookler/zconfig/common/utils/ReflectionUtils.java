@@ -298,11 +298,10 @@ public class ReflectionUtils {
      * @throws Exception
      */
     public static void setObjectValue(@Nonnull Object o, @Nonnull Field f,
-                                      @Nonnull Object value)
+                                      Object value)
     throws Exception {
         Preconditions.checkArgument(o != null);
         Preconditions.checkArgument(f != null);
-        Preconditions.checkArgument(value != null);
 
         String method = "set" + StringUtils.capitalize(f.getName());
         Method m = MethodUtils.getAccessibleMethod(o.getClass(), method,
@@ -330,11 +329,10 @@ public class ReflectionUtils {
      * @throws Exception
      */
     public static void setStringValue(@Nonnull Object o, @Nonnull Field f,
-                                      @Nonnull String value)
+                                      String value)
     throws Exception {
         Preconditions.checkArgument(o != null);
         Preconditions.checkArgument(f != null);
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(value));
 
         setObjectValue(o, f, value);
     }

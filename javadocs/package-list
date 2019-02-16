@@ -9,4 +9,6 @@ com.wookler.zconfig.common.utils
 com.wookler.zconfig.common.writers
 com.wookler.zconfig.core
 com.wookler.zconfig.core.model
+com.wookler.zconfig.core.model.nodes
 com.wookler.zconfig.core.utils
+com.wookler.zconfig.core.zookeeper

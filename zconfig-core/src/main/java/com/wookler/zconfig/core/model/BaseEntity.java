@@ -26,6 +26,7 @@ package com.wookler.zconfig.core.model;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.google.common.base.Preconditions;
+import com.wookler.zconfig.core.utils.EntityUtils;
 import org.springframework.lang.NonNull;
 
 import javax.annotation.Nonnull;
@@ -86,20 +87,5 @@ public abstract class BaseEntity<K, T> extends PersistedEntity<K, T> {
     public void setUpdated(
             @Nonnull ModifiedBy<String> updated) {
         this.updated = updated;
-    }
-
-    /**
-     * Copy the attribute values from the passed source entity to the current.
-     *
-     * @param source - Source entity to copy from.
-     * @throws EntityException
-     */
-    @Override
-    @SuppressWarnings("unchecked")
-    public void copyChanges(T source) throws EntityException {
-        Preconditions.checkArgument(source instanceof BaseEntity);
-        BaseEntity<K, T> se = (BaseEntity<K, T>) source;
-        this.owner = se.owner;
-        this.updated = se.updated;
     }
 }

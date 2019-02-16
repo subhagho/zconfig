@@ -17,31 +17,44 @@
  * under the License.
  *
  * Copyright (c) $year
- * Date: 15/2/19 8:22 PM
+ * Date: 16/2/19 12:13 PM
  * Subho Ghosh (subho dot ghosh at outlook.com)
  *
  */
 
-package com.wookler.zconfig.core.model;
+package com.wookler.zconfig.core.zookeeper;
 
 /**
- * Enum represents the state of a defined application instance.
+ * Exception instance used to raise error with regards to ZooKeeper.
  */
-public enum EApplicationState {
+public class ZkException extends Exception {
+    private static final String PREFIX = "ZooKeeper Error : %s";
+
     /**
-     * New Application - Not yet ready for use.
+     * Exception constructor with error message string.
+     *
+     * @param s - Error message string.
      */
-    New,
+    public ZkException(String s) {
+        super(String.format(PREFIX, s));
+    }
+
     /**
-     * Application is available and ready for use.
+     * Exception constructor with error message string and inner cause.
+     *
+     * @param s         - Error message string.
+     * @param throwable - Inner cause.
      */
-    Available,
+    public ZkException(String s, Throwable throwable) {
+        super(String.format(PREFIX, s), throwable);
+    }
+
     /**
-     * Application is deprecated and shouldn't be used.
+     * Exception constructor inner cause.
+     *
+     * @param throwable - Inner cause.
      */
-    Deprecated,
-    /**
-     * Application has been deleted.
-     */
-    Deleted
+    public ZkException(Throwable throwable) {
+        super(String.format(PREFIX, throwable.getLocalizedMessage()), throwable);
+    }
 }

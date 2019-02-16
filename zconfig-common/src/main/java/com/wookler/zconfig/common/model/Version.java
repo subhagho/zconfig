@@ -104,6 +104,26 @@ public class Version {
     }
 
     /**
+     * Compare this version with the target version.
+     *
+     * <pre>
+     *      if (this < target) return < 0
+     *      if (this > target) return > 0
+     *      else return 0
+     * </pre>
+     *
+     * @param target - Target version to compare to.
+     * @return - Comparison value
+     */
+    public int compare(@Nonnull Version target) {
+        int ret = this.majorVersion - target.majorVersion;
+        if (ret == 0) {
+            ret = this.minorVersion - target.minorVersion;
+        }
+        return ret;
+    }
+
+    /**
      * Override the default toString to print the version info.
      *
      * @return - Version Info (majorVersion.minorVersion)

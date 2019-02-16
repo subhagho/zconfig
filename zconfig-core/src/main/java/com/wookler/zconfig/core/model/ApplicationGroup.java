@@ -212,15 +212,7 @@ public class ApplicationGroup extends BaseEntity<String, ApplicationGroup>
      */
     @Override
     public void copyChanges(ApplicationGroup source) throws EntityException {
-        if (compareKey(source) == 0) {
-            throw new EntityException(String.format(
-                    "Invalid source entity : [expected id=%s][actual id=%s]",
-                    getId(), source.getId()));
-        }
-        super.copyChanges(source);
-        this.name = source.name;
-        this.description = source.description;
-        this.channelName = source.channelName;
+        EntityUtils.copyChanges(source, this);
     }
 
     /**

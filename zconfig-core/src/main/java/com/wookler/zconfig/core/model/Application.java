@@ -58,7 +58,7 @@ public class Application extends BaseEntity<String, Application>
     /**
      * State of this application instance.
      */
-    private EApplicationState state;
+    private EZkNodeState state;
 
     /**
      * Get the Application Group name.
@@ -123,7 +123,7 @@ public class Application extends BaseEntity<String, Application>
      *
      * @return - Application instance state.
      */
-    public EApplicationState getState() {
+    public EZkNodeState getState() {
         return state;
     }
 
@@ -132,7 +132,7 @@ public class Application extends BaseEntity<String, Application>
      *
      * @param state - Application instance state.
      */
-    public void setState(@Nonnull EApplicationState state) {
+    public void setState(@Nonnull EZkNodeState state) {
         this.state = state;
     }
 
@@ -165,16 +165,7 @@ public class Application extends BaseEntity<String, Application>
      */
     @Override
     public void copyChanges(Application source) throws EntityException {
-        if (compareKey(source) == 0) {
-            throw new EntityException(String.format(
-                    "Invalid source entity : [expected id=%s][actual id=%s]",
-                    getId(), source.getId()));
-        }
-        super.copyChanges(source);
-        this.name = source.name;
-        this.description = source.description;
-        this.group = source.group;
-        this.state = source.state;
+        EntityUtils.copyChanges(source, this);
     }
 
     /**

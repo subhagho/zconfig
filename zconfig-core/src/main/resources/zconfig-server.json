@@ -1,0 +1,45 @@
+{
+    "header": {
+        "name": "zconfig-core",
+        "description": "This is a Sample ZConfig Client configuration.",
+        "version": "0.0",
+        "createdBy": {
+            "user": "subho",
+            "timestamp": "12.31.2018 12:32:19"
+        },
+        "updatedBy": {
+            "user": "subho",
+            "timestamp": "01.02.2019 12:32:19"
+        }
+    },
+    "zconfig": {
+        "instance": {
+            "name": "TEST-SERVER",
+            "port": "7878"
+        },
+        "server": {
+            "rmq": {
+                "settings": {
+                    "parameters": {
+                        "virtualHost": "/",
+                        "hostname": "localhost",
+                        "port": "5672"
+                    }
+                }
+            },
+            "zookeeper": {
+                "settings": {
+                    "connectionString": "127.0.0.1:2181",
+                    "retry": {
+                        "parameters": {
+                            "type": "org.apache.curator.retry.ExponentialBackoffRetry",
+                            "sleepTime": "3000",
+                            "retries": "3"
+                        }
+                    },
+                    "rootPath": "/zconfig"
+                }
+            }
+        }
+    }
+}

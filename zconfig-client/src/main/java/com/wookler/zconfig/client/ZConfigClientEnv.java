@@ -29,12 +29,8 @@ import com.google.common.base.Strings;
 import com.wookler.zconfig.common.*;
 import com.wookler.zconfig.common.model.Version;
 import com.wookler.zconfig.common.parsers.AbstractConfigParser;
-import com.wookler.zconfig.common.utils.NetUtils;
-import org.joda.time.DateTime;
 
 import javax.annotation.Nonnull;
-import java.net.InetAddress;
-import java.util.UUID;
 
 /**
  * Singleton class to define and expose environment settings.

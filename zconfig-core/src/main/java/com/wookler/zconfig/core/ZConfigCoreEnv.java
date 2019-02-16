@@ -29,6 +29,7 @@ import com.google.common.base.Strings;
 import com.wookler.zconfig.common.*;
 import com.wookler.zconfig.common.model.Version;
 import com.wookler.zconfig.common.parsers.AbstractConfigParser;
+import com.wookler.zconfig.core.zookeeper.ZkConnectionConfig;
 
 import javax.annotation.Nonnull;
 
@@ -42,6 +43,7 @@ public class ZConfigCoreEnv extends ZConfigEnv {
     public static final String CONFIG_NAME = "zconfig-core";
 
     private ZConfigCoreInstance instance;
+    private ZkConnectionConfig zkConnectionConfig;
 
     /**
      * Default constructor - Sets the name of the config.
@@ -65,9 +67,13 @@ public class ZConfigCoreEnv extends ZConfigEnv {
         super.init(parser, configfile, version);
         instance = new ZConfigCoreInstance();
         setupInstance(ZConfigCoreInstance.class, instance);
-
         LogUtils.debug(getClass(), instance);
 
+        zkConnectionConfig = new ZkConnectionConfig();
+        ConfigurationAnnotationProcessor
+                .readConfigAnnotations(ZkConnectionConfig.class, getConfiguration(),
+                                       zkConnectionConfig);
+        LogUtils.debug(getClass(), zkConnectionConfig);
 
         updateState(EEnvState.Initialized);
         LogUtils.info(getClass(),
@@ -79,6 +85,15 @@ public class ZConfigCoreEnv extends ZConfigEnv {
      */
     public ZConfigCoreInstance getInstance() {
         return instance;
+    }
+
+    /**
+     * Get the ZooKeeper connection configuration.
+     *
+     * @return - ZooKeeper connection configuration.
+     */
+    public ZkConnectionConfig getZkConnectionConfig() {
+        return zkConnectionConfig;
     }
 
     private static final ZConfigCoreEnv __ENV__ = new ZConfigCoreEnv();
