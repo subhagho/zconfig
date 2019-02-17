@@ -25,14 +25,14 @@
 package com.wookler.zconfig.core.model.nodes;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.wookler.zconfig.core.model.ZkConfigPathNode;
+import com.wookler.zconfig.core.model.PersistedConfigPathNode;
 
 /**
  * ZooKeeper node that stores a configuration value.
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY,
               property = "@class")
-public class ZkConfigValueNode extends ZkConfigPathNode {
+public class PersistedConfigValueNode extends PersistedConfigPathNode {
     /**
      * Configuration Value.
      */

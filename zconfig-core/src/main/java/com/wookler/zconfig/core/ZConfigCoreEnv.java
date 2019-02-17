@@ -29,6 +29,7 @@ import com.google.common.base.Strings;
 import com.wookler.zconfig.common.*;
 import com.wookler.zconfig.common.model.Version;
 import com.wookler.zconfig.common.parsers.AbstractConfigParser;
+import com.wookler.zconfig.common.utils.DefaultUniqueIDGenerator;
 import com.wookler.zconfig.common.utils.IUniqueIDGenerator;
 import com.wookler.zconfig.core.zookeeper.ZkConnectionConfig;
 
@@ -45,7 +46,7 @@ public class ZConfigCoreEnv extends ZConfigEnv {
 
     private ZConfigCoreInstance instance;
     private ZkConnectionConfig zkConnectionConfig;
-    private IUniqueIDGenerator idGenerator;
+    private IUniqueIDGenerator idGenerator = new DefaultUniqueIDGenerator();
 
     /**
      * Default constructor - Sets the name of the config.

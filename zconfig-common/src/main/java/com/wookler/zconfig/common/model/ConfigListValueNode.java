@@ -34,33 +34,7 @@ import java.util.List;
 /**
  * Class represent a configuration node of type list with String values.
  */
-public class ConfigListValueNode extends ConfigListNode<ConfigValueNode>
-        implements IVersionedNode<String> {
-    /**
-     * Current change version of this node.
-     */
-    private String changeVersion;
-
-    /**
-     * Get the current version of this node.
-     *
-     * @return - Current Version.
-     */
-    @Override
-    public String getVersion() {
-        return changeVersion;
-    }
-
-    /**
-     * Set the current version of this node.
-     *
-     * @param version - Current Version.
-     */
-    @Override
-    public void setVersion(@Nonnull String version) {
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(version));
-        changeVersion = version;
-    }
+public class ConfigListValueNode extends ConfigListNode<ConfigValueNode>{
 
     /**
      * Find the value node in the list with the specified name.

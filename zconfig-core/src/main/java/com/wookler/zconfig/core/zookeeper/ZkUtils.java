@@ -27,13 +27,14 @@ package com.wookler.zconfig.core.zookeeper;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.wookler.zconfig.common.LogUtils;
+import com.wookler.zconfig.common.model.Configuration;
 import com.wookler.zconfig.common.model.Version;
 import com.wookler.zconfig.core.ZConfigCoreEnv;
 import com.wookler.zconfig.core.ZConfigCoreInstance;
 import com.wookler.zconfig.core.model.Application;
 import com.wookler.zconfig.core.model.ApplicationGroup;
 import com.wookler.zconfig.core.model.IZkNode;
-import com.wookler.zconfig.core.model.ZkConfigNode;
+import com.wookler.zconfig.core.model.PersistedConfigNode;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -217,7 +218,7 @@ public class ZkUtils {
      */
     public static final InterProcessMutex getZkLock(
             @Nonnull CuratorFramework client,
-            @Nonnull ZkConfigNode configuration,
+            @Nonnull PersistedConfigNode configuration,
             @Nonnull Version version)
     throws ZkException {
         String path = String.format("%s/%d", configuration.getAbsolutePath(),
@@ -246,7 +247,7 @@ public class ZkUtils {
      * @return - Absolute Path
      * @throws ZkException
      */
-    public static final String getZkPath(@Nonnull ZkConfigNode configNode,
+    public static final String getZkPath(@Nonnull PersistedConfigNode configNode,
                                          @Nonnull String path)
     throws ZkException {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(path));
@@ -259,5 +260,92 @@ public class ZkUtils {
             }
         }
         return buff.toString();
+    }
+
+    /**
+     * Get the ZooKeeper path for the specified configuration.
+     *
+     * @param configuration - Configuration instance.
+     * @return - ZooKeeper Path.
+     * @throws ZkException
+     */
+    public static final String getZkPath(@Nonnull Configuration configuration)
+    throws ZkException {
+        String path = String.format("%s/%s/%s", configuration.getApplicationGroup(),
+                                    configuration.getApplication(),
+                                    configuration.getName());
+        return String.format("%s/%s", getServerRootPath(), path);
+    }
+
+    /**
+     * Get the ZooKeeper path for the specified configuration.
+     *
+     * @param group - Application Group instance.
+     * @return - ZooKeeper Path.
+     * @throws ZkException
+     */
+    public static final String getZkPath(@Nonnull ApplicationGroup group)
+    throws ZkException {
+        return String.format("%s%s", getServerRootPath(), group.getAbsolutePath());
+    }
+
+    /**
+     * Get the ZooKeeper path for the specified configuration.
+     *
+     * @param application - Application instance.
+     * @return - ZooKeeper Path.
+     * @throws ZkException
+     */
+    public static final String getZkPath(@Nonnull Application application)
+    throws ZkException {
+        return String
+                .format("%s%s", getServerRootPath(), application.getAbsolutePath());
+    }
+
+    /**
+     * Get the ZooKeeper path for the specified application group.
+     *
+     * @param group - Application Group name.
+     * @return - ZooKeeper Path.
+     * @throws ZkException
+     */
+    public static final String getZkPath(@Nonnull String group) throws ZkException {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(group));
+        return String.format("%s/%s", getServerRootPath(), group);
+    }
+
+    /**
+     * Get the ZooKeeper path for the specified application group.
+     *
+     * @param group       - Application Group instance.
+     * @param application - Application name.
+     * @return - ZooKeeper Path.
+     * @throws ZkException
+     */
+    public static final String getZkPath(ApplicationGroup group,
+                                         @Nonnull String application)
+    throws ZkException {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(application));
+        return String
+                .format("%s%s/%s", getServerRootPath(), group.getAbsolutePath(),
+                        application);
+    }
+
+    /**
+     * Get the ZooKeeper path for the specified configname application.
+     *
+     * @param application - Application instance.
+     * @param configname  - Configuration name.
+     * @return - ZooKeeper Path.
+     * @throws ZkException
+     */
+    public static final String getZkPath(Application application,
+                                         @Nonnull String configname)
+    throws ZkException {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(configname));
+        return String
+                .format("%s%s/%s", getServerRootPath(),
+                        application.getAbsolutePath(),
+                        configname);
     }
 }

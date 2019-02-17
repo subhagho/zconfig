@@ -303,19 +303,9 @@ public class JSONFileConfigWriter extends AbstractConfigWriter {
      *
      * @param node  - Configuration node.
      * @param jnode - Parent Header node.
-     * @throws ConfigurationException
      */
-    private void addNodeHeader(ConfigElementNode node, ObjectNode jnode)
-    throws ConfigurationException {
-        jnode.put(JSONConfigConstants.CONFIG_NODE_VERSION, node.getNodeVersion());
-        if (node.getCreatedBy() != null)
-            addUpdateInfo(node.getCreatedBy(),
-                          JSONConfigConstants.CONFIG_CREATED_BY,
-                          jnode);
-        if (node.getUpdatedBy() != null)
-            addUpdateInfo(node.getUpdatedBy(),
-                          JSONConfigConstants.CONFIG_UPDATED_BY,
-                          jnode);
+    private void addNodeHeader(ConfigElementNode node, ObjectNode jnode) {
+
         String desc = node.getDescription();
         if (!Strings.isNullOrEmpty(desc)) {
             jnode.put(JSONConfigConstants.CONFIG_HEADER_DESC, desc);

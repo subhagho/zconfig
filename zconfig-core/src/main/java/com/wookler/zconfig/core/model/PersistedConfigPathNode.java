@@ -41,7 +41,8 @@ import javax.annotation.Nonnull;
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY,
               property = "@class")
-public class ZkConfigPathNode extends BaseEntity<String, ZkConfigPathNode>
+public class PersistedConfigPathNode
+        extends BaseEntity<String, PersistedConfigPathNode>
         implements IZkNode {
     /**
      * Name of this application group.
@@ -55,17 +56,17 @@ public class ZkConfigPathNode extends BaseEntity<String, ZkConfigPathNode>
     /**
      * Configuration this path node belongs to.
      */
-    private ZkConfigNode parent;
+    private PersistedConfigNode parent;
 
     /**
      * Get the version of this node instance.
      */
-    private String nodeVersion;
+    private Version nodeVersion;
 
     /**
      * State of this node.
      */
-    private EZkNodeState state;
+    private EPersistedNodeState state;
 
     /**
      * Get the Application Group name.
@@ -112,7 +113,7 @@ public class ZkConfigPathNode extends BaseEntity<String, ZkConfigPathNode>
      *
      * @return - Parent configuration.
      */
-    public ZkConfigNode getParent() {
+    public PersistedConfigNode getParent() {
         return parent;
     }
 
@@ -121,7 +122,7 @@ public class ZkConfigPathNode extends BaseEntity<String, ZkConfigPathNode>
      *
      * @param parent - Parent configuration.
      */
-    public void setParent(@Nonnull ZkConfigNode parent) {
+    public void setParent(@Nonnull PersistedConfigNode parent) {
         this.parent = parent;
     }
 
@@ -130,7 +131,7 @@ public class ZkConfigPathNode extends BaseEntity<String, ZkConfigPathNode>
      *
      * @return - Node Version.
      */
-    public String getNodeVersion() {
+    public Version getNodeVersion() {
         return nodeVersion;
     }
 
@@ -139,8 +140,7 @@ public class ZkConfigPathNode extends BaseEntity<String, ZkConfigPathNode>
      *
      * @param nodeVersion - Node Version.
      */
-    public void setNodeVersion(@Nonnull String nodeVersion) {
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(nodeVersion));
+    public void setNodeVersion(@Nonnull Version nodeVersion) {
         this.nodeVersion = nodeVersion;
     }
 
@@ -151,7 +151,7 @@ public class ZkConfigPathNode extends BaseEntity<String, ZkConfigPathNode>
      * @return - (<0 key < source.key) (0 key == source.key) (>0 key > source.key)
      */
     @Override
-    public int compareKey(PersistedEntity<String, ZkConfigPathNode> source) {
+    public int compareKey(PersistedEntity<String, PersistedConfigPathNode> source) {
         return getId().compareTo(source.getId());
     }
 
@@ -172,7 +172,7 @@ public class ZkConfigPathNode extends BaseEntity<String, ZkConfigPathNode>
      * @throws EntityException
      */
     @Override
-    public void copyChanges(ZkConfigPathNode source) throws EntityException {
+    public void copyChanges(PersistedConfigPathNode source) throws EntityException {
         EntityUtils.copyChanges(source, this);
     }
 
@@ -184,7 +184,7 @@ public class ZkConfigPathNode extends BaseEntity<String, ZkConfigPathNode>
      * @throws EntityException
      */
     @Override
-    public ZkConfigPathNode clone(Object... params) throws EntityException {
+    public PersistedConfigPathNode clone(Object... params) throws EntityException {
         if (params != null && params.length > 0) {
             Object obj = params[0];
             if (obj instanceof IUniqueIDGenerator) {
@@ -197,7 +197,7 @@ public class ZkConfigPathNode extends BaseEntity<String, ZkConfigPathNode>
                 }
                 String id = idgen.generateStringId(ctx);
                 Preconditions.checkState(!Strings.isNullOrEmpty(id));
-                ZkConfigPathNode node = new ZkConfigPathNode();
+                PersistedConfigPathNode node = new PersistedConfigPathNode();
                 node.setId(id);
                 node.copyChanges(this);
 

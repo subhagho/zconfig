@@ -51,36 +51,12 @@ import javax.annotation.Nonnull;
  * </pre>
  */
 public class ConfigValueNode extends AbstractConfigNode
-        implements IConfigValue<String>, IVersionedNode<String> {
-    /**
-     * Current change Version of this node.
-     */
-    private String changeVersion;
+        implements IConfigValue<String> {
+
     /**
      * Configuration value element.
      */
     private String value;
-
-    /**
-     * Get the current version of this node.
-     *
-     * @return - Current Version.
-     */
-    @Override
-    public String getVersion() {
-        return changeVersion;
-    }
-
-    /**
-     * Set the current version of this node.
-     *
-     * @param version - Current Version.
-     */
-    @Override
-    public void setVersion(@Nonnull String version) {
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(version));
-        changeVersion = version;
-    }
 
     /**
      * Get the configuration value element.

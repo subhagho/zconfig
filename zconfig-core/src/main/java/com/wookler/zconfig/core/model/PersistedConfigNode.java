@@ -42,7 +42,7 @@ import javax.annotation.Nonnull;
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY,
               property = "@class")
-public class ZkConfigNode extends BaseEntity<String, ZkConfigNode>
+public class PersistedConfigNode extends BaseEntity<String, PersistedConfigNode>
         implements IZkNode {
     /**
      * Name of this application group.
@@ -63,7 +63,7 @@ public class ZkConfigNode extends BaseEntity<String, ZkConfigNode>
     /**
      * Specifies the sync mode for this configuration.
      */
-    private ESyncMode syncMode;
+    private ESyncMode syncMode = ESyncMode.MANUAL;
 
     /**
      * Get the Application Group name.
@@ -167,7 +167,7 @@ public class ZkConfigNode extends BaseEntity<String, ZkConfigNode>
      * @return - (<0 key < source.key) (0 key == source.key) (>0 key > source.key)
      */
     @Override
-    public int compareKey(PersistedEntity<String, ZkConfigNode> source) {
+    public int compareKey(PersistedEntity<String, PersistedConfigNode> source) {
         return getId().compareTo(source.getId());
     }
 
@@ -188,7 +188,7 @@ public class ZkConfigNode extends BaseEntity<String, ZkConfigNode>
      * @throws EntityException
      */
     @Override
-    public void copyChanges(ZkConfigNode source) throws EntityException {
+    public void copyChanges(PersistedConfigNode source) throws EntityException {
         EntityUtils.copyChanges(source, this);
     }
 
@@ -200,7 +200,7 @@ public class ZkConfigNode extends BaseEntity<String, ZkConfigNode>
      * @throws EntityException
      */
     @Override
-    public ZkConfigNode clone(Object... params) throws EntityException {
+    public PersistedConfigNode clone(Object... params) throws EntityException {
         if (params != null && params.length > 0) {
             Object obj = params[0];
             if (obj instanceof IUniqueIDGenerator) {
@@ -213,7 +213,7 @@ public class ZkConfigNode extends BaseEntity<String, ZkConfigNode>
                 }
                 String id = idgen.generateStringId(ctx);
                 Preconditions.checkState(!Strings.isNullOrEmpty(id));
-                ZkConfigNode node = new ZkConfigNode();
+                PersistedConfigNode node = new PersistedConfigNode();
                 node.setId(id);
                 node.copyChanges(this);
 

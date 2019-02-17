@@ -17,28 +17,31 @@
  * under the License.
  *
  * Copyright (c) $year
- * Date: 17/2/19 10:41 AM
+ * Date: 15/2/19 8:22 PM
  * Subho Ghosh (subho dot ghosh at outlook.com)
  *
  */
 
-package com.wookler.zconfig.common.model;
+package com.wookler.zconfig.core.model;
 
 /**
- * Interface that exposes a version.
+ * Enum represents the state of a defined ZooKeeper node instance.
  */
-public interface IVersionedNode<T> {
+public enum EPersistedNodeState {
     /**
-     * Get the current version of this node.
-     *
-     * @return - Current Version.
+     * Node - Not yet ready for use.
      */
-    T getVersion();
-
+    New,
     /**
-     * Set the current version of this node.
-     *
-     * @param version - Current Version.
+     * Node is available and ready for use.
      */
-    void setVersion(T version);
+    Available,
+    /**
+     * Node is deprecated and shouldn't be used.
+     */
+    Deprecated,
+    /**
+     * Node has been deleted.
+     */
+    Deleted
 }

@@ -17,31 +17,30 @@
  * under the License.
  *
  * Copyright (c) $year
- * Date: 15/2/19 8:22 PM
+ * Date: 17/2/19 8:26 PM
  * Subho Ghosh (subho dot ghosh at outlook.com)
  *
  */
 
-package com.wookler.zconfig.core.model;
+package com.wookler.zconfig.core.test;
 
-/**
- * Enum represents the state of a defined ZooKeeper node instance.
- */
-public enum EZkNodeState {
-    /**
-     * Node - Not yet ready for use.
-     */
-    New,
-    /**
-     * Node is available and ready for use.
-     */
-    Available,
-    /**
-     * Node is deprecated and shouldn't be used.
-     */
-    Deprecated,
-    /**
-     * Node has been deleted.
-     */
-    Deleted
+import javax.security.auth.Subject;
+import java.security.Principal;
+
+public class TestUser implements Principal {
+    private String name;
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public boolean implies(Subject subject) {
+        return false;
+    }
 }

@@ -25,6 +25,8 @@
 package com.wookler.zconfig.common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.wookler.zconfig.common.model.Configuration;
@@ -209,7 +211,8 @@ public abstract class ZConfigEnv {
      */
     public ObjectMapper getJsonMapper() {
         ObjectMapper mapper = new ObjectMapper();
-
+        mapper.registerModule(new JodaModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         return mapper;
     }
 }

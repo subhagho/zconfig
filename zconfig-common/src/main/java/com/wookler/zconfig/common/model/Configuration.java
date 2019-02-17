@@ -439,7 +439,6 @@ public class Configuration {
             } else {
                 props = new ConfigPropertiesNode();
                 props.setConfiguration(this);
-                props.setNodeVersion(0);
             }
             if (node.getParent() != null) {
                 ConfigPropertiesNode pp = resolvedProperties(node.getParent());

@@ -24,56 +24,6 @@
 
 package com.wookler.zconfig.common.model;
 
-import com.google.common.base.Preconditions;
-
 public abstract class ConfigElementNode extends AbstractConfigNode {
 
-    /**
-     * Node creation info.
-     */
-    private ModifiedBy createdBy;
-    /**
-     * Node updation info.
-     */
-    private ModifiedBy updatedBy;
-
-    /**
-     * Get the node creation info.
-     *
-     * @return - Created By info.
-     */
-    public ModifiedBy getCreatedBy() {
-        return createdBy;
-    }
-
-    /**
-     * Set the node creation info.
-     *
-     * @param createdBy - Created timestamp.
-     */
-    public void setCreatedBy(ModifiedBy createdBy) {
-        Preconditions.checkArgument(createdBy != null);
-
-        this.createdBy = createdBy;
-    }
-
-    /**
-     * Get node last updation info.
-     *
-     * @return - Last updation info.
-     */
-    public ModifiedBy getUpdatedBy() {
-        return updatedBy;
-    }
-
-    /**
-     * Set the last updation info for this node.
-     *
-     * @param updatedBy - Last updated timestamp
-     */
-    public void setUpdatedBy(ModifiedBy updatedBy) {
-        Preconditions.checkArgument(updatedBy != null);
-
-        this.updatedBy = updatedBy;
-    }
 }

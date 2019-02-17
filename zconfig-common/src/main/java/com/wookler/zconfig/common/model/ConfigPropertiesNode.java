@@ -103,7 +103,6 @@ public class ConfigPropertiesNode extends ConfigKeyValueNode {
     public ConfigPropertiesNode copy() {
         ConfigPropertiesNode node = new ConfigPropertiesNode();
         node.setName(this.getName());
-        node.setNodeVersion(0);
         Map<String, String> properties = new HashMap<>(this.getKeyValues());
         node.setKeyValues(properties);
 

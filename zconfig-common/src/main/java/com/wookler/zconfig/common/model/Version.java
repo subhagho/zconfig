@@ -51,6 +51,24 @@ public class Version {
     private int minorVersion = 0;
 
     /**
+     * Default empty constructor
+     */
+    public Version() {
+
+    }
+
+    /**
+     * Initializing constructor with version data.
+     *
+     * @param majorVersion - Major Version
+     * @param minorVersion - Minor Version
+     */
+    public Version(int majorVersion, int minorVersion) {
+        this.majorVersion = majorVersion;
+        this.minorVersion = minorVersion;
+    }
+
+    /**
      * Get the Major Version number.
      *
      * @return - Major version number.
@@ -121,6 +139,23 @@ public class Version {
             ret = this.minorVersion - target.minorVersion;
         }
         return ret;
+    }
+
+    /**
+     * Compare the Minor version with the target. Major version should be same else
+     * will throw a runtime exception.
+     * <pre>
+     *      if (this < target) return < 0
+     *      if (this > target) return > 0
+     *      else return 0
+     * </pre>
+     *
+     * @param target - Target version to compare to.
+     * @return - Comparison value
+     */
+    public int compareMinorVersion(@Nonnull Version target) {
+        Preconditions.checkArgument(majorVersion == target.minorVersion);
+        return (minorVersion - target.minorVersion);
     }
 
     /**

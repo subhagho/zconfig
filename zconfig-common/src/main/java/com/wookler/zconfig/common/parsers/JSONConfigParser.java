@@ -251,37 +251,6 @@ public class JSONConfigParser extends AbstractConfigParser {
             while (nodes.hasNext()) {
                 Map.Entry<String, JsonNode> nn = nodes.next();
                 if (nn.getKey()
-                      .compareTo(JSONConfigConstants.CONFIG_NODE_VERSION) == 0) {
-                    JsonNode n = nn.getValue();
-                    if (n.getNodeType() != JsonNodeType.NUMBER) {
-                        throw new ConfigurationException(String.format(
-                                "Invalid node value : [expected type=%s][actual type=%s]",
-                                JsonNodeType.NUMBER.name(),
-                                n.getNodeType().name()));
-                    }
-                    ((ConfigElementNode) configNode).setNodeVersion(n.longValue());
-                    isProcessed(n);
-                } else if (nn.getKey()
-                             .compareTo(JSONConfigConstants.CONFIG_CREATED_BY) ==
-                        0) {
-                    ModifiedBy createdby =
-                            parseUpdateInfo(nn.getValue(),
-                                            JSONConfigConstants.CONFIG_CREATED_BY);
-                    if (createdby != null) {
-                        ((ConfigElementNode) configNode).setCreatedBy(createdby);
-                        isProcessed(nn.getValue());
-                    }
-                } else if (nn.getKey()
-                             .compareTo(JSONConfigConstants.CONFIG_UPDATED_BY) ==
-                        0) {
-                    ModifiedBy updatedBy =
-                            parseUpdateInfo(nn.getValue(),
-                                            JSONConfigConstants.CONFIG_UPDATED_BY);
-                    if (updatedBy != null) {
-                        ((ConfigElementNode) configNode).setUpdatedBy(updatedBy);
-                        isProcessed(nn.getValue());
-                    }
-                } else if (nn.getKey()
                              .compareTo(JSONConfigConstants.CONFIG_HEADER_DESC) ==
                         0) {
                     JsonNode n = nn.getValue();

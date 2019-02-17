@@ -58,7 +58,7 @@ public class Application extends BaseEntity<String, Application>
     /**
      * State of this application instance.
      */
-    private EZkNodeState state;
+    private EPersistedNodeState state;
 
     /**
      * Get the Application Group name.
@@ -123,7 +123,7 @@ public class Application extends BaseEntity<String, Application>
      *
      * @return - Application instance state.
      */
-    public EZkNodeState getState() {
+    public EPersistedNodeState getState() {
         return state;
     }
 
@@ -132,7 +132,7 @@ public class Application extends BaseEntity<String, Application>
      *
      * @param state - Application instance state.
      */
-    public void setState(@Nonnull EZkNodeState state) {
+    public void setState(@Nonnull EPersistedNodeState state) {
         this.state = state;
     }
 

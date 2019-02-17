@@ -36,38 +36,12 @@ import java.util.Map;
 /**
  * Abstract Configuration node represents Key/Value pairs.
  */
-public abstract class ConfigKeyValueNode extends ConfigElementNode
-        implements IVersionedNode<String> {
-    /**
-     * Current change version of this node.
-     */
-    private String changeVersion;
+public abstract class ConfigKeyValueNode extends ConfigElementNode {
 
     /**
      * Map containing the defined parameters within a node definition.
      */
     private Map<String, String> keyValues;
-
-    /**
-     * Get the current version of this node.
-     *
-     * @return - Current Version.
-     */
-    @Override
-    public String getVersion() {
-        return changeVersion;
-    }
-
-    /**
-     * Set the current version of this node.
-     *
-     * @param version - Current Version.
-     */
-    @Override
-    public void setVersion(@Nonnull String version) {
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(version));
-        changeVersion = version;
-    }
 
     /**
      * Get the defined parameters for a specific node.
