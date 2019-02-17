@@ -57,6 +57,9 @@ public class JSONConfigParser extends AbstractConfigParser {
      * <pre>
      *     {
      *         "header" : {
+     *             "id" : "[configuration ID],
+     *             "group" : "[application group]",
+     *             "application" : [application]",
      *             "name" : "[configuration name]",
      *             "version" : "[version string]",
      *             "createdBy" : {
@@ -662,6 +665,37 @@ public class JSONConfigParser extends AbstractConfigParser {
                                 JSONConfigConstants.CONFIG_HEADER_NODE);
             }
             if (!isProcessed(header)) {
+                // Read the configuration ID
+                JsonNode hid = header.get(JSONConfigConstants.CONFIG_HEADER_ID);
+                if (hid == null) {
+                    throw ConfigurationException
+                            .propertyNotFoundException(
+                                    JSONConfigConstants.CONFIG_HEADER_ID);
+                }
+                String id = hid.textValue();
+                Preconditions.checkState(!Strings.isNullOrEmpty(id));
+                configuration.setId(id);
+                // Read the Application Group.
+                JsonNode hgrp = header.get(JSONConfigConstants.CONFIG_HEADER_GROUP);
+                if (hgrp == null) {
+                    throw ConfigurationException
+                            .propertyNotFoundException(
+                                    JSONConfigConstants.CONFIG_HEADER_GROUP);
+                }
+                String grp = hgrp.textValue();
+                Preconditions.checkState(!Strings.isNullOrEmpty(grp));
+                configuration.setApplicationGroup(grp);
+                // Read the Application.
+                JsonNode happ = header.get(JSONConfigConstants.CONFIG_HEADER_APP);
+                if (happ == null) {
+                    throw ConfigurationException
+                            .propertyNotFoundException(
+                                    JSONConfigConstants.CONFIG_HEADER_APP);
+                }
+                String app = happ.textValue();
+                Preconditions.checkState(!Strings.isNullOrEmpty(app));
+                configuration.setApplication(app);
+
                 // Read the configuration name
                 JsonNode hname = header.get(JSONConfigConstants.CONFIG_HEADER_NAME);
                 if (hname == null) {

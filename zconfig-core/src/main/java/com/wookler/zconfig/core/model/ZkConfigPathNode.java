@@ -60,7 +60,7 @@ public class ZkConfigPathNode extends BaseEntity<String, ZkConfigPathNode>
     /**
      * Get the version of this node instance.
      */
-    private Version nodeVersion;
+    private String nodeVersion;
 
     /**
      * State of this node.
@@ -130,7 +130,7 @@ public class ZkConfigPathNode extends BaseEntity<String, ZkConfigPathNode>
      *
      * @return - Node Version.
      */
-    public Version getNodeVersion() {
+    public String getNodeVersion() {
         return nodeVersion;
     }
 
@@ -139,7 +139,8 @@ public class ZkConfigPathNode extends BaseEntity<String, ZkConfigPathNode>
      *
      * @param nodeVersion - Node Version.
      */
-    public void setNodeVersion(@Nonnull Version nodeVersion) {
+    public void setNodeVersion(@Nonnull String nodeVersion) {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(nodeVersion));
         this.nodeVersion = nodeVersion;
     }
 
@@ -230,7 +231,7 @@ public class ZkConfigPathNode extends BaseEntity<String, ZkConfigPathNode>
     @Override
     @JsonIgnore
     public String getAbsolutePath() {
-        return String.format("%s/%s", parent.getAbsolutePath(nodeVersion),
+        return String.format("%s/%s", parent.getAbsolutePath(),
                              getPath());
     }
 }

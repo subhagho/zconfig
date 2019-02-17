@@ -33,6 +33,8 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import javax.annotation.Nonnull;
+
 /**
  * Class represents a configuration value element. All configuration values are treated as String values
  * and converters provided to get a specific value type.
@@ -49,11 +51,36 @@ import org.joda.time.format.DateTimeFormatter;
  * </pre>
  */
 public class ConfigValueNode extends AbstractConfigNode
-        implements IConfigValue<String> {
+        implements IConfigValue<String>, IVersionedNode<String> {
+    /**
+     * Current change Version of this node.
+     */
+    private String changeVersion;
     /**
      * Configuration value element.
      */
     private String value;
+
+    /**
+     * Get the current version of this node.
+     *
+     * @return - Current Version.
+     */
+    @Override
+    public String getVersion() {
+        return changeVersion;
+    }
+
+    /**
+     * Set the current version of this node.
+     *
+     * @param version - Current Version.
+     */
+    @Override
+    public void setVersion(@Nonnull String version) {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(version));
+        changeVersion = version;
+    }
 
     /**
      * Get the configuration value element.

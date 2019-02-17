@@ -1,5 +1,8 @@
 {
     "header": {
+        "id" : "UNIQUE-99918239012",
+        "group" : "TEST-APP-GROUP",
+        "application" : "TEST-SERVER",
         "name": "zconfig-core",
         "description": "This is a Sample ZConfig Client configuration.",
         "version": "0.0",

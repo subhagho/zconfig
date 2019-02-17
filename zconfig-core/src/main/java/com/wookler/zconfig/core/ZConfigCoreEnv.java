@@ -29,6 +29,7 @@ import com.google.common.base.Strings;
 import com.wookler.zconfig.common.*;
 import com.wookler.zconfig.common.model.Version;
 import com.wookler.zconfig.common.parsers.AbstractConfigParser;
+import com.wookler.zconfig.common.utils.IUniqueIDGenerator;
 import com.wookler.zconfig.core.zookeeper.ZkConnectionConfig;
 
 import javax.annotation.Nonnull;
@@ -44,6 +45,7 @@ public class ZConfigCoreEnv extends ZConfigEnv {
 
     private ZConfigCoreInstance instance;
     private ZkConnectionConfig zkConnectionConfig;
+    private IUniqueIDGenerator idGenerator;
 
     /**
      * Default constructor - Sets the name of the config.
@@ -75,6 +77,7 @@ public class ZConfigCoreEnv extends ZConfigEnv {
                                        zkConnectionConfig);
         LogUtils.debug(getClass(), zkConnectionConfig);
 
+
         updateState(EEnvState.Initialized);
         LogUtils.info(getClass(),
                       "Core environment successfully initialized...");
@@ -94,6 +97,15 @@ public class ZConfigCoreEnv extends ZConfigEnv {
      */
     public ZkConnectionConfig getZkConnectionConfig() {
         return zkConnectionConfig;
+    }
+
+    /**
+     * Get the Unique ID Generator handle.
+     *
+     * @return - Unique ID Generator
+     */
+    public IUniqueIDGenerator getIdGenerator() {
+        return idGenerator;
     }
 
     private static final ZConfigCoreEnv __ENV__ = new ZConfigCoreEnv();

@@ -38,6 +38,18 @@ import java.util.UUID;
  */
 public class Configuration {
     /**
+     * Unique configuration ID for this configuration/version.
+     */
+    private String id;
+    /**
+     * Application Group this configuration belongs to.
+     */
+    private String applicationGroup;
+    /**
+     * Application this configuration belong to.
+     */
+    private String application;
+    /**
      * Local instance ID of this configuration handle.
      */
     @JsonIgnore
@@ -71,6 +83,10 @@ public class Configuration {
      * Root configuration node for this configuration.
      */
     private ConfigPathNode rootConfigNode;
+    /**
+     * Specifies the sync mode for this configuration.
+     */
+    private ESyncMode syncMode;
 
     /**
      * Default constructor
@@ -79,6 +95,60 @@ public class Configuration {
         instanceId = UUID.randomUUID().toString();
         state = new NodeState();
         state.setState(ENodeState.Loading);
+    }
+
+    /**
+     * Get the unique ID for this configuration.
+     *
+     * @return - Unique Configuration ID.
+     */
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * Set the unique ID for this configuration.
+     *
+     * @param id - Unique Configuration ID.
+     */
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    /**
+     * Get the Application Group this configuration belongs to.
+     *
+     * @return - Application Group name.
+     */
+    public String getApplicationGroup() {
+        return applicationGroup;
+    }
+
+    /**
+     * Set the Application Group this configuration belongs to.
+     *
+     * @param applicationGroup - Application Group name.
+     */
+    public void setApplicationGroup(String applicationGroup) {
+        this.applicationGroup = applicationGroup;
+    }
+
+    /**
+     * Get the Application this configuration belongs to.
+     *
+     * @return - Application name.
+     */
+    public String getApplication() {
+        return application;
+    }
+
+    /**
+     * Set the Application this configuration belongs to.
+     *
+     * @param application - Application name.
+     */
+    public void setApplication(String application) {
+        this.application = application;
     }
 
     /**
@@ -210,6 +280,24 @@ public class Configuration {
             ConfigPathNode rootConfigNode) {
         Preconditions.checkArgument(rootConfigNode != null);
         this.rootConfigNode = rootConfigNode;
+    }
+
+    /**
+     * Get the Sync mode for this configuration.
+     *
+     * @return - Update Sync mode.
+     */
+    public ESyncMode getSyncMode() {
+        return syncMode;
+    }
+
+    /**
+     * Set the Sync mode for this configuration.
+     *
+     * @param syncMode - Update Sync mode.
+     */
+    public void setSyncMode(ESyncMode syncMode) {
+        this.syncMode = syncMode;
     }
 
     /**

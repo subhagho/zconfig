@@ -27,6 +27,7 @@ package com.wookler.zconfig.common.model;
 import com.google.common.base.Strings;
 import com.wookler.zconfig.common.ConfigProviderFactory;
 import com.wookler.zconfig.common.ConfigTestConstants;
+import com.wookler.zconfig.common.LogUtils;
 import com.wookler.zconfig.common.parsers.JSONConfigParser;
 import com.wookler.zconfig.common.readers.ConfigFileReader;
 import org.junit.jupiter.api.BeforeAll;
@@ -77,6 +78,7 @@ class ConfigurationTest {
             assertNotNull(node);
             assertTrue(node instanceof ConfigListElementNode);
             assertEquals(4, ((ConfigListElementNode) node).size());
+            LogUtils.debug(getClass(), node.getAbsolutePath());
         } catch (Throwable e) {
             error(getClass(), e);
             fail(e);
@@ -93,7 +95,7 @@ class ConfigurationTest {
 
             ConfigListValueNode nl = (ConfigListValueNode) node;
             assertEquals(8, nl.size());
-
+            LogUtils.debug(getClass(), node.getAbsolutePath());
         } catch (Throwable e) {
             error(getClass(), e);
             fail(e);

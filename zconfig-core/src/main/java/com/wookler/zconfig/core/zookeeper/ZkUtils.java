@@ -32,6 +32,7 @@ import com.wookler.zconfig.core.ZConfigCoreEnv;
 import com.wookler.zconfig.core.ZConfigCoreInstance;
 import com.wookler.zconfig.core.model.Application;
 import com.wookler.zconfig.core.model.ApplicationGroup;
+import com.wookler.zconfig.core.model.IZkNode;
 import com.wookler.zconfig.core.model.ZkConfigNode;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
@@ -51,13 +52,17 @@ public class ZkUtils {
      */
     private static final String ZK_LOCK_PATH = "__LOCKS__";
     /**
+     * System Root lock path.
+     */
+    private static final String ZK_ROOT_LOCK = "__ROOT_LOCK__";
+    /**
      * Default retry sleep interval.
      */
     private static final int DEFAULT_RETRY_SLEEP = 1000;
     /**
      * ZooKeeper Root path for this server.
      */
-    private static final String SERVER_ROOT_PATH = "/zconfig-sever";
+    private static final String SERVER_ROOT_PATH = "/ZCONFIG-SERVER";
 
     /**
      * Get a new instance of the Curator Client. Method will start() the client.
@@ -157,6 +162,19 @@ public class ZkUtils {
     }
 
     /**
+     * Get the lock to the ZooKeeper root.
+     *
+     * @param client - Curator Framework client handle.
+     * @return - Lock instance.
+     * @throws ZkException
+     */
+    public static final InterProcessMutex getSystemLock(
+            @Nonnull CuratorFramework client)
+    throws ZkException {
+        return getZkLock(client, ZK_ROOT_LOCK);
+    }
+
+    /**
      * Get the distributed lock instance for the specified Application Group.
      *
      * @param client - Curator Framework client handle.
@@ -205,5 +223,41 @@ public class ZkUtils {
         String path = String.format("%s/%d", configuration.getAbsolutePath(),
                                     version.getMajorVersion());
         return getZkLock(client, path);
+    }
+
+    /**
+     * Get the ZooKeeper path for the specified node.
+     *
+     * @param node - Node to get path for.
+     * @return - ZooKeeper path.
+     * @throws ZkException
+     */
+    public static final String getZkPath(@Nonnull IZkNode node)
+    throws ZkException {
+        return String.format("%s/%s", getServerRootPath(), node.getAbsolutePath());
+    }
+
+    /**
+     * Get the ZooKeeper path of the specified path String
+     * relative to the configuration.
+     *
+     * @param configNode - Root configuration node.
+     * @param path       - Path to append.
+     * @return - Absolute Path
+     * @throws ZkException
+     */
+    public static final String getZkPath(@Nonnull ZkConfigNode configNode,
+                                         @Nonnull String path)
+    throws ZkException {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(path));
+        String p = getZkPath(configNode);
+        StringBuilder buff = new StringBuilder(p);
+        String[] parts = path.split("\\.");
+        if (parts.length > 0) {
+            for (String part : parts) {
+                buff.append("/").append(part);
+            }
+        }
+        return buff.toString();
     }
 }

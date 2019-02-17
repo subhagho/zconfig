@@ -34,6 +34,10 @@ import com.wookler.zconfig.common.ConfigurationException;
  */
 public abstract class AbstractConfigNode {
     /**
+     * Unique node ID.
+     */
+    private String id;
+    /**
      * Represents the local state of this configuration node instance.
      */
     private NodeState state;
@@ -61,6 +65,33 @@ public abstract class AbstractConfigNode {
      * Description of this configuration element.
      */
     private String description;
+
+    /**
+     * Get the unique Node ID.
+     *
+     * @return - Unique Node ID.
+     */
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * Set the unique Node ID.
+     *
+     * @param id - Unique Node ID.
+     */
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    /**
+     * Set the node state.
+     *
+     * @param state - Node State.
+     */
+    public void setState(NodeState state) {
+        this.state = state;
+    }
 
     /**
      * Get the state handle for this node.

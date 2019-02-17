@@ -29,6 +29,9 @@ package com.wookler.zconfig.common;
  */
 public class JSONConfigConstants {
     public static final String CONFIG_HEADER_NODE = "header";
+    public static final String CONFIG_HEADER_ID = "id";
+    public static final String CONFIG_HEADER_GROUP = "group";
+    public static final String CONFIG_HEADER_APP = "application";
     public static final String CONFIG_HEADER_NAME = "name";
     public static final String CONFIG_HEADER_DESC = "description";
     public static final String CONFIG_HEADER_VERSION = "version";

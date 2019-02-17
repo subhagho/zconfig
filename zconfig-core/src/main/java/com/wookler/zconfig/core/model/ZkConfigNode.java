@@ -29,6 +29,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.wookler.zconfig.common.Context;
+import com.wookler.zconfig.common.model.ESyncMode;
 import com.wookler.zconfig.common.model.Version;
 import com.wookler.zconfig.common.utils.IUniqueIDGenerator;
 import com.wookler.zconfig.core.utils.EntityUtils;
@@ -52,10 +53,6 @@ public class ZkConfigNode extends BaseEntity<String, ZkConfigNode>
      */
     private String description;
     /**
-     * Lowest Available Version of this Configuration.
-     */
-    private Version lowestVersion;
-    /**
      * Latest Version of this Configuration.
      */
     private Version currentVersion;
@@ -63,6 +60,10 @@ public class ZkConfigNode extends BaseEntity<String, ZkConfigNode>
      * Application instance this configuration belongs to.
      */
     private Application application;
+    /**
+     * Specifies the sync mode for this configuration.
+     */
+    private ESyncMode syncMode;
 
     /**
      * Get the Application Group name.
@@ -104,23 +105,6 @@ public class ZkConfigNode extends BaseEntity<String, ZkConfigNode>
         this.description = description;
     }
 
-    /**
-     * Get the lowest version available for this configuration.
-     *
-     * @return - Lowest available version.
-     */
-    public Version getLowestVersion() {
-        return lowestVersion;
-    }
-
-    /**
-     * Set the lowest version available for this configuration.
-     *
-     * @param lowestVersion - Lowest available version.
-     */
-    public void setLowestVersion(@Nonnull Version lowestVersion) {
-        this.lowestVersion = lowestVersion;
-    }
 
     /**
      * Get the current (latest) version for this configuration.
@@ -156,6 +140,24 @@ public class ZkConfigNode extends BaseEntity<String, ZkConfigNode>
      */
     public void setApplication(@Nonnull Application application) {
         this.application = application;
+    }
+
+    /**
+     * Get the Sync mode for this configuration.
+     *
+     * @return - Update Sync mode.
+     */
+    public ESyncMode getSyncMode() {
+        return syncMode;
+    }
+
+    /**
+     * Set the Sync mode for this configuration.
+     *
+     * @param syncMode - Update Sync mode.
+     */
+    public void setSyncMode(ESyncMode syncMode) {
+        this.syncMode = syncMode;
     }
 
     /**
@@ -245,20 +247,7 @@ public class ZkConfigNode extends BaseEntity<String, ZkConfigNode>
     @Override
     @JsonIgnore
     public String getAbsolutePath() {
-        return String.format("%s/%s", application.getAbsolutePath(), getPath());
-    }
-
-    /**
-     * Get the absolute path of this config node element appended with the
-     * requested version.
-     *
-     * @param version - Configuration Version
-     * @return - Absolute Path.
-     */
-    public String getAbsolutePath(@Nonnull Version version) {
-        Preconditions.checkArgument(version.compare(lowestVersion) >= 0);
-        Preconditions.checkArgument(version.compare(currentVersion) <= 0);
-
-        return String.format("%s/%d", getAbsolutePath(), version.getMajorVersion());
+        return String.format("%s/%s/%d", application.getAbsolutePath(), getPath(),
+                             currentVersion.getMajorVersion());
     }
 }

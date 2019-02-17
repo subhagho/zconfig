@@ -26,6 +26,8 @@ package com.wookler.zconfig.core.model;
 
 import org.joda.time.DateTime;
 
+import javax.annotation.Nonnull;
+
 /**
  * Class represents a Owner/Modifier attribute.
  *
@@ -40,6 +42,22 @@ public class ModifiedBy<K> implements ICopiable<ModifiedBy<K>> {
      * Updation timestamp.
      */
     private DateTime timestamp;
+
+    /**
+     * Default empty constructor
+     */
+    public ModifiedBy() {
+    }
+
+    /**
+     * Constructor with Owner/Timestamp.
+     *
+     * @param ownerId - Owner ID.
+     */
+    public ModifiedBy(@Nonnull K ownerId) {
+        this.ownerId = ownerId;
+        this.timestamp = DateTime.now();
+    }
 
     /**
      * Get the owner/modifier ID.

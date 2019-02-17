@@ -24,6 +24,7 @@
 
 package com.wookler.zconfig.common;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.wookler.zconfig.common.model.Configuration;
@@ -201,4 +202,14 @@ public abstract class ZConfigEnv {
         return configuration;
     }
 
+    /**
+     * Get a new instance of the JSON Object mapper.
+     *
+     * @return - JSON Object mapper.
+     */
+    public ObjectMapper getJsonMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+
+        return mapper;
+    }
 }

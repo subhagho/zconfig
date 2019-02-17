@@ -27,6 +27,7 @@ package com.wookler.zconfig.core.zookeeper;
 import com.wookler.zconfig.common.LogUtils;
 import com.wookler.zconfig.core.ZConfigCoreEnv;
 import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.recipes.locks.InterProcessMutex;
 import org.apache.curator.utils.ZKPaths;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -71,6 +72,27 @@ class ZkUtilsTest {
                 assertTrue(data.length > 0);
                 String nid = new String(data);
                 assertEquals(id, nid);
+            }
+        } catch (Throwable t) {
+            LogUtils.error(getClass(), t);
+            fail(t.getLocalizedMessage());
+        }
+    }
+
+    @Test
+    void getZkLock() {
+        try {
+            try (CuratorFramework client = ZkUtils.getZkClient()) {
+                assertNotNull(client);
+                String id = UUID.randomUUID().toString();
+                InterProcessMutex lock = ZkUtils.getZkLock(client, id);
+                assertNotNull(lock);
+                lock.acquire();
+                try {
+                    LogUtils.debug(getClass(), "Acquired ZK lock...");
+                } finally {
+                    lock.release();
+                }
             }
         } catch (Throwable t) {
             LogUtils.error(getClass(), t);

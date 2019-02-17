@@ -1,5 +1,8 @@
 {
     "header": {
+        "id" : "UNIQUE-99918239014",
+        "group" : "TEST-APP-GROUP",
+        "application" : "TEST-APPLICATION",
         "name": "test-config-included",
         "description" : "This is a test JSON configuration file.",
         "version": "0.2",

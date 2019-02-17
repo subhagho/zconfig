@@ -24,7 +24,6 @@
 
 package com.wookler.zconfig.common.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 
 public abstract class ConfigElementNode extends AbstractConfigNode {
@@ -37,18 +36,6 @@ public abstract class ConfigElementNode extends AbstractConfigNode {
      * Node updation info.
      */
     private ModifiedBy updatedBy;
-
-    /**
-     * Incremented version indicator.
-     */
-    private long nodeVersion = 0;
-
-    /**
-     * Default constructor - Will initialize the update indicators.
-     */
-    public ConfigElementNode() {
-        this.nodeVersion = 0;
-    }
 
     /**
      * Get the node creation info.
@@ -88,46 +75,5 @@ public abstract class ConfigElementNode extends AbstractConfigNode {
         Preconditions.checkArgument(updatedBy != null);
 
         this.updatedBy = updatedBy;
-    }
-
-    /**
-     * Get the record version of this node.
-     *
-     * @return - Record version.
-     */
-    public long getNodeVersion() {
-        return nodeVersion;
-    }
-
-    /**
-     * Set the record version of this node.
-     *
-     * @param nodeVersion - Record version
-     */
-    public void setNodeVersion(long nodeVersion) {
-        Preconditions.checkArgument(nodeVersion >= 0);
-        this.nodeVersion = nodeVersion;
-    }
-
-    /**
-     * Indicate this node has been updated.
-     */
-    @Override
-    protected void updated() {
-        if (getState().isSynced()) {
-            nodeVersion++;
-            super.updated();
-        }
-    }
-
-    /**
-     * Mark this node as deleted.
-     */
-    @Override
-    protected boolean deleted() {
-        boolean ret = super.deleted();
-        if (ret)
-            nodeVersion++;
-        return ret;
     }
 }
