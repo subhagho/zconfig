@@ -522,7 +522,7 @@ public class ZkConfigDAO implements IConfigDAO {
                 zkNode = new PersistedConfigMapNode();
                 setupNewPathNode(zkNode, node, modifiedBy, configNode,
                                  version);
-                zkNode.setMap(node.getKeyValues());
+                zkNode.setMapFrom(node.getKeyValues());
                 String path = zkNode.getAbsolutePath();
                 path = client.create().creatingParentsIfNeeded().forPath(path);
             } else {
@@ -531,7 +531,7 @@ public class ZkConfigDAO implements IConfigDAO {
                     zkNode = new PersistedConfigMapNode();
                     setupNewPathNode(zkNode, node, modifiedBy, configNode,
                                      version);
-                    zkNode.setMap(node.getKeyValues());
+                    zkNode.setMapFrom(node.getKeyValues());
                 } else {
                     String json = new String(data);
                     ObjectMapper mapper = ZConfigCoreEnv.get().getJsonMapper();
@@ -544,7 +544,7 @@ public class ZkConfigDAO implements IConfigDAO {
                                 configNode.getCurrentVersion().toString(),
                                 zkNode.getNodeVersion().toString()));
                     }
-                    zkNode.setMap(node.getKeyValues());
+                    zkNode.setMapFrom(node.getKeyValues());
                     zkNode.setNodeVersion(version);
                     zkNode.setUpdated(modifiedBy);
                 }
@@ -706,8 +706,7 @@ public class ZkConfigDAO implements IConfigDAO {
      * @param client      - Curator client handle.
      * @param application - Application
      * @param name        - Configuration name.
-     * @param version - Configuration Version
-     *
+     * @param version     - Configuration Version
      * @return - Application  instance.
      * @throws PersistenceException
      */

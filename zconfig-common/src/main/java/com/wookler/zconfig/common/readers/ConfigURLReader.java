@@ -30,6 +30,7 @@ import com.wookler.zconfig.common.ConfigurationException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -40,13 +41,11 @@ import java.net.URLConnection;
  */
 public class ConfigURLReader extends AbstractConfigReader {
     /**
-     * Input stream for this reader instance.
-     */
-    private BufferedReader inputStream;
-    /**
      * Formatted URL location to read from.
      */
     private URL remoteURL;
+
+    private URLConnection connection = null;
 
     /**
      * Create this instance with the specified URL string.
@@ -81,9 +80,7 @@ public class ConfigURLReader extends AbstractConfigReader {
     public void open() throws ConfigurationException {
         if (!state.isOpen()) {
             try {
-                URLConnection conn = remoteURL.openConnection();
-                inputStream = new BufferedReader(
-                        new InputStreamReader(conn.getInputStream()));
+                connection = remoteURL.openConnection();
                 state.setState(EReaderState.Open);
             } catch (IOException e) {
                 state.setError(e);
@@ -93,20 +90,42 @@ public class ConfigURLReader extends AbstractConfigReader {
     }
 
     /**
-     * Get the input stream associated with this reader.
+     * Get the buffered input stream associated with this reader.
+     *
+     * @return - Buffered Input stream.
+     * @throws ConfigurationException
+     */
+    @Override
+    public BufferedReader getBufferedStream() throws ConfigurationException {
+        if (!state.isOpen()) {
+            try {
+                return new BufferedReader(
+                        new InputStreamReader(connection.getInputStream()));
+            } catch (IOException e) {
+                state.setError(e);
+                throw new ConfigurationException(e);
+            }
+        }
+        throw new ConfigurationException("Reader not opened or has exception.");
+    }
+
+    /**
+     * Get the  input stream associated with this reader.
      *
      * @return - Input stream.
      * @throws ConfigurationException
      */
     @Override
-    public BufferedReader getInputStream() throws ConfigurationException {
+    public InputStream getInputStream() throws ConfigurationException {
         if (!state.isOpen()) {
-            throw new ConfigurationException("Reader is not opened.");
+            try {
+                return connection.getInputStream();
+            } catch (IOException e) {
+                state.setError(e);
+                throw new ConfigurationException(e);
+            }
         }
-        if (state.hasError()) {
-            throw new ConfigurationException(state.getError());
-        }
-        return inputStream;
+        throw new ConfigurationException("Reader not opened or has exception.");
     }
 
     /**
@@ -115,14 +134,7 @@ public class ConfigURLReader extends AbstractConfigReader {
     @Override
     public void close() {
         if (state.isOpen()) {
-            if (inputStream != null) {
-                try {
-                    inputStream.close();
-                    state.setState(EReaderState.Closed);
-                } catch (IOException e) {
-                    state.setError(e);
-                }
-            }
+            state.setState(EReaderState.Closed);
         }
     }
 }

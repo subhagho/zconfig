@@ -28,6 +28,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.wookler.zconfig.common.model.nodes.ConfigValueNode;
 import com.wookler.zconfig.core.model.PersistedConfigPathNode;
 
 import javax.annotation.Nonnull;
@@ -61,6 +62,23 @@ public class PersistedConfigMapNode extends PersistedConfigPathNode {
      */
     public void setMap(Map<String, String> map) {
         this.map = map;
+    }
+
+    /**
+     * Set the configuration key/value map.
+     *
+     * @param map - Key/Value map.
+     */
+    public void setMapFrom(Map<String, ConfigValueNode> map) {
+        if (map != null && !map.isEmpty()) {
+            this.map = new HashMap<>(map.size());
+            for (String key : map.keySet()) {
+                ConfigValueNode vn = map.get(key);
+                if (vn != null) {
+                    this.map.put(key, vn.getValue());
+                }
+            }
+        }
     }
 
     /**

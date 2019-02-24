@@ -35,10 +35,6 @@ import java.io.*;
  */
 public class ConfigFileReader extends AbstractConfigReader {
     /**
-     * File stream associated with this reader.
-     */
-    private BufferedReader inputStream;
-    /**
      * Input configuration file handle.
      */
     private File inputFile;
@@ -71,13 +67,7 @@ public class ConfigFileReader extends AbstractConfigReader {
     @Override
     public void open() throws ConfigurationException {
         if (!state.isOpen()) {
-            try {
-                inputStream = new BufferedReader(new FileReader(inputFile));
-                state.setState(EReaderState.Open);
-            } catch (FileNotFoundException e) {
-                state.setError(e);
-                throw new ConfigurationException(e);
-            }
+            state.setState(EReaderState.Open);
         }
     }
 
@@ -88,31 +78,46 @@ public class ConfigFileReader extends AbstractConfigReader {
      * @throws ConfigurationException
      */
     @Override
-    public BufferedReader getInputStream() throws ConfigurationException {
+    public BufferedReader getBufferedStream() throws ConfigurationException {
         if (!state.isOpen()) {
-            throw new ConfigurationException("Reader is not opened.");
+            try {
+                return
+                        new BufferedReader(new FileReader(inputFile));
+            } catch (FileNotFoundException e) {
+                state.setError(e);
+                throw new ConfigurationException(e);
+            }
         }
-        if (state.hasError()) {
-            throw new ConfigurationException(state.getError());
+        throw new ConfigurationException("Reader not opened or has exception.");
+    }
+
+    /**
+     * Get the  input stream associated with this reader.
+     *
+     * @return - Input stream.
+     * @throws ConfigurationException
+     */
+    @Override
+    public InputStream getInputStream() throws ConfigurationException {
+        if (!state.isOpen()) {
+            try {
+                return
+                        new FileInputStream(inputFile);
+            } catch (FileNotFoundException e) {
+                state.setError(e);
+                throw new ConfigurationException(e);
+            }
         }
-        return inputStream;
+        throw new ConfigurationException("Reader not opened or has exception.");
     }
 
     /**
      * Close this configuration reader instance.
-     *
      */
     @Override
     public void close() {
         if (state.isOpen()) {
-            if (inputStream != null) {
-                try {
-                    inputStream.close();
-                    state.setState(EReaderState.Closed);
-                } catch (IOException e) {
-                    state.setError(e);
-                }
-            }
+            state.setState(EReaderState.Closed);
         }
     }
 }

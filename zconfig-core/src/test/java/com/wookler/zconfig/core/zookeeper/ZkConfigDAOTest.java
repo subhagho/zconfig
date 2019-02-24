@@ -160,6 +160,7 @@ class ZkConfigDAOTest {
                 TEST_CONFIG_FILE));
         Path path = Paths.get(TEST_CONFIG_FILE);
         parser.parse(TEST_CONFIG_NAME, ConfigProviderFactory.reader(path.toUri()),
+                     null,
                      new Version(0, 0));
         Configuration configuration = parser.getConfiguration();
         if (configuration == null) {

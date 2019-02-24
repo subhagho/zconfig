@@ -38,6 +38,7 @@ import com.wookler.zconfig.common.readers.AbstractConfigReader;
 import com.wookler.zconfig.common.readers.EReaderType;
 import org.joda.time.DateTime;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
@@ -50,7 +51,6 @@ import java.util.Map;
 public class JSONConfigParser extends AbstractConfigParser {
 
     private Map<Integer, JsonNode> processedNodes = null;
-    private ConfigurationSettings settings = null;
 
     /**
      * Parse the configuration from the JSON file specified in the properties.
@@ -131,18 +131,21 @@ public class JSONConfigParser extends AbstractConfigParser {
                 reader.open();
             }
 
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode rootNode = mapper.readTree(reader.getInputStream());
+            try (BufferedReader br = reader.getBufferedStream()) {
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode rootNode = mapper.readTree(br);
 
-            if (settings != null) {
-                this.settings = settings;
-            } else {
-                this.settings = new ConfigurationSettings();
+                if (settings != null) {
+                    this.settings = settings;
+                } else {
+                    this.settings = new ConfigurationSettings();
+                }
+                parse(name, version, rootNode);
+
+                // Call the load finish handler.
+                doPostLoad();
             }
-            parse(name, version, rootNode);
-
-            // Call the load finish handler.
-            doPostLoad();
+            configuration.validate();
         } catch (JsonProcessingException e) {
             if (configuration != null)
                 configuration.getState().setError(e);
@@ -727,8 +730,7 @@ public class JSONConfigParser extends AbstractConfigParser {
                             .propertyNotFoundException(
                                     JSONConfigConstants.CONFIG_CREATED_BY);
                 }
-                ModifiedBy createdBy = parseUpdateInfo(cnode,
-                                                       JSONConfigConstants.CONFIG_CREATED_BY);
+                ModifiedBy createdBy = parseUpdateInfo(cnode);
                 configuration.setCreatedBy(createdBy);
 
                 // Read the configuration Last updation info.
@@ -738,8 +740,7 @@ public class JSONConfigParser extends AbstractConfigParser {
                             .propertyNotFoundException(
                                     JSONConfigConstants.CONFIG_UPDATED_BY);
                 }
-                ModifiedBy updatedBy = parseUpdateInfo(unode,
-                                                       JSONConfigConstants.CONFIG_UPDATED_BY);
+                ModifiedBy updatedBy = parseUpdateInfo(unode);
                 configuration.setUpdatedBy(updatedBy);
 
                 JsonNode dnode = header.get(JSONConfigConstants.CONFIG_HEADER_DESC);
@@ -759,11 +760,10 @@ public class JSONConfigParser extends AbstractConfigParser {
      * Read the modification information from the specified JSON node.
      *
      * @param node - JSON node to read info under.
-     * @param name - Name of node containing the info.
      * @return - Modification info object.
      * @throws ConfigurationException
      */
-    private ModifiedBy parseUpdateInfo(JsonNode node, String name)
+    private ModifiedBy parseUpdateInfo(JsonNode node)
     throws ConfigurationException {
         if (isProcessed(node)) {
             return null;

@@ -40,6 +40,11 @@ import java.util.Map;
  */
 public abstract class AbstractConfigParser {
     /**
+     * Configuration settings to be used by this parser.
+     */
+    protected ConfigurationSettings settings = null;
+
+    /**
      * Configuration instance handle.
      */
     protected Configuration configuration;

@@ -526,6 +526,58 @@ public class Configuration {
     }
 
     /**
+     * Validate that the configuration has been loaded properly.
+     *
+     * @throws ConfigurationException
+     */
+    public void validate() throws ConfigurationException {
+        if (Strings.isNullOrEmpty(id)) {
+            throw ConfigurationException
+                    .propertyNotFoundException(
+                            "id");
+        }
+        if (Strings.isNullOrEmpty(name)) {
+            throw ConfigurationException
+                    .propertyNotFoundException(
+                            "name");
+        }
+        if (Strings.isNullOrEmpty(applicationGroup)) {
+            throw ConfigurationException
+                    .propertyNotFoundException(
+                            "applicationGroup");
+        }
+        if (Strings.isNullOrEmpty(application)) {
+            throw ConfigurationException
+                    .propertyNotFoundException(
+                            "application");
+        }
+        if (Strings.isNullOrEmpty(description)) {
+            throw ConfigurationException
+                    .propertyNotFoundException(
+                            "description");
+        }
+        if (version == null) {
+            throw ConfigurationException
+                    .propertyNotFoundException(
+                            "version");
+        }
+        if (createdBy == null) {
+            throw ConfigurationException
+                    .propertyNotFoundException(
+                            "createdBy");
+        }
+        if (updatedBy == null) {
+            throw ConfigurationException
+                    .propertyNotFoundException(
+                            "updatedBy");
+        }
+        if (rootConfigNode == null) {
+            throw new ConfigurationException(
+                    "No configuration read : Root node is NULL.");
+        }
+    }
+
+    /**
      * Get the path to the temp directory for this configuration instance.
      * <p>
      * If temp directory doesn't exist, this call will create it.
