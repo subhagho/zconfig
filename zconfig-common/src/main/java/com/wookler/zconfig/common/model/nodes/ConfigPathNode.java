@@ -433,4 +433,19 @@ public class ConfigPathNode extends ConfigElementNode {
             }
         }
     }
+
+    /**
+     * Validate that this node has been setup correctly.
+     *
+     * @throws ConfigurationException
+     */
+    @Override
+    public void validate() throws ConfigurationException {
+        super.validate();
+        if (children != null && !children.isEmpty()) {
+            for (String key : children.keySet()) {
+                children.get(key).validate();
+            }
+        }
+    }
 }

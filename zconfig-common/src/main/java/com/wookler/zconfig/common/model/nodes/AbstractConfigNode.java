@@ -299,4 +299,15 @@ public abstract class AbstractConfigNode {
      * @throws ConfigurationException
      */
     public abstract void loaded() throws ConfigurationException;
+
+    /**
+     * Validate that this node has been setup correctly.
+     *
+     * @throws ConfigurationException
+     */
+    public void validate() throws ConfigurationException {
+        if (Strings.isNullOrEmpty(name)) {
+            throw ConfigurationException.propertyNotFoundException("name");
+        }
+    }
 }

@@ -79,7 +79,7 @@ public class ConfigFileReader extends AbstractConfigReader {
      */
     @Override
     public BufferedReader getBufferedStream() throws ConfigurationException {
-        if (!state.isOpen()) {
+        if (state.isOpen()) {
             try {
                 return
                         new BufferedReader(new FileReader(inputFile));
@@ -99,7 +99,7 @@ public class ConfigFileReader extends AbstractConfigReader {
      */
     @Override
     public InputStream getInputStream() throws ConfigurationException {
-        if (!state.isOpen()) {
+        if (state.isOpen()) {
             try {
                 return
                         new FileInputStream(inputFile);

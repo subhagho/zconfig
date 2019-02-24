@@ -259,4 +259,21 @@ public abstract class ConfigKeyValueNode extends ConfigElementNode {
         }
         updateState(ENodeState.Synced);
     }
+
+    /**
+     * Validate that this node has been setup correctly.
+     *
+     * @throws ConfigurationException
+     */
+    @Override
+    public void validate() throws ConfigurationException {
+        super.validate();
+        if (keyValues == null || keyValues.isEmpty()) {
+            throw new ConfigurationException("Missing Key/Values : NULL or Empty.");
+        }
+        for (String key : keyValues.keySet()) {
+            ConfigValueNode vn = keyValues.get(key);
+            vn.validate();
+        }
+    }
 }

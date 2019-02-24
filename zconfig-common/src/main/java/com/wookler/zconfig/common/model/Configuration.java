@@ -575,6 +575,7 @@ public class Configuration {
             throw new ConfigurationException(
                     "No configuration read : Root node is NULL.");
         }
+        rootConfigNode.validate();
     }
 
     /**

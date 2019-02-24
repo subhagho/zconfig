@@ -156,4 +156,21 @@ public abstract class ConfigResourceNode extends ConfigElementNode {
         }
         updateState(ENodeState.Synced);
     }
+
+
+    /**
+     * Validate that this node has been setup correctly.
+     *
+     * @throws ConfigurationException
+     */
+    @Override
+    public void validate() throws ConfigurationException {
+        super.validate();
+        if (type == null) {
+            throw ConfigurationException.propertyNotFoundException("type");
+        }
+        if (location == null) {
+            throw ConfigurationException.propertyNotFoundException("location");
+        }
+    }
 }

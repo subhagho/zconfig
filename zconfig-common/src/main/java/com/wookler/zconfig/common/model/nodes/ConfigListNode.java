@@ -26,6 +26,7 @@ package com.wookler.zconfig.common.model.nodes;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
+import com.wookler.zconfig.common.ConfigurationException;
 import com.wookler.zconfig.common.model.Configuration;
 
 import java.util.ArrayList;
@@ -39,7 +40,8 @@ import java.util.List;
  *
  * @param <T> - Element type
  */
-public abstract class ConfigListNode<T> extends ConfigElementNode {
+public abstract class ConfigListNode<T extends AbstractConfigNode>
+        extends ConfigElementNode {
     private List<T> values;
 
     /**
@@ -149,5 +151,25 @@ public abstract class ConfigListNode<T> extends ConfigElementNode {
     @JsonIgnore
     public boolean isEmpty() {
         return (values == null || values.isEmpty());
+    }
+
+
+    /**
+     * Validate that this node has been setup correctly.
+     *
+     * @throws ConfigurationException
+     */
+    @Override
+    public void validate() throws ConfigurationException {
+        super.validate();
+        if (isEmpty()) {
+            throw new ConfigurationException("No List elements loaded.");
+        }
+        if (!isEmpty()) {
+            List<T> values = getValues();
+            for (T value : values) {
+                value.validate();
+            }
+        }
     }
 }

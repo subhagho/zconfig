@@ -25,6 +25,7 @@
 package com.wookler.zconfig.common.model.nodes;
 
 import com.google.common.base.Preconditions;
+import com.wookler.zconfig.common.ConfigurationException;
 import com.wookler.zconfig.common.model.Configuration;
 import com.wookler.zconfig.common.model.EResourceType;
 
@@ -89,4 +90,17 @@ public class ConfigResourceFile extends ConfigResourceNode {
         super.setType(EResourceType.FILE);
     }
 
+
+    /**
+     * Validate that this node has been setup correctly.
+     *
+     * @throws ConfigurationException
+     */
+    @Override
+    public void validate() throws ConfigurationException {
+        super.validate();
+        if (resourceHandle == null) {
+            throw new ConfigurationException("No File resource handle loaded.");
+        }
+    }
 }

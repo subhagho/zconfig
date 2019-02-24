@@ -31,8 +31,7 @@ import com.wookler.zconfig.common.DateTimeUtils;
 import com.wookler.zconfig.common.ValueParseException;
 import com.wookler.zconfig.common.XMLConfigConstants;
 import com.wookler.zconfig.common.model.*;
-import com.wookler.zconfig.common.model.nodes.AbstractConfigNode;
-import com.wookler.zconfig.common.model.nodes.ConfigPathNode;
+import com.wookler.zconfig.common.model.nodes.*;
 import com.wookler.zconfig.common.readers.AbstractConfigReader;
 import org.joda.time.DateTime;
 import org.w3c.dom.Document;
@@ -135,6 +134,12 @@ public class XmlConfigParser extends AbstractConfigParser {
         }
     }
 
+    /**
+     * Parse the XML body to create the configuration nodes.
+     *
+     * @param node - Root node of the configuration.
+     * @throws ConfigurationException
+     */
     private void parseBody(Element node) throws ConfigurationException {
         ConfigPathNode rootNode = new ConfigPathNode(configuration, null);
         rootNode.setName(node.getNodeName());
@@ -155,11 +160,179 @@ public class XmlConfigParser extends AbstractConfigParser {
         }
     }
 
-    private void parseNode(Element node, AbstractConfigNode parent)
+    /**
+     * Parse the XML Node and generate corresponding Configuration nodes.
+     *
+     * @param node   - XML Node Element.
+     * @param parent - Parent Config Node.
+     * @throws ConfigurationException
+     */
+    private void parseNode(Node node, AbstractConfigNode parent)
+    throws ConfigurationException {
+        short nodeListType = isListNode(node);
+        if (nodeListType == Node.ELEMENT_NODE) {
+            if (!(parent instanceof ConfigPathNode)) {
+                throw new ConfigurationException(String.format(
+                        "Cannot add Config Node List to parent : [parent=%s][path=%s]",
+                        parent.getClass().getCanonicalName(),
+                        parent.getAbsolutePath()));
+            }
+            if (!(node instanceof Element)) {
+                throw new ConfigurationException(String.format(
+                        "Expecting XML Element node : [type=%s][path=%s]",
+                        node.getClass().getCanonicalName(),
+                        parent.getAbsolutePath()));
+            }
+            ConfigListElementNode nodeList =
+                    new ConfigListElementNode(configuration, parent);
+            nodeList.setName(node.getNodeName());
+            ((ConfigPathNode) parent).addChildNode(nodeList);
+            parseChildren((Element) node, nodeList);
+        } else if (nodeListType == Node.TEXT_NODE) {
+            if (!(parent instanceof ConfigPathNode)) {
+                throw new ConfigurationException(String.format(
+                        "Cannot add Config Value List to parent : [parent=%s][path=%s]",
+                        parent.getClass().getCanonicalName(),
+                        parent.getAbsolutePath()));
+            }
+            if (!(node instanceof Element)) {
+                throw new ConfigurationException(String.format(
+                        "Expecting XML Element node : [type=%s][path=%s]",
+                        node.getClass().getCanonicalName(),
+                        parent.getAbsolutePath()));
+            }
+            ConfigListValueNode nodeList =
+                    new ConfigListValueNode(configuration, parent);
+            nodeList.setName(node.getNodeName());
+            ((ConfigPathNode) parent).addChildNode(nodeList);
+            parseChildren((Element) node, nodeList);
+        } else if (node.getNodeType() == Node.ELEMENT_NODE) {
+            if (!(parent instanceof ConfigPathNode)) {
+                throw new ConfigurationException(String.format(
+                        "Cannot add Config Node to parent : [parent=%s][path=%s]",
+                        parent.getClass().getCanonicalName(),
+                        parent.getAbsolutePath()));
+            }
+
+            String nodeName = node.getNodeName();
+            if (nodeName.compareTo(settings.getPropertiesNodeName()) == 0) {
+                ConfigPropertiesNode pnode =
+                        new ConfigPropertiesNode(configuration, parent);
+                ((ConfigPathNode) parent).addChildNode(pnode);
+                parseChildren((Element) node, pnode);
+            } else if (nodeName.compareTo(settings.getParametersNodeName()) == 0) {
+                ConfigParametersNode pnode =
+                        new ConfigParametersNode(configuration, parent);
+                ((ConfigPathNode) parent).addChildNode(pnode);
+                parseChildren((Element) node, pnode);
+            } else if (nodeName.compareTo(settings.getAttributesNodeName()) == 0) {
+                ConfigAttributesNode pnode =
+                        new ConfigAttributesNode(configuration, parent);
+                ((ConfigPathNode) parent).addChildNode(pnode);
+                parseChildren((Element) node, pnode);
+            } else if (nodeName.compareTo(ConfigIncludeNode.NODE_NAME) == 0) {
+                ConfigAttributesNode pnode =
+                        new ConfigAttributesNode(configuration, parent);
+                ((ConfigPathNode) parent).addChildNode(pnode);
+                parseChildren((Element) node, pnode);
+            } else {
+                ConfigPathNode pnode = new ConfigPathNode(configuration, parent);
+                pnode.setName(node.getNodeName());
+                ((ConfigPathNode) parent).addChildNode(pnode);
+                parseChildren((Element) node, pnode);
+            }
+        } else if (node.getNodeType() == Node.TEXT_NODE) {
+            ConfigValueNode vn = new ConfigValueNode(configuration, parent);
+            vn.setName(node.getNodeName());
+            String value = vn.getValue();
+            if (!Strings.isNullOrEmpty(value)) {
+                value = value.trim();
+                vn.setValue(value);
+            }
+            if (parent instanceof ConfigPathNode) {
+                ((ConfigPathNode) parent).addChildNode(vn);
+            } else if (parent instanceof ConfigListValueNode) {
+                ((ConfigListValueNode) parent).addValue(vn);
+            } else if (parent instanceof ConfigKeyValueNode) {
+                ((ConfigKeyValueNode) parent)
+                        .addKeyValue(vn.getName(), vn.getValue());
+            } else {
+                throw new ConfigurationException(String.format(
+                        "Cannot add ConfigValue to parent : [parent=%s][path=%s]",
+                        parent.getClass().getCanonicalName(),
+                        parent.getAbsolutePath()));
+            }
+        }
+    }
+
+    private void parseIncludeNode(Element node, AbstractConfigNode parent)
     throws ConfigurationException {
 
     }
 
+    /**
+     * Parse the child nodes for the passed XML Element.
+     *
+     * @param node   - XML Node Element.
+     * @param parent - Parent Config Node.
+     * @throws ConfigurationException
+     */
+    private void parseChildren(Element node, AbstractConfigNode parent)
+    throws ConfigurationException {
+        if (node.hasChildNodes()) {
+            NodeList nodeList = node.getChildNodes();
+            for (int ii = 0; ii < nodeList.getLength(); ii++) {
+                Node nn = nodeList.item(ii);
+                parseNode(nn, parent);
+            }
+        }
+    }
+
+    /**
+     * Check if the passed node is a List node of type String/Elements.
+     *
+     * @param node - XML Node to check for.
+     * @return - Node Type if List else -1
+     */
+    private short isListNode(Node node) {
+        String nodeName = node.getNodeName();
+        if (nodeName.compareTo(settings.getAttributesNodeName()) == 0 ||
+                nodeName.compareTo(settings.getParametersNodeName()) == 0 ||
+                nodeName.compareTo(settings.getPropertiesNodeName()) == 0) {
+            return -1;
+        }
+        if (node.hasChildNodes()) {
+            NodeList children = node.getChildNodes();
+            if (children.getLength() > 1) {
+                short nodeType = -1;
+                String name = null;
+                for (int ii = 0; ii < children.getLength(); ii++) {
+                    Node nn = children.item(ii);
+                    if (Strings.isNullOrEmpty(name)) {
+                        name = nn.getNodeName();
+                        nodeType = nn.getNodeType();
+                        continue;
+                    }
+                    short nt = nn.getNodeType();
+                    String nname = nn.getNodeName();
+                    if (nodeType != nt || name.compareTo(nname) != 0) {
+                        return -1;
+                    }
+                }
+                return nodeType;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Parse the Configuration header information from the passed Node Element.
+     * Will also do a version compatibility check.
+     *
+     * @param node    - XML Node Element.
+     * @param version - Expected Version.
+     * @throws ConfigurationException
+     */
     private void parseHeader(Element node, Version version)
     throws ConfigurationException {
         NodeList hnode =
@@ -249,6 +422,13 @@ public class XmlConfigParser extends AbstractConfigParser {
         }
     }
 
+    /**
+     * Parse an Update Info node from the XML Element.
+     *
+     * @param node - XML Node Element.
+     * @return - Update Info.
+     * @throws ConfigurationException
+     */
     private ModifiedBy parseUpdateInfo(Element node)
     throws ConfigurationException {
         NodeList children = node.getChildNodes();

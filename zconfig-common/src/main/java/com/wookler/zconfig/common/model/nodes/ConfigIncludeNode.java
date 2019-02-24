@@ -258,4 +258,26 @@ public class ConfigIncludeNode extends ConfigElementNode {
             node.loaded();
         }
     }
+
+    /**
+     * Validate that this node has been setup correctly.
+     *
+     * @throws ConfigurationException
+     */
+    @Override
+    public void validate() throws ConfigurationException {
+        super.validate();
+        if (Strings.isNullOrEmpty(configName)) {
+            throw ConfigurationException.propertyNotFoundException("configName");
+        }
+        if (readerType == null) {
+            throw ConfigurationException.propertyNotFoundException("readerType");
+        }
+        if (version == null) {
+            throw ConfigurationException.propertyNotFoundException("version");
+        }
+        if (node == null) {
+            throw new ConfigurationException("No included configuration loaded.");
+        }
+    }
 }

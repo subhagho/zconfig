@@ -378,9 +378,10 @@ public class JSONConfigParser extends AbstractConfigParser {
      * @param <T>       - Type
      * @throws ConfigurationException
      */
-    private <T> void parseArrayNodes(String name, ConfigListNode<T> listNode,
-                                     AbstractConfigNode parent,
-                                     ArrayNode arrayNode)
+    private <T extends AbstractConfigNode> void parseArrayNodes(String name,
+                                                                ConfigListNode<T> listNode,
+                                                                AbstractConfigNode parent,
+                                                                ArrayNode arrayNode)
     throws ConfigurationException {
         setupNode(name, listNode, parent, arrayNode, false);
         if (arrayNode.size() > 0) {
