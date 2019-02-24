@@ -17,12 +17,12 @@
  * under the License.
  *
  * Copyright (c) $year
- * Date: 31/12/18 7:15 PM
+ * Date: 24/2/19 12:36 PM
  * Subho Ghosh (subho dot ghosh at outlook.com)
  *
  */
 
-package com.wookler.zconfig.common.model;
+package com.wookler.zconfig.common.model.nodes;
 
 /**
  * Config node interface to be implemented for configuration value nodes.

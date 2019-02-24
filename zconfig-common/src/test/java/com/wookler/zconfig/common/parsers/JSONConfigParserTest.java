@@ -56,16 +56,18 @@ class JSONConfigParserTest {
             Properties properties = new Properties();
             properties.load(new FileInputStream(BASIC_PROPS_FILE));
 
-            String filename = properties.getProperty(ConfigTestConstants.PROP_CONFIG_FILE);
+            String filename =
+                    properties.getProperty(ConfigTestConstants.PROP_CONFIG_FILE);
             assertFalse(Strings.isNullOrEmpty(filename));
-            String vs = properties.getProperty(ConfigTestConstants.PROP_CONFIG_VERSION);
+            String vs =
+                    properties.getProperty(ConfigTestConstants.PROP_CONFIG_VERSION);
             assertFalse(Strings.isNullOrEmpty(vs));
             Version version = Version.parse(vs);
             assertNotNull(version);
 
             try (ConfigFileReader reader = new ConfigFileReader(filename)) {
 
-                parser.parse("test-config", reader, version);
+                parser.parse("test-config", reader, null, version);
                 Configuration configuration = parser.getConfiguration();
                 assertNotNull(configuration);
 
@@ -88,16 +90,18 @@ class JSONConfigParserTest {
             Properties properties = new Properties();
             properties.load(new FileInputStream(BASIC_PROPS_FILE));
 
-            String url = properties.getProperty(ConfigTestConstants.PROP_CONFIG_URL);
+            String url =
+                    properties.getProperty(ConfigTestConstants.PROP_CONFIG_URL);
             assertFalse(Strings.isNullOrEmpty(url));
-            String vs = properties.getProperty(ConfigTestConstants.PROP_CONFIG_VERSION);
+            String vs =
+                    properties.getProperty(ConfigTestConstants.PROP_CONFIG_VERSION);
             assertFalse(Strings.isNullOrEmpty(vs));
             Version version = Version.parse(vs);
             assertNotNull(version);
 
             try (ConfigURLReader reader = new ConfigURLReader(url)) {
 
-                parser.parse("test-config", reader, version);
+                parser.parse("test-config", reader, null, version);
                 Configuration configuration = parser.getConfiguration();
                 assertNotNull(configuration);
 
@@ -120,16 +124,18 @@ class JSONConfigParserTest {
             Properties properties = new Properties();
             properties.load(new FileInputStream(INCLUDED_PROPS_FILE));
 
-            String filename = properties.getProperty(ConfigTestConstants.PROP_CONFIG_FILE);
+            String filename =
+                    properties.getProperty(ConfigTestConstants.PROP_CONFIG_FILE);
             assertFalse(Strings.isNullOrEmpty(filename));
-            String vs = properties.getProperty(ConfigTestConstants.PROP_CONFIG_VERSION);
+            String vs =
+                    properties.getProperty(ConfigTestConstants.PROP_CONFIG_VERSION);
             assertFalse(Strings.isNullOrEmpty(vs));
             Version version = Version.parse(vs);
             assertNotNull(version);
 
             try (ConfigFileReader reader = new ConfigFileReader(filename)) {
 
-                parser.parse("test-config-include", reader, version);
+                parser.parse("test-config-include", reader, null, version);
                 Configuration configuration = parser.getConfiguration();
                 assertNotNull(configuration);
 

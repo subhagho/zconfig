@@ -33,6 +33,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.wookler.zconfig.common.*;
 import com.wookler.zconfig.common.model.*;
+import com.wookler.zconfig.common.model.nodes.*;
 import com.wookler.zconfig.common.readers.AbstractConfigReader;
 import com.wookler.zconfig.common.readers.EReaderType;
 import org.joda.time.DateTime;
@@ -49,6 +50,7 @@ import java.util.Map;
 public class JSONConfigParser extends AbstractConfigParser {
 
     private Map<Integer, JsonNode> processedNodes = null;
+    private ConfigurationSettings settings = null;
 
     /**
      * Parse the configuration from the JSON file specified in the properties.
@@ -105,13 +107,15 @@ public class JSONConfigParser extends AbstractConfigParser {
      *     }
      * </pre>
      *
-     * @param name    - Configuration name being loaded.
-     * @param reader  - Configuration reader handle to read input from.
-     * @param version - Configuration version to load.
+     * @param name     - Configuration name being loaded.
+     * @param reader   - Configuration reader handle to read input from.
+     * @param settings - Configuration Settings to use for parsing.
+     * @param version  - Configuration version to load.
      * @throws ConfigurationException
      */
     @Override
     public void parse(String name, AbstractConfigReader reader,
+                      ConfigurationSettings settings,
                       Version version)
     throws ConfigurationException {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(name));
@@ -130,6 +134,11 @@ public class JSONConfigParser extends AbstractConfigParser {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode rootNode = mapper.readTree(reader.getInputStream());
 
+            if (settings != null) {
+                this.settings = settings;
+            } else {
+                this.settings = new ConfigurationSettings();
+            }
             parse(name, version, rootNode);
 
             // Call the load finish handler.
@@ -172,9 +181,10 @@ public class JSONConfigParser extends AbstractConfigParser {
      * @param node    - JSON Root node.
      * @throws ConfigurationException
      */
-    private synchronized void parse(String name, Version version, JsonNode node)
+    private synchronized void parse(String name,
+                                    Version version, JsonNode node)
     throws ConfigurationException {
-        configuration = new Configuration();
+        configuration = new Configuration(settings);
         configuration.getState().setState(ENodeState.Loading);
         configuration.setName(name);
 
@@ -480,17 +490,20 @@ public class JSONConfigParser extends AbstractConfigParser {
                                               AbstractConfigNode parent)
     throws ConfigurationException {
         AbstractConfigNode nn = null;
-        if (name.compareTo(ConfigPropertiesNode.NODE_NAME) == 0) {
+        if (name.compareTo(
+                configuration.getSettings().getPropertiesNodeName()) == 0) {
             ConfigPropertiesNode pn =
                     new ConfigPropertiesNode(configuration, parent);
             setupNodeWithChildren(name, parent, pn, node, false);
             nn = pn;
-        } else if (name.compareTo(ConfigParametersNode.NODE_NAME) == 0) {
+        } else if (name.compareTo(
+                configuration.getSettings().getParametersNodeName()) == 0) {
             ConfigParametersNode pn =
                     new ConfigParametersNode(configuration, parent);
             setupNodeWithChildren(name, parent, pn, node, false);
             nn = pn;
-        } else if (name.compareTo(ConfigAttributesNode.NODE_NAME) == 0) {
+        } else if (name.compareTo(
+                configuration.getSettings().getAttributesNodeName()) == 0) {
             ConfigAttributesNode pn =
                     new ConfigAttributesNode(configuration, parent);
             setupNodeWithChildren(name, parent, pn, node, false);
@@ -605,7 +618,8 @@ public class JSONConfigParser extends AbstractConfigParser {
                                       uri.toString()));
             }
             JSONConfigParser nparser = new JSONConfigParser();
-            nparser.parse(node.getConfigName(), reader, node.getVersion());
+            nparser.parse(node.getConfigName(), reader, settings,
+                          node.getVersion());
             if (nparser.configuration != null) {
                 node.setNode(nparser.configuration.getRootConfigNode());
                 nparser.configuration.getRootConfigNode().setParent(node);

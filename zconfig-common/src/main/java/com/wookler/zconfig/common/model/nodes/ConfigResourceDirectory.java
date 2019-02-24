@@ -17,15 +17,17 @@
  * under the License.
  *
  * Copyright (c) $year
- * Date: 2/1/19 8:57 AM
+ * Date: 24/2/19 12:36 PM
  * Subho Ghosh (subho dot ghosh at outlook.com)
  *
  */
 
-package com.wookler.zconfig.common.model;
+package com.wookler.zconfig.common.model.nodes;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.wookler.zconfig.common.model.Configuration;
+import com.wookler.zconfig.common.model.EResourceType;
 
 import java.io.File;
 
@@ -33,6 +35,12 @@ import java.io.File;
  * Configuration resource node for the type directory.
  */
 public class ConfigResourceDirectory extends ConfigResourceFile {
+
+    /**
+     * Default constructor - Initialize the state object.
+     */
+    public ConfigResourceDirectory() {
+    }
 
     /**
      * Constructor with Configuration and Parent node.

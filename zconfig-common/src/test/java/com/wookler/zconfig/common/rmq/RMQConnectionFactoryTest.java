@@ -55,7 +55,7 @@ class RMQConnectionFactoryTest {
                     CONFIG_FILE));
         }
         Path path = Paths.get(CONFIG_FILE);
-        parser.parse(CONFIG_NAME, ConfigProviderFactory.reader(path.toUri()),
+        parser.parse(CONFIG_NAME, ConfigProviderFactory.reader(path.toUri()), null,
                      Version.parse(CONFIG_VERSION));
         configuration = parser.getConfiguration();
     }

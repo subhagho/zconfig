@@ -17,42 +17,31 @@
  * under the License.
  *
  * Copyright (c) $year
- * Date: 2/1/19 8:02 AM
+ * Date: 24/2/19 12:36 PM
  * Subho Ghosh (subho dot ghosh at outlook.com)
  *
  */
 
-package com.wookler.zconfig.common.model;
+package com.wookler.zconfig.common.model.nodes;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.wookler.zconfig.common.ConfigurationException;
+import com.wookler.zconfig.common.model.Configuration;
+import com.wookler.zconfig.common.model.ENodeState;
 
-import java.net.URI;
+import java.util.List;
 
 /**
- * Node denotes a resource URI. Resources specified will be downloaded (if required) and made accessible
- * via the configuration handle.
- * <p>
- * XML:
- * <resource name="name" URI="uri" type="type" />
- * <p>
- * JSON:
- * resource : {
- * name : "name",
- * URI : "uri",
- * type : "type",
- * ...
- * }
+ * Class represent a configuration node of type list with String values.
  */
-public abstract class ConfigResourceNode extends ConfigElementNode {
+public class ConfigListValueNode extends ConfigListNode<ConfigValueNode> {
+
     /**
-     * Resource type of this node.
+     * Default constructor - Initialize the state object.
      */
-    private EResourceType type;
-    /**
-     * Resource location of the resource pointed to by this node.
-     */
-    private URI location;
+    public ConfigListValueNode() {
+    }
 
     /**
      * Constructor with Configuration and Parent node.
@@ -60,62 +49,53 @@ public abstract class ConfigResourceNode extends ConfigElementNode {
      * @param configuration - Configuration this node belong to.
      * @param parent        - Parent node.
      */
-    public ConfigResourceNode(
+    public ConfigListValueNode(
             Configuration configuration,
             AbstractConfigNode parent) {
         super(configuration, parent);
     }
 
     /**
-     * Get the resource type of this node.
+     * Find the value node in the list with the specified name.
      *
-     * @return - Resource type.
+     * @param name - Name of node to find.
+     * @return - Value node, else NULL.
      */
-    public EResourceType getType() {
-        return type;
+    public ConfigValueNode getValue(String name) {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(name));
+        List<ConfigValueNode> values = getValues();
+        if (values != null && !values.isEmpty()) {
+            for (ConfigValueNode value : values) {
+                if (value != null && value.getName().compareTo(name) == 0) {
+                    return value;
+                }
+            }
+        }
+        return null;
     }
 
-    /**
-     * Set the resource type for this node.
-     *
-     * @param type - Resource type.
-     */
-    public void setType(EResourceType type) {
-        Preconditions.checkArgument(type != null);
-        this.type = type;
-    }
 
     /**
-     * Get the URI to the location of the resource.
-     *
-     * @return - Location URI.
-     */
-    public URI getLocation() {
-        return location;
-    }
-
-    /**
-     * Set the URI to the location of the resource.
-     *
-     * @param location - Location URI.
-     */
-    public void setLocation(URI location) {
-        Preconditions.checkArgument(location != null);
-        this.location = location;
-    }
-
-    /**
-     * Check if this node if the terminal value specified in the path.
-     *
      * @param path  - Tokenized Path array.
      * @param index - Current index in the path array to search for.
-     * @return
+     * @return - Node found or NULL.
      */
     @Override
     public AbstractConfigNode find(String[] path, int index) {
         String key = path[index];
-        if (getName().compareTo(key) == 0 && (index == path.length - 1)) {
-            return this;
+        if (getName().compareTo(key) == 0) {
+            if (index == path.length - 1) {
+                return this;
+            } else if (!isEmpty()) {
+                index = index + 1;
+                List<ConfigValueNode> nodes = getValues();
+                for (AbstractConfigNode node : nodes) {
+                    AbstractConfigNode fn = node.find(path, index);
+                    if (fn != null) {
+                        return fn;
+                    }
+                }
+            }
         }
         return null;
     }
@@ -130,7 +110,6 @@ public abstract class ConfigResourceNode extends ConfigElementNode {
         getState().setState(state);
     }
 
-
     /**
      * Mark the configuration instance has been completely loaded.
      *
@@ -144,5 +123,11 @@ public abstract class ConfigResourceNode extends ConfigElementNode {
                     getState().getState().name()));
         }
         updateState(ENodeState.Synced);
+        List<ConfigValueNode> values = getValues();
+        if (values != null && !values.isEmpty()) {
+            for (ConfigValueNode v : values) {
+                v.loaded();
+            }
+        }
     }
 }

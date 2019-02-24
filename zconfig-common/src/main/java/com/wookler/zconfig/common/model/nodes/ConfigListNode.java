@@ -17,15 +17,16 @@
  * under the License.
  *
  * Copyright (c) $year
- * Date: 1/1/19 10:04 AM
+ * Date: 24/2/19 12:33 PM
  * Subho Ghosh (subho dot ghosh at outlook.com)
  *
  */
 
-package com.wookler.zconfig.common.model;
+package com.wookler.zconfig.common.model.nodes;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
+import com.wookler.zconfig.common.model.Configuration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,12 +35,18 @@ import java.util.List;
  * Class represents a array of node elements.
  * <p>
  * Node elements are expected to be of type
- * com.wookler.zconfig.common.model.AbstractConfigNode or Strings (for value node).
+ * com.wookler.zconfig.common.model.nodes.AbstractConfigNode or Strings (for value node).
  *
  * @param <T> - Element type
  */
 public abstract class ConfigListNode<T> extends ConfigElementNode {
     private List<T> values;
+
+    /**
+     * Default constructor - Initialize the state object.
+     */
+    public ConfigListNode() {
+    }
 
     /**
      * Constructor with Configuration and Parent node.

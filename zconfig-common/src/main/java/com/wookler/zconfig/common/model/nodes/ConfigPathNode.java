@@ -17,19 +17,24 @@
  * under the License.
  *
  * Copyright (c) $year
- * Date: 31/12/18 7:27 PM
+ * Date: 24/2/19 12:36 PM
  * Subho Ghosh (subho dot ghosh at outlook.com)
  *
  */
 
-package com.wookler.zconfig.common.model;
+package com.wookler.zconfig.common.model.nodes;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.wookler.zconfig.common.ConfigurationException;
+import com.wookler.zconfig.common.model.Configuration;
+import com.wookler.zconfig.common.model.ConfigurationSettings;
+import com.wookler.zconfig.common.model.ENodeState;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -44,6 +49,22 @@ public class ConfigPathNode extends ConfigElementNode {
      */
     private Map<String, AbstractConfigNode> children;
 
+    /**
+     * Default constructor - Initialize the state object.
+     */
+    public ConfigPathNode() {
+    }
+
+    /**
+     * Constructor with Configuration and Parent node.
+     *
+     * @param configuration - Configuration this node belong to.
+     * @param parent        - Parent node.
+     */
+    public ConfigPathNode(Configuration configuration,
+                          AbstractConfigNode parent) {
+        super(configuration, parent);
+    }
 
     /**
      * Get the map of child nodes for this path element.
@@ -54,16 +75,6 @@ public class ConfigPathNode extends ConfigElementNode {
         return children;
     }
 
-    /**
-     * Constructor with Configuration and Parent node.
-     *
-     * @param configuration - Configuration this node belong to.
-     * @param parent - Parent node.
-     */
-    public ConfigPathNode(Configuration configuration,
-                          AbstractConfigNode parent) {
-        super(configuration, parent);
-    }
 
     /**
      * Set the map of child nodes for this path element.
@@ -132,9 +143,10 @@ public class ConfigPathNode extends ConfigElementNode {
      */
     public ConfigParametersNode parmeters() {
         if (children != null &&
-                children.containsKey(ConfigParametersNode.NODE_NAME)) {
+                children.containsKey(
+                        getConfiguration().getSettings().getParametersNodeName())) {
             return (ConfigParametersNode) children
-                    .get(ConfigParametersNode.NODE_NAME);
+                    .get(getConfiguration().getSettings().getParametersNodeName());
         }
         return null;
     }
@@ -146,9 +158,10 @@ public class ConfigPathNode extends ConfigElementNode {
      */
     public ConfigPropertiesNode properties() {
         if (children != null &&
-                children.containsKey(ConfigPropertiesNode.NODE_NAME)) {
+                children.containsKey(
+                        getConfiguration().getSettings().getPropertiesNodeName())) {
             return (ConfigPropertiesNode) children
-                    .get(ConfigPropertiesNode.NODE_NAME);
+                    .get(getConfiguration().getSettings().getPropertiesNodeName());
         }
         return null;
     }
@@ -160,9 +173,10 @@ public class ConfigPathNode extends ConfigElementNode {
      */
     public ConfigAttributesNode attributes() {
         if (children != null &&
-                children.containsKey(ConfigAttributesNode.NODE_NAME)) {
+                children.containsKey(
+                        getConfiguration().getSettings().getAttributesNodeName())) {
             return (ConfigAttributesNode) children
-                    .get(ConfigAttributesNode.NODE_NAME);
+                    .get(getConfiguration().getSettings().getAttributesNodeName());
         }
         return null;
     }
@@ -172,7 +186,7 @@ public class ConfigPathNode extends ConfigElementNode {
      *
      * @param path  - Tokenized Path array.
      * @param index - Current index in the path array to search for.
-     * @return
+     * @return - Node found or NULL.
      */
     @Override
     public AbstractConfigNode find(String[] path, int index) {
@@ -183,22 +197,62 @@ public class ConfigPathNode extends ConfigElementNode {
                 if (index == path.length - 1) {
                     return this;
                 } else {
-                    String cname = path[index + 1];
-                    String[] pc = hasSubPath(cname);
-                    if (pc != null && pc.length == 2) {
-                        cname = pc[0];
-                        if (children.containsKey(cname)) {
-                            AbstractConfigNode node = children.get(cname);
-                            return node.find(pc[1]);
-                        }
-                    } else if (children.containsKey(cname)) {
-                        AbstractConfigNode node = children.get(cname);
-                        return node.find(path, index + 1);
-                    }
+                    return findChild(path, index);
+                }
+            } else if (ConfigurationSettings.isWildcard(key)) {
+                if (index == path.length - 1) {
+                    return this;
+                } else {
+                    return findChild(path, index);
                 }
             }
         } else if (index == path.length - 1) {
             return find(pp);
+        }
+        return null;
+    }
+
+    /**
+     * Find if any child node matches the required search criteria.
+     *
+     * @param path  - Path Array.
+     * @param index - Index in the path array.
+     * @return - Found node or NULL.
+     */
+    public AbstractConfigNode findChild(String[] path, int index) {
+        String cname = path[index + 1];
+        String[] pc = hasSubPath(cname);
+        if (pc != null && pc.length == 2) {
+            cname = pc[0];
+            if (children.containsKey(cname)) {
+                AbstractConfigNode node = children.get(cname);
+                return node.find(pc[1]);
+            }
+        } else if (children.containsKey(cname)) {
+            AbstractConfigNode node = children.get(cname);
+            return node.find(path, index + 1);
+        } else if (ConfigurationSettings.isWildcard(cname)) {
+            List<AbstractConfigNode> nodes = new ArrayList<>();
+            for (String ckey : children.keySet()) {
+                AbstractConfigNode cn = children.get(ckey);
+                AbstractConfigNode sn = cn.find(path, index + 1);
+                if (sn != null) {
+                    nodes.add(sn);
+                }
+            }
+            if (!nodes.isEmpty()) {
+                if (nodes.size() > 1) {
+                    ConfigSearchListNode nodeList =
+                            new ConfigSearchListNode(getConfiguration(),
+                                                     null);
+                    for (AbstractConfigNode nn : nodes) {
+                        nodeList.addValue(nn);
+                    }
+                    return nodeList;
+                } else {
+                    return nodes.get(0);
+                }
+            }
         }
         return null;
     }
@@ -216,7 +270,8 @@ public class ConfigPathNode extends ConfigElementNode {
             if (parts.length == 1) {
                 return new String[]{parts[0], String
                         .format("%s.%s", parts[0],
-                                ConfigParametersNode.NODE_NAME)};
+                                getConfiguration().getSettings()
+                                                  .getParametersNodeName())};
             }
         }
         index = name.indexOf("@");
@@ -225,7 +280,8 @@ public class ConfigPathNode extends ConfigElementNode {
             if (parts.length == 1) {
                 return new String[]{parts[0], String
                         .format("%s.%s", parts[0],
-                                ConfigAttributesNode.NODE_NAME)};
+                                getConfiguration().getSettings()
+                                                  .getAttributesNodeName())};
             }
         }
         index = name.indexOf("$");
@@ -234,7 +290,8 @@ public class ConfigPathNode extends ConfigElementNode {
             if (parts.length == 1) {
                 return new String[]{parts[0], String
                         .format("%s.%s", parts[0],
-                                ConfigPropertiesNode.NODE_NAME)};
+                                getConfiguration().getSettings()
+                                                  .getPropertiesNodeName())};
             }
         }
         return null;
@@ -251,15 +308,18 @@ public class ConfigPathNode extends ConfigElementNode {
         int index = name.indexOf("#");
         if (index > 0) {
             String[] parts = name.split("#");
-            if (nodeName.compareTo(parts[0]) == 0) {
+            if (nodeName.compareTo(parts[0]) == 0 ||
+                    ConfigurationSettings.isWildcard(parts[0])) {
                 if (parts.length == 1) {
                     return String
                             .format("%s.%s", parts[0],
-                                    ConfigParametersNode.NODE_NAME);
+                                    getConfiguration().getSettings()
+                                                      .getParametersNodeName());
                 } else {
                     return String
                             .format("%s.%s.%s", parts[0],
-                                    ConfigParametersNode.NODE_NAME,
+                                    getConfiguration().getSettings()
+                                                      .getParametersNodeName(),
                                     parts[1]);
                 }
             }
@@ -267,15 +327,18 @@ public class ConfigPathNode extends ConfigElementNode {
         index = name.indexOf("@");
         if (index > 0) {
             String[] parts = name.split("@");
-            if (nodeName.compareTo(parts[0]) == 0) {
+            if (nodeName.compareTo(parts[0]) == 0 ||
+                    ConfigurationSettings.isWildcard(parts[0])) {
                 if (parts.length == 1) {
                     return String
                             .format("%s.%s", parts[0],
-                                    ConfigAttributesNode.NODE_NAME);
+                                    getConfiguration().getSettings()
+                                                      .getAttributesNodeName());
                 } else {
                     return String
                             .format("%s.%s.%s", parts[0],
-                                    ConfigAttributesNode.NODE_NAME,
+                                    getConfiguration().getSettings()
+                                                      .getAttributesNodeName(),
                                     parts[1]);
                 }
             }
@@ -283,15 +346,18 @@ public class ConfigPathNode extends ConfigElementNode {
         index = name.indexOf("$");
         if (index > 0) {
             String[] parts = name.split("\\$");
-            if (nodeName.compareTo(parts[0]) == 0) {
+            if (nodeName.compareTo(parts[0]) == 0 ||
+                    ConfigurationSettings.isWildcard(parts[0])) {
                 if (parts.length == 1) {
                     return String
                             .format("%s.%s", parts[0],
-                                    ConfigPropertiesNode.NODE_NAME);
+                                    getConfiguration().getSettings()
+                                                      .getPropertiesNodeName());
                 } else {
                     return String
                             .format("%s.%s.%s", parts[0],
-                                    ConfigPropertiesNode.NODE_NAME,
+                                    getConfiguration().getSettings()
+                                                      .getPropertiesNodeName(),
                                     parts[1]);
                 }
             }
@@ -303,7 +369,7 @@ public class ConfigPathNode extends ConfigElementNode {
      * Override default toString(). Will print a path element with children if any.
      * Example: /path:[{child}, {child}...]
      *
-     * @return
+     * @return - Path String.
      */
     @Override
     public String toString() {
@@ -320,7 +386,8 @@ public class ConfigPathNode extends ConfigElementNode {
                         buff.append(", ");
                     }
                 }
-                buff.append(String.format("{%s}", node.toString()));
+                if (node != null)
+                    buff.append(String.format("{%s}", node.toString()));
             }
             buff.append("]");
         }

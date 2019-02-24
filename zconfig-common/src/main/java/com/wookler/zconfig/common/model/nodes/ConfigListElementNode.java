@@ -17,16 +17,18 @@
  * under the License.
  *
  * Copyright (c) $year
- * Date: 1/1/19 10:48 AM
+ * Date: 24/2/19 12:33 PM
  * Subho Ghosh (subho dot ghosh at outlook.com)
  *
  */
 
-package com.wookler.zconfig.common.model;
+package com.wookler.zconfig.common.model.nodes;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.wookler.zconfig.common.ConfigurationException;
+import com.wookler.zconfig.common.model.Configuration;
+import com.wookler.zconfig.common.model.ENodeState;
 
 import java.util.List;
 
@@ -36,10 +38,16 @@ import java.util.List;
 public class ConfigListElementNode extends ConfigListNode<ConfigElementNode> {
 
     /**
+     * Default constructor - Initialize the state object.
+     */
+    public ConfigListElementNode() {
+    }
+
+    /**
      * Constructor with Configuration and Parent node.
      *
      * @param configuration - Configuration this node belong to.
-     * @param parent - Parent node.
+     * @param parent        - Parent node.
      */
     public ConfigListElementNode(
             Configuration configuration,
@@ -83,7 +91,7 @@ public class ConfigListElementNode extends ConfigListNode<ConfigElementNode> {
      *
      * @param path  - Tokenized Path array.
      * @param index - Current index in the path array to search for.
-     * @return
+     * @return - Node found or NULL.
      */
     @Override
     public AbstractConfigNode find(String[] path, int index) {

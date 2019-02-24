@@ -17,12 +17,16 @@
  * under the License.
  *
  * Copyright (c) $year
- * Date: 31/12/18 9:02 PM
+ * Date: 24/2/19 12:36 PM
  * Subho Ghosh (subho dot ghosh at outlook.com)
  *
  */
 
-package com.wookler.zconfig.common.model;
+package com.wookler.zconfig.common.model.nodes;
+
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+import com.wookler.zconfig.common.model.Configuration;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -52,10 +56,15 @@ import java.util.Map;
  */
 public class ConfigPropertiesNode extends ConfigKeyValueNode {
     /**
-     * Static Node name for the parameters node.
+     * Search abbreviation for properties node.
      */
-    public static final String NODE_NAME = "properties";
     public static final String NODE_ABBR_PREFIX = "$";
+
+    /**
+     * Default constructor - Initialize the state object.
+     */
+    public ConfigPropertiesNode() {
+    }
 
     /**
      * Constructor with Configuration and Parent node.
@@ -76,7 +85,12 @@ public class ConfigPropertiesNode extends ConfigKeyValueNode {
      */
     @Override
     public void setName(String name) {
-        super.setName(NODE_NAME);
+        if (getConfiguration() != null)
+            super.setName(getConfiguration().getSettings().getPropertiesNodeName());
+        else {
+            Preconditions.checkArgument(!Strings.isNullOrEmpty(name));
+            super.setName(name);
+        }
     }
 
     /**

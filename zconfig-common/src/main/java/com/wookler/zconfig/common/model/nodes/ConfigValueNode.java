@@ -17,23 +17,23 @@
  * under the License.
  *
  * Copyright (c) $year
- * Date: 31/12/18 9:04 PM
+ * Date: 24/2/19 12:36 PM
  * Subho Ghosh (subho dot ghosh at outlook.com)
  *
  */
 
-package com.wookler.zconfig.common.model;
+package com.wookler.zconfig.common.model.nodes;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.wookler.zconfig.common.ConfigurationException;
 import com.wookler.zconfig.common.GlobalConstants;
+import com.wookler.zconfig.common.model.Configuration;
+import com.wookler.zconfig.common.model.ENodeState;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-
-import javax.annotation.Nonnull;
 
 /**
  * Class represents a configuration value element. All configuration values are treated as String values
@@ -57,6 +57,12 @@ public class ConfigValueNode extends AbstractConfigNode
      * Configuration value element.
      */
     private String value;
+
+    /**
+     * Default constructor - Initialize the state object.
+     */
+    public ConfigValueNode() {
+    }
 
     /**
      * Constructor with Configuration and Parent node.

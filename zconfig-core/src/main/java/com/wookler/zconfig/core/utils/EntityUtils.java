@@ -44,7 +44,7 @@ public class EntityUtils {
      * Generate a hash code based on the passed string value.
      *
      * @param value - Generated Hash Code.
-     * @return
+     * @return - Hash Code.
      */
     public static int getStringHashCode(String value) {
         final int prime = 31;

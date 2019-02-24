@@ -28,6 +28,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.wookler.zconfig.common.ConfigurationException;
+import com.wookler.zconfig.common.model.nodes.*;
 
 import java.io.File;
 import java.util.Map;
@@ -88,11 +89,26 @@ public class Configuration {
      */
     private ESyncMode syncMode;
 
+    private ConfigurationSettings settings;
+
+
     /**
-     * Default constructor
+     * Default Empty constructor.
      */
     public Configuration() {
         instanceId = UUID.randomUUID().toString();
+        state = new NodeState();
+        state.setState(ENodeState.Loading);
+    }
+
+    /**
+     * Constructor with configuration settings.
+     *
+     * @param settings - Configuration Settings.
+     */
+    public Configuration(ConfigurationSettings settings) {
+        instanceId = UUID.randomUUID().toString();
+        this.settings = settings;
         state = new NodeState();
         state.setState(ENodeState.Loading);
     }
@@ -298,6 +314,24 @@ public class Configuration {
      */
     public void setSyncMode(ESyncMode syncMode) {
         this.syncMode = syncMode;
+    }
+
+    /**
+     * Get the configuration settings used to parse this configuration.
+     *
+     * @return - Configuration Settings.
+     */
+    public ConfigurationSettings getSettings() {
+        return settings;
+    }
+
+    /**
+     * Set the configuration settings used to parse this configuration.
+     *
+     * @param settings - Configuration Settings.
+     */
+    public void setSettings(ConfigurationSettings settings) {
+        this.settings = settings;
     }
 
     /**

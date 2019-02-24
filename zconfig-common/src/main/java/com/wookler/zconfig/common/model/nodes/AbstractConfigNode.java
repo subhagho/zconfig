@@ -17,17 +17,20 @@
  * under the License.
  *
  * Copyright (c) $year
- * Date: 31/12/18 7:12 PM
+ * Date: 24/2/19 12:33 PM
  * Subho Ghosh (subho dot ghosh at outlook.com)
  *
  */
 
-package com.wookler.zconfig.common.model;
+package com.wookler.zconfig.common.model.nodes;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.wookler.zconfig.common.ConfigurationException;
+import com.wookler.zconfig.common.model.Configuration;
+import com.wookler.zconfig.common.model.ENodeState;
+import com.wookler.zconfig.common.model.NodeState;
 
 /**
  * Abstract base node for defining configuration elements.
@@ -66,21 +69,20 @@ public abstract class AbstractConfigNode {
     /**
      * Default constructor - Initialize the state object.
      */
-    /*
     public AbstractConfigNode() {
         state = new NodeState();
         state.setState(ENodeState.Loading);
     }
-    */
+
 
     /**
      * Constructor with Configuration and Parent node.
      *
      * @param configuration - Configuration this node belong to.
-     * @param parent - Parent node.
+     * @param parent        - Parent node.
      */
     protected AbstractConfigNode(Configuration configuration,
-                              AbstractConfigNode parent) {
+                                 AbstractConfigNode parent) {
         this.configuration = configuration;
         this.parent = parent;
 

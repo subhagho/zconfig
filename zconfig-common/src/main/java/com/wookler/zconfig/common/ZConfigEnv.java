@@ -129,6 +129,7 @@ public abstract class ZConfigEnv {
                     configfile));
             Path path = Paths.get(configfile);
             parser.parse(configName, ConfigProviderFactory.reader(path.toUri()),
+                         null,
                          version);
             configuration = parser.getConfiguration();
             if (configuration == null) {

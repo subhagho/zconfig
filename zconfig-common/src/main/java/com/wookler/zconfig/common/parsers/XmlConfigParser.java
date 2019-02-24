@@ -25,6 +25,7 @@
 package com.wookler.zconfig.common.parsers;
 
 import com.wookler.zconfig.common.ConfigurationException;
+import com.wookler.zconfig.common.model.ConfigurationSettings;
 import com.wookler.zconfig.common.model.Version;
 import com.wookler.zconfig.common.readers.AbstractConfigReader;
 
@@ -35,13 +36,15 @@ public class XmlConfigParser extends AbstractConfigParser {
     /**
      * Parse and load the configuration instance using the specified properties.
      *
-     * @param name    - Configuration name being loaded.
-     * @param reader  - Configuration reader handle to read input from.
-     * @param version - Configuration version to load.
+     * @param name     - Configuration name being loaded.
+     * @param reader   - Configuration reader handle to read input from.
+     * @param settings - Configuration Settings to use for parsing.
+     * @param version  - Configuration version to load.
      * @throws ConfigurationException
      */
     @Override
-    public void parse(String name, AbstractConfigReader reader, Version version)
+    public void parse(String name, AbstractConfigReader reader,
+                      ConfigurationSettings settings, Version version)
     throws ConfigurationException {
 
     }

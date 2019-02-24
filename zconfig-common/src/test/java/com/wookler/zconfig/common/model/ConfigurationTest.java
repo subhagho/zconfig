@@ -28,6 +28,7 @@ import com.google.common.base.Strings;
 import com.wookler.zconfig.common.ConfigProviderFactory;
 import com.wookler.zconfig.common.ConfigTestConstants;
 import com.wookler.zconfig.common.LogUtils;
+import com.wookler.zconfig.common.model.nodes.*;
 import com.wookler.zconfig.common.parsers.JSONConfigParser;
 import com.wookler.zconfig.common.readers.ConfigFileReader;
 import org.junit.jupiter.api.BeforeAll;
@@ -64,7 +65,7 @@ class ConfigurationTest {
 
         try (ConfigFileReader reader = new ConfigFileReader(filename)) {
 
-            parser.parse("test-config", reader, version);
+            parser.parse("test-config", reader, null, version);
             configuration = parser.getConfiguration();
             assertNotNull(configuration);
         }
@@ -88,7 +89,8 @@ class ConfigurationTest {
     @Test
     void update() {
         try {
-            String path = "configuration.node_1.node_2.node_3.node_4.TEST_VALUE_LIST";
+            String path =
+                    "configuration.node_1.node_2.node_3.node_4.TEST_VALUE_LIST";
             AbstractConfigNode node = configuration.find(path);
             assertNotNull(node);
             assertTrue(node instanceof ConfigListValueNode);
@@ -181,6 +183,32 @@ class ConfigurationTest {
             String value = ((ConfigValueNode) node).getValue();
             assertFalse(Strings.isNullOrEmpty(value));
             debug(getClass(), String.format("[path=%s][value=%s]", path, value));
+        } catch (Throwable e) {
+            error(getClass(), e);
+            fail(e);
+        }
+    }
+
+    @Test
+    void searchWildcard() {
+        try {
+            String path = "configuration.node_1.node_2.node_3.*";
+            AbstractConfigNode node = configuration.find(path);
+            assertNotNull(node);
+            assertTrue(node instanceof ConfigSearchListNode);
+            debug(getClass(), node);
+
+            path = "*.createdBy";
+            node = configuration.find(node, path);
+            assertNotNull(node);
+            assertTrue(node instanceof ConfigPathNode);
+            debug(getClass(), node);
+
+            path = "configuration.node_1.node_2.node_3.*.TEST_VALUE_LIST";
+            node = configuration.find(path);
+            assertNotNull(node);
+            assertTrue(node instanceof ConfigListValueNode);
+            debug(getClass(), node);
         } catch (Throwable e) {
             error(getClass(), e);
             fail(e);

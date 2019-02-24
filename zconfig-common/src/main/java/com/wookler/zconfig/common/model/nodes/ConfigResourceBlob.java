@@ -17,16 +17,18 @@
  * under the License.
  *
  * Copyright (c) $year
- * Date: 2/1/19 8:36 AM
+ * Date: 24/2/19 12:36 PM
  * Subho Ghosh (subho dot ghosh at outlook.com)
  *
  */
 
-package com.wookler.zconfig.common.model;
+package com.wookler.zconfig.common.model.nodes;
 
 import com.google.common.base.Preconditions;
 import com.wookler.zconfig.common.ConfigurationException;
 import com.wookler.zconfig.common.FileReadResponse;
+import com.wookler.zconfig.common.model.Configuration;
+import com.wookler.zconfig.common.model.EResourceType;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

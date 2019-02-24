@@ -17,16 +17,19 @@
  * under the License.
  *
  * Copyright (c) $year
- * Date: 1/1/19 8:50 PM
+ * Date: 24/2/19 12:33 PM
  * Subho Ghosh (subho dot ghosh at outlook.com)
  *
  */
 
-package com.wookler.zconfig.common.model;
+package com.wookler.zconfig.common.model.nodes;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.wookler.zconfig.common.ConfigurationException;
+import com.wookler.zconfig.common.model.Configuration;
+import com.wookler.zconfig.common.model.ENodeState;
+import com.wookler.zconfig.common.model.Version;
 import com.wookler.zconfig.common.readers.EReaderType;
 
 import java.io.File;
@@ -82,6 +85,12 @@ public class ConfigIncludeNode extends ConfigElementNode {
      * The configuration version to load.
      */
     private Version version;
+
+    /**
+     * Default constructor - Initialize the state object.
+     */
+    public ConfigIncludeNode() {
+    }
 
     /**
      * Constructor with Configuration and Parent node.
@@ -191,7 +200,7 @@ public class ConfigIncludeNode extends ConfigElementNode {
      *
      * @param path  - Tokenized Path array.
      * @param index - Current index in the path array to search for.
-     * @return
+     * @return - Node found or NULL.
      */
     @Override
     public AbstractConfigNode find(String[] path, int index) {

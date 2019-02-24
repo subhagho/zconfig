@@ -24,7 +24,7 @@
 
 package com.wookler.zconfig.core;
 
-import com.wookler.zconfig.common.model.AbstractConfigNode;
+import com.wookler.zconfig.common.model.nodes.AbstractConfigNode;
 import com.wookler.zconfig.common.model.Configuration;
 import com.wookler.zconfig.common.model.Version;
 import com.wookler.zconfig.core.model.Application;

@@ -17,17 +17,25 @@
  * under the License.
  *
  * Copyright (c) $year
- * Date: 3/1/19 5:14 PM
+ * Date: 24/2/19 12:33 PM
  * Subho Ghosh (subho dot ghosh at outlook.com)
  *
  */
 
-package com.wookler.zconfig.common.model;
+package com.wookler.zconfig.common.model.nodes;
+
+import com.wookler.zconfig.common.model.Configuration;
 
 /**
  * Node type defines a base configuration element node.
  */
 public abstract class ConfigElementNode extends AbstractConfigNode {
+    /**
+     * Default constructor - Initialize the state object.
+     */
+    public ConfigElementNode() {
+    }
+
     /**
      * Constructor with Configuration and Parent node.
      *

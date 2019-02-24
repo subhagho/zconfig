@@ -17,19 +17,20 @@
  * under the License.
  *
  * Copyright (c) $year
- * Date: 31/12/18 7:41 PM
+ * Date: 24/2/19 12:33 PM
  * Subho Ghosh (subho dot ghosh at outlook.com)
  *
  */
 
-package com.wookler.zconfig.common.model;
+package com.wookler.zconfig.common.model.nodes;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.wookler.zconfig.common.ConfigurationException;
+import com.wookler.zconfig.common.model.Configuration;
+import com.wookler.zconfig.common.model.ENodeState;
 
-import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,6 +43,12 @@ public abstract class ConfigKeyValueNode extends ConfigElementNode {
      * Map containing the defined parameters within a node definition.
      */
     private Map<String, ConfigValueNode> keyValues;
+
+    /**
+     * Default constructor - Initialize the state object.
+     */
+    public ConfigKeyValueNode() {
+    }
 
     /**
      * Constructor with Configuration and Parent node.

@@ -132,7 +132,7 @@ class ConfigurationAnnotationProcessorTest {
 
         try (ConfigFileReader reader = new ConfigFileReader(filename)) {
 
-            parser.parse("test-config", reader, version);
+            parser.parse("test-config", reader, null, version);
             configuration = parser.getConfiguration();
             assertNotNull(configuration);
         }

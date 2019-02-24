@@ -38,7 +38,7 @@ import com.wookler.zconfig.common.ConfigurationException;
 import com.wookler.zconfig.common.DateTimeUtils;
 import com.wookler.zconfig.common.JSONConfigConstants;
 import com.wookler.zconfig.common.model.*;
-import com.wookler.zconfig.common.model.annotations.ConfigValue;
+import com.wookler.zconfig.common.model.nodes.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;

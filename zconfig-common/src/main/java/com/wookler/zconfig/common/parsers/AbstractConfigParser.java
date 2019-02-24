@@ -28,6 +28,7 @@ import com.google.common.base.Strings;
 import com.wookler.zconfig.common.ConfigurationException;
 import com.wookler.zconfig.common.VariableRegexParser;
 import com.wookler.zconfig.common.model.*;
+import com.wookler.zconfig.common.model.nodes.*;
 import com.wookler.zconfig.common.readers.AbstractConfigReader;
 
 import java.util.HashMap;
@@ -72,7 +73,7 @@ public abstract class AbstractConfigParser {
     /**
      * Replace variable values with the scoped property sets.
      *
-     * @param node - Node to preform replacement on.
+     * @param node       - Node to preform replacement on.
      * @param inputProps - Input Property set.
      * @throws ConfigurationException
      */
@@ -146,7 +147,8 @@ public abstract class AbstractConfigParser {
      * @param properties - Property Map to lookup variable values.
      * @return - Replaced String
      */
-    private String replaceVariables(String value, Map<String, ConfigValueNode> properties) {
+    private String replaceVariables(String value,
+                                    Map<String, ConfigValueNode> properties) {
         if (!Strings.isNullOrEmpty(value)) {
             if (VariableRegexParser.hasVariable(value)) {
                 List<String> vars = VariableRegexParser.getVariables(value);
@@ -170,12 +172,14 @@ public abstract class AbstractConfigParser {
     /**
      * Parse and load the configuration instance using the specified properties.
      *
-     * @param name    - Configuration name being loaded.
-     * @param reader  - Configuration reader handle to read input from.
-     * @param version - Configuration version to load.
+     * @param name     - Configuration name being loaded.
+     * @param reader   - Configuration reader handle to read input from.
+     * @param settings - Configuration Settings to use for parsing.
+     * @param version  - Configuration version to load.
      * @throws ConfigurationException
      */
     public abstract void parse(String name, AbstractConfigReader reader,
+                               ConfigurationSettings settings,
                                Version version)
     throws ConfigurationException;
 

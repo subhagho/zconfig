@@ -25,8 +25,8 @@
 package com.wookler.zconfig.common.utils;
 
 import com.wookler.zconfig.common.LogUtils;
-import com.wookler.zconfig.common.model.AbstractConfigNode;
-import com.wookler.zconfig.common.model.ConfigListElementNode;
+import com.wookler.zconfig.common.model.nodes.AbstractConfigNode;
+import com.wookler.zconfig.common.model.nodes.ConfigListElementNode;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 
 import static org.junit.jupiter.api.Assertions.*;
 
