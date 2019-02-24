@@ -157,6 +157,7 @@ public class ConfigIncludeNode extends ConfigElementNode {
     public void setNode(ConfigPathNode node) {
         Preconditions.checkArgument(node != null);
         this.node = node;
+        this.node.setParent(this);
     }
 
     /**
@@ -279,5 +280,16 @@ public class ConfigIncludeNode extends ConfigElementNode {
         if (node == null) {
             throw new ConfigurationException("No included configuration loaded.");
         }
+    }
+
+    /**
+     * Change the configuration instance this node belongs to.
+     * Used for included configurations.
+     *
+     * @param configuration - Changed configuration.
+     */
+    @Override
+    public void changeConfiguration(Configuration configuration) {
+        setConfiguration(configuration);
     }
 }

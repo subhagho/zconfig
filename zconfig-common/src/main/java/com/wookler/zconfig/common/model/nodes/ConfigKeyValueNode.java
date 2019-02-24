@@ -276,4 +276,19 @@ public abstract class ConfigKeyValueNode extends ConfigElementNode {
             vn.validate();
         }
     }
+
+    /**
+     * Change the configuration instance this node belongs to.
+     * Used for included configurations.
+     *
+     * @param configuration - Changed configuration.
+     */
+    @Override
+    public void changeConfiguration(Configuration configuration) {
+        setConfiguration(configuration);
+        for (String key : keyValues.keySet()) {
+            ConfigValueNode vn = keyValues.get(key);
+            vn.changeConfiguration(configuration);
+        }
+    }
 }

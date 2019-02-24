@@ -172,4 +172,21 @@ public abstract class ConfigListNode<T extends AbstractConfigNode>
             }
         }
     }
+
+    /**
+     * Change the configuration instance this node belongs to.
+     * Used for included configurations.
+     *
+     * @param configuration - Changed configuration.
+     */
+    @Override
+    public void changeConfiguration(Configuration configuration) {
+        setConfiguration(configuration);
+        if (!isEmpty()) {
+            List<T> values = getValues();
+            for (T value : values) {
+                value.changeConfiguration(configuration);
+            }
+        }
+    }
 }

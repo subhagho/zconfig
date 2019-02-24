@@ -448,4 +448,19 @@ public class ConfigPathNode extends ConfigElementNode {
             }
         }
     }
+
+    /**
+     * Change the configuration instance this node belongs to.
+     * Used for included configurations.
+     *
+     * @param configuration - Changed configuration.
+     */
+    @Override
+    public void changeConfiguration(Configuration configuration) {
+        if (children != null && !children.isEmpty()) {
+            for (String key : children.keySet()) {
+                children.get(key).changeConfiguration(configuration);
+            }
+        }
+    }
 }

@@ -26,13 +26,11 @@ package com.wookler.zconfig.common.parsers;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.wookler.zconfig.common.ConfigurationException;
-import com.wookler.zconfig.common.DateTimeUtils;
-import com.wookler.zconfig.common.ValueParseException;
-import com.wookler.zconfig.common.XMLConfigConstants;
+import com.wookler.zconfig.common.*;
 import com.wookler.zconfig.common.model.*;
 import com.wookler.zconfig.common.model.nodes.*;
 import com.wookler.zconfig.common.readers.AbstractConfigReader;
+import com.wookler.zconfig.common.readers.EReaderType;
 import org.joda.time.DateTime;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -45,6 +43,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 
 /**
  * Configuration Parser implementation that reads the configuration from a XML file.
@@ -231,10 +230,10 @@ public class XmlConfigParser extends AbstractConfigParser {
                 ((ConfigPathNode) parent).addChildNode(pnode);
                 parseChildren((Element) node, pnode);
             } else if (nodeName.compareTo(ConfigIncludeNode.NODE_NAME) == 0) {
-                ConfigAttributesNode pnode =
-                        new ConfigAttributesNode(configuration, parent);
+                ConfigIncludeNode pnode =
+                        new ConfigIncludeNode(configuration, parent);
                 ((ConfigPathNode) parent).addChildNode(pnode);
-                parseChildren((Element) node, pnode);
+                parseIncludeNode((Element) node, pnode);
             } else {
                 ConfigPathNode pnode = new ConfigPathNode(configuration, parent);
                 pnode.setName(node.getNodeName());
@@ -265,9 +264,76 @@ public class XmlConfigParser extends AbstractConfigParser {
         }
     }
 
-    private void parseIncludeNode(Element node, AbstractConfigNode parent)
+    /**
+     * Parse a included configuration node.
+     *
+     * @param node   - XML Node Element.
+     * @param parent - Config Include Node.
+     * @throws ConfigurationException
+     */
+    private void parseIncludeNode(Element node, ConfigIncludeNode parent)
     throws ConfigurationException {
+        String attr = node.getAttribute(ConfigIncludeNode.NODE_CONFIG_NAME);
+        if (Strings.isNullOrEmpty(attr)) {
+            throw ConfigurationException
+                    .propertyNotFoundException(ConfigIncludeNode.NODE_CONFIG_NAME);
+        }
+        parent.setConfigName(attr);
 
+        attr = node.getAttribute(ConfigIncludeNode.NODE_PATH);
+        if (Strings.isNullOrEmpty(attr)) {
+            throw ConfigurationException
+                    .propertyNotFoundException(ConfigIncludeNode.NODE_PATH);
+        }
+        parent.setPath(attr);
+
+        attr = node.getAttribute(ConfigIncludeNode.NODE_TYPE);
+        if (Strings.isNullOrEmpty(attr)) {
+            throw ConfigurationException
+                    .propertyNotFoundException(ConfigIncludeNode.NODE_TYPE);
+        }
+        EReaderType type = EReaderType.parse(attr);
+        if (type == null) {
+            throw new ConfigurationException(
+                    String.format("Invalid Reader Type : [value=%s]", attr));
+        }
+        parent.setReaderType(type);
+        attr = node.getAttribute(ConfigIncludeNode.NODE_VERSION);
+        if (Strings.isNullOrEmpty(attr)) {
+            throw ConfigurationException
+                    .propertyNotFoundException(ConfigIncludeNode.NODE_VERSION);
+        }
+        try {
+            Version version = Version.parse(attr);
+            parent.setVersion(version);
+        } catch (ValueParseException e) {
+            throw new ConfigurationException(e);
+        }
+
+        URI uri = parent.getURI();
+        if (uri == null) {
+            throw new ConfigurationException(
+                    "Error getting URI for include node.");
+        }
+        AbstractConfigReader reader = ConfigProviderFactory.reader(uri);
+        if (reader == null) {
+            throw new ConfigurationException(
+                    String.format("Error getting reader instance : [URI=%s]",
+                                  uri.toString()));
+        }
+        XmlConfigParser nparser = new XmlConfigParser();
+        nparser.parse(parent.getConfigName(), reader, settings,
+                      parent.getVersion());
+        if (nparser.configuration != null) {
+            ConfigPathNode configPathNode =
+                    nparser.configuration.getRootConfigNode();
+            parent.setNode(configPathNode);
+            configPathNode.changeConfiguration(configuration);
+        } else {
+            throw new ConfigurationException(String.format(
+                    "Error loading included configuration. [URI=%s]",
+                    uri.toString()));
+        }
     }
 
     /**

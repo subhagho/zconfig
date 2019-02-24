@@ -68,7 +68,7 @@ public class ConfigValueNode extends AbstractConfigNode
      * Constructor with Configuration and Parent node.
      *
      * @param configuration - Configuration this node belong to.
-     * @param parent - Parent node.
+     * @param parent        - Parent node.
      */
     public ConfigValueNode(Configuration configuration,
                            AbstractConfigNode parent) {
@@ -283,5 +283,16 @@ public class ConfigValueNode extends AbstractConfigNode
     @Override
     public void updateState(ENodeState state) {
         getState().setState(state);
+    }
+
+    /**
+     * Change the configuration instance this node belongs to.
+     * Used for included configurations.
+     *
+     * @param configuration - Changed configuration.
+     */
+    @Override
+    public void changeConfiguration(Configuration configuration) {
+        setConfiguration(configuration);
     }
 }

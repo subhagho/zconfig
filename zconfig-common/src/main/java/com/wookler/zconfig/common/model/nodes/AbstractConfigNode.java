@@ -310,4 +310,12 @@ public abstract class AbstractConfigNode {
             throw ConfigurationException.propertyNotFoundException("name");
         }
     }
+
+    /**
+     * Change the configuration instance this node belongs to.
+     * Used for included configurations.
+     *
+     * @param configuration - Changed configuration.
+     */
+    public abstract void changeConfiguration(Configuration configuration);
 }

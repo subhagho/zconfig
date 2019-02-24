@@ -625,8 +625,10 @@ public class JSONConfigParser extends AbstractConfigParser {
             nparser.parse(node.getConfigName(), reader, settings,
                           node.getVersion());
             if (nparser.configuration != null) {
-                node.setNode(nparser.configuration.getRootConfigNode());
-                nparser.configuration.getRootConfigNode().setParent(node);
+                ConfigPathNode configPathNode =
+                        nparser.configuration.getRootConfigNode();
+                node.setNode(configPathNode);
+                configPathNode.changeConfiguration(configuration);
             } else {
                 throw new ConfigurationException(String.format(
                         "Error loading included configuration. [URI=%s]",

@@ -173,4 +173,15 @@ public abstract class ConfigResourceNode extends ConfigElementNode {
             throw ConfigurationException.propertyNotFoundException("location");
         }
     }
+
+    /**
+     * Change the configuration instance this node belongs to.
+     * Used for included configurations.
+     *
+     * @param configuration - Changed configuration.
+     */
+    @Override
+    public void changeConfiguration(Configuration configuration) {
+        setConfiguration(configuration);
+    }
 }
