@@ -38,6 +38,18 @@ import java.io.RandomAccessFile;
 public class ConfigResourceBlob extends ConfigResourceFile {
 
     /**
+     * Constructor with Configuration and Parent node.
+     *
+     * @param configuration - Configuration this node belong to.
+     * @param parent        - Parent node.
+     */
+    public ConfigResourceBlob(
+            Configuration configuration,
+            AbstractConfigNode parent) {
+        super(configuration, parent);
+    }
+
+    /**
      * Override set type as this type can only be BLOB.
      *
      * @param type - Resource type.

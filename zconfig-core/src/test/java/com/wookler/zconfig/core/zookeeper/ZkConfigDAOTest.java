@@ -31,6 +31,7 @@ import com.wookler.zconfig.common.model.Configuration;
 import com.wookler.zconfig.common.model.Version;
 import com.wookler.zconfig.common.parsers.AbstractConfigParser;
 import com.wookler.zconfig.common.utils.ResourceReaderUtils;
+import com.wookler.zconfig.core.IConfigDAO;
 import com.wookler.zconfig.core.ZConfigCoreEnv;
 import com.wookler.zconfig.core.model.Application;
 import com.wookler.zconfig.core.model.ApplicationGroup;
@@ -90,7 +91,7 @@ class ZkConfigDAOTest {
             user.setName("TEST_" + UUID.randomUUID().toString());
 
             try (CuratorFramework client = ZkUtils.getZkClient()) {
-                ZkConfigDAO dao = new ZkConfigDAO();
+                IConfigDAO dao = new ZkConfigDAO();
 
                 Configuration configuration = readConfiguration();
                 assertNotNull(configuration);
@@ -135,7 +136,8 @@ class ZkConfigDAOTest {
                 assertNotNull(configNode);
 
                 configNode = dao.readConfigHeader(client, application,
-                                                  configuration.getName());
+                                                  configuration.getName(),
+                                                  configNode.getCurrentVersion());
                 assertNotNull(configNode);
                 LogUtils.debug(getClass(), configNode);
             }

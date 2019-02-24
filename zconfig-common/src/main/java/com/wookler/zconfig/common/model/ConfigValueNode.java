@@ -59,6 +59,17 @@ public class ConfigValueNode extends AbstractConfigNode
     private String value;
 
     /**
+     * Constructor with Configuration and Parent node.
+     *
+     * @param configuration - Configuration this node belong to.
+     * @param parent - Parent node.
+     */
+    public ConfigValueNode(Configuration configuration,
+                           AbstractConfigNode parent) {
+        super(configuration, parent);
+    }
+
+    /**
      * Get the configuration value element.
      *
      * @return - Value.

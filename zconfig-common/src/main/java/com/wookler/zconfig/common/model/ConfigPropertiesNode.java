@@ -24,8 +24,6 @@
 
 package com.wookler.zconfig.common.model;
 
-import com.google.common.base.Strings;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,7 +31,7 @@ import java.util.Map;
  * Configuration node representing configuration properties. Properties can be defined for any path scope and used as
  * substitutions markers when specifying configuration values.
  * Properties are specified as key/value pairs enclosed in a {properties} block.
- *
+ * <p>
  * Example:
  * JSON >>
  * <pre>
@@ -57,6 +55,19 @@ public class ConfigPropertiesNode extends ConfigKeyValueNode {
      * Static Node name for the parameters node.
      */
     public static final String NODE_NAME = "properties";
+    public static final String NODE_ABBR_PREFIX = "$";
+
+    /**
+     * Constructor with Configuration and Parent node.
+     *
+     * @param configuration - Configuration this node belong to.
+     * @param parent        - Parent node.
+     */
+    public ConfigPropertiesNode(
+            Configuration configuration,
+            AbstractConfigNode parent) {
+        super(configuration, parent);
+    }
 
     /**
      * Override the setName method to set the name to the static node name.
@@ -69,43 +80,43 @@ public class ConfigPropertiesNode extends ConfigKeyValueNode {
     }
 
     /**
-     * Settings aren't searchable hence method will always return null.
-     *
-     * @param path - Tokenized Path array.
-     * @param index - Current index in the path array to search for.
-     * @return - NULL
-     */
-    @Override
-    public AbstractConfigNode find(String[] path, int index) {
-        String key = path[index];
-        if (!Strings.isNullOrEmpty(key)) {
-            if (key.startsWith("@") && (index == path.length - 1)) {
-                key = key.substring(1);
-                if (Strings.isNullOrEmpty(key)) {
-                    return this;
-                } else if (hasKey(key)) {
-                    String value = getValue(key);
-                    ConfigValueNode cv = new ConfigValueNode();
-                    cv.setName(NODE_NAME);
-                    cv.setValue(value);
-                    return cv;
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
      * Create a copy of this configuration node.
      *
      * @return - Copy of node.
      */
     public ConfigPropertiesNode copy() {
-        ConfigPropertiesNode node = new ConfigPropertiesNode();
+        ConfigPropertiesNode node =
+                new ConfigPropertiesNode(getConfiguration(), getParent());
         node.setName(this.getName());
-        Map<String, String> properties = new HashMap<>(this.getKeyValues());
+        Map<String, ConfigValueNode> properties =
+                new HashMap<>(this.getKeyValues());
         node.setKeyValues(properties);
 
         return node;
+    }
+
+
+    /**
+     * Find the specified path under this configuration node.
+     *
+     * @param path - Dot separated path.
+     * @return - Node at path
+     */
+    @Override
+    public AbstractConfigNode find(String path) {
+        return find(path, NODE_ABBR_PREFIX);
+    }
+
+
+    /**
+     * Find a configuration node specified by the path/index.
+     *
+     * @param path  - Tokenized Path array.
+     * @param index - Current index in the path array to search for.
+     * @return - Configuration Node found.
+     */
+    @Override
+    public AbstractConfigNode find(String[] path, int index) {
+        return find(path, index, NODE_ABBR_PREFIX);
     }
 }

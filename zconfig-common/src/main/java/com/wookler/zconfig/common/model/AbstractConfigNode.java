@@ -62,6 +62,32 @@ public abstract class AbstractConfigNode {
      */
     private String description;
 
+
+    /**
+     * Default constructor - Initialize the state object.
+     */
+    /*
+    public AbstractConfigNode() {
+        state = new NodeState();
+        state.setState(ENodeState.Loading);
+    }
+    */
+
+    /**
+     * Constructor with Configuration and Parent node.
+     *
+     * @param configuration - Configuration this node belong to.
+     * @param parent - Parent node.
+     */
+    protected AbstractConfigNode(Configuration configuration,
+                              AbstractConfigNode parent) {
+        this.configuration = configuration;
+        this.parent = parent;
+
+        state = new NodeState();
+        state.setState(ENodeState.Loading);
+    }
+
     /**
      * Set the node state.
      *
@@ -105,14 +131,6 @@ public abstract class AbstractConfigNode {
      */
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    /**
-     * Default constructor - Initialize the state object.
-     */
-    public AbstractConfigNode() {
-        state = new NodeState();
-        state.setState(ENodeState.Loading);
     }
 
     /**
@@ -223,7 +241,6 @@ public abstract class AbstractConfigNode {
      * @return - Configuration Node found.
      */
     public abstract AbstractConfigNode find(String[] path, int index);
-
 
     /**
      * Indicate this node has been updated.

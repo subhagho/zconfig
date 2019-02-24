@@ -29,6 +29,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.wookler.zconfig.common.model.*;
 import com.wookler.zconfig.common.utils.IUniqueIDGenerator;
+import com.wookler.zconfig.core.IConfigDAO;
+import com.wookler.zconfig.core.PersistenceException;
 import com.wookler.zconfig.core.ServiceEnvException;
 import com.wookler.zconfig.core.ZConfigCoreEnv;
 import com.wookler.zconfig.core.model.*;
@@ -47,7 +49,7 @@ import java.util.List;
 /**
  * Data Access Object to read/update configuration data from ZooKeeper.
  */
-public class ZkConfigDAO {
+public class ZkConfigDAO implements IConfigDAO {
 
     /**
      * Create/Update the Application Group passed to ZooKeeper.
@@ -56,12 +58,13 @@ public class ZkConfigDAO {
      * @param group  - Application Group instance.
      * @param user   - User Principal
      * @return - Application Group instance.
-     * @throws ZkException
+     * @throws PersistenceException
      */
+    @Override
     public ApplicationGroup saveApplicationGroup(@Nonnull CuratorFramework client,
                                                  @Nonnull ApplicationGroup group,
                                                  @Nonnull Principal user)
-    throws ZkException {
+    throws PersistenceException {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(group.getName()));
         Preconditions.checkArgument(!Strings.isNullOrEmpty(group.getDescription()));
         Preconditions.checkArgument(!Strings.isNullOrEmpty(group.getChannelName()));
@@ -80,14 +83,14 @@ public class ZkConfigDAO {
                 } else {
                     String json = new String(data);
                     if (Strings.isNullOrEmpty(json)) {
-                        throw new ZkException(
+                        throw new PersistenceException(
                                 "Invalid Application Group : NULL/empty data returned.");
                     }
                     ObjectMapper mapper = ZConfigCoreEnv.get().getJsonMapper();
                     ApplicationGroup nGroup =
                             mapper.readValue(json, ApplicationGroup.class);
                     if (group.getId().compareTo(nGroup.getId()) != 0) {
-                        throw new ZkException(String.format(
+                        throw new PersistenceException(String.format(
                                 "Error Updating Application Group : ID mismatch. [expected=%s][actual=%s]",
                                 group.getId(), nGroup.getId()));
                     }
@@ -100,7 +103,7 @@ public class ZkConfigDAO {
 
             return group;
         } catch (Exception e) {
-            throw new ZkException(e);
+            throw new PersistenceException(e);
         }
     }
 
@@ -111,12 +114,13 @@ public class ZkConfigDAO {
      * @param application - Application Group instance.
      * @param user        - User Principal
      * @return - Application Group instance.
-     * @throws ZkException
+     * @throws PersistenceException
      */
+    @Override
     public Application saveApplication(@Nonnull CuratorFramework client,
                                        @Nonnull Application application,
                                        @Nonnull Principal user)
-    throws ZkException {
+    throws PersistenceException {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(application.getName()));
         Preconditions.checkArgument(
                 !Strings.isNullOrEmpty(application.getDescription()));
@@ -135,14 +139,14 @@ public class ZkConfigDAO {
                 } else {
                     String json = new String(data);
                     if (Strings.isNullOrEmpty(json)) {
-                        throw new ZkException(
+                        throw new PersistenceException(
                                 "Invalid Application Group : NULL/empty data returned.");
                     }
                     ObjectMapper mapper = ZConfigCoreEnv.get().getJsonMapper();
                     Application nGroup =
                             mapper.readValue(json, Application.class);
                     if (application.getId().compareTo(nGroup.getId()) != 0) {
-                        throw new ZkException(String.format(
+                        throw new PersistenceException(String.format(
                                 "Error Updating Application Group : ID mismatch. [expected=%s][actual=%s]",
                                 application.getId(), nGroup.getId()));
                     }
@@ -155,7 +159,7 @@ public class ZkConfigDAO {
 
             return application;
         } catch (Exception e) {
-            throw new ZkException(e);
+            throw new PersistenceException(e);
         }
     }
 
@@ -167,26 +171,27 @@ public class ZkConfigDAO {
      * @param version       - Updated Version.
      * @param user          - User Principle
      * @return - Updated Config Node.
-     * @throws ZkException
+     * @throws PersistenceException
      */
+    @Override
     public PersistedConfigNode saveConfigHeader(@Nonnull CuratorFramework client,
                                                 @Nonnull
                                                         Configuration configuration,
                                                 @Nonnull Version version,
                                                 @Nonnull Principal user)
-    throws ZkException {
+    throws PersistenceException {
         try {
             ApplicationGroup group = readApplicationGroup(client, configuration
                     .getApplicationGroup());
             if (group == null) {
-                throw new ZkException(
+                throw new PersistenceException(
                         String.format("Application Group not found. [group=%s]",
                                       configuration.getApplicationGroup()));
             }
             Application application =
                     readApplication(client, group, configuration.getApplication());
             if (application == null) {
-                throw new ZkException(
+                throw new PersistenceException(
                         String.format("Application not found. [application=%s]",
                                       configuration.getApplication()));
             }
@@ -210,7 +215,7 @@ public class ZkConfigDAO {
                     configNode = mapper.readValue(data, PersistedConfigNode.class);
                     if (!configuration.getVersion()
                                       .equals(configNode.getCurrentVersion())) {
-                        throw new ZkException(String.format(
+                        throw new PersistenceException(String.format(
                                 "Updating Stale Version : [expected=%s][actual=%s]",
                                 configNode.getCurrentVersion().toString(),
                                 configuration.getVersion().toString()));
@@ -229,8 +234,24 @@ public class ZkConfigDAO {
 
             return configNode;
         } catch (Exception e) {
-            throw new ZkException(e);
+            throw new PersistenceException(e);
         }
+    }
+
+
+    /**
+     * Save the updated Configuration header.
+     *
+     * @param client - Curator Client handle.
+     * @param config - Configuration header node.
+     * @param user   - User Principal
+     * @return - Configuration header node.
+     */
+    @Override
+    public PersistedConfigNode saveConfigHeader(@Nonnull CuratorFramework client,
+                                                @Nonnull PersistedConfigNode config,
+                                                @Nonnull Principal user) {
+        return null;
     }
 
     /**
@@ -265,15 +286,16 @@ public class ZkConfigDAO {
      * @param version    - Updated Version
      * @param user       - User Principal
      * @return - Created/Updated Config Path node.
-     * @throws ZkException
+     * @throws PersistenceException
      */
+    @Override
     public PersistedConfigPathNode saveConfigNode(@Nonnull CuratorFramework client,
                                                   @Nonnull AbstractConfigNode node,
                                                   @Nonnull
                                                           PersistedConfigNode configNode,
                                                   @Nonnull Version version,
                                                   @Nonnull Principal user)
-    throws ZkException {
+    throws PersistenceException {
         try {
             String path = node.getAbsolutePath();
             String zkPath = ZkUtils.getZkPath(configNode, path);
@@ -297,7 +319,7 @@ public class ZkConfigDAO {
             }
             return null;
         } catch (Exception e) {
-            throw new ZkException(e);
+            throw new PersistenceException(e);
         }
     }
 
@@ -312,7 +334,7 @@ public class ZkConfigDAO {
      * @param zkPath     - ZooKeeper node path.
      * @param stat       - ZK Stat response.
      * @return - Created/Updated Config Path node.
-     * @throws ZkException
+     * @throws PersistenceException
      */
     private PersistedConfigValueNode saveValueConfigNode(
             @Nonnull CuratorFramework client,
@@ -322,7 +344,7 @@ public class ZkConfigDAO {
             @Nonnull Principal user,
             @Nonnull Version version,
             String zkPath,
-            Stat stat) throws ZkException {
+            Stat stat) throws PersistenceException {
         try {
             ModifiedBy<String> modifiedBy = new ModifiedBy<>(user.getName());
 
@@ -348,7 +370,7 @@ public class ZkConfigDAO {
                     if (configNode.getCurrentVersion()
                                   .compareMinorVersion(zkNode.getNodeVersion()) <
                             0) {
-                        throw new ZkException(String.format(
+                        throw new PersistenceException(String.format(
                                 "Update Failed : Passed node version is stale. [expected=%s][actual=%s]",
                                 configNode.getCurrentVersion().toString(),
                                 zkNode.getNodeVersion().toString()));
@@ -365,7 +387,7 @@ public class ZkConfigDAO {
 
             return zkNode;
         } catch (Exception e) {
-            throw new ZkException(e);
+            throw new PersistenceException(e);
         }
     }
 
@@ -407,7 +429,7 @@ public class ZkConfigDAO {
      * @param zkPath     - ZooKeeper node path.
      * @param stat       - ZK Stat response.
      * @return - Created/Updated Config Path node.
-     * @throws ZkException
+     * @throws PersistenceException
      */
     private PersistedConfigListValueNode saveValueListConfigNode(
             @Nonnull CuratorFramework client,
@@ -416,7 +438,7 @@ public class ZkConfigDAO {
             @Nonnull Principal user,
             @Nonnull Version version,
             String zkPath,
-            Stat stat) throws ZkException {
+            Stat stat) throws PersistenceException {
         try {
             ModifiedBy<String> modifiedBy = new ModifiedBy<>(user.getName());
             List<String> values = null;
@@ -449,7 +471,7 @@ public class ZkConfigDAO {
                     if (configNode.getCurrentVersion()
                                   .compareMinorVersion(zkNode.getNodeVersion()) <
                             0) {
-                        throw new ZkException(String.format(
+                        throw new PersistenceException(String.format(
                                 "Update Failed : Passed node version is stale. [expected=%s][actual=%s]",
                                 configNode.getCurrentVersion().toString(),
                                 zkNode.getNodeVersion().toString()));
@@ -466,7 +488,7 @@ public class ZkConfigDAO {
 
             return zkNode;
         } catch (Exception e) {
-            throw new ZkException(e);
+            throw new PersistenceException(e);
         }
     }
 
@@ -481,7 +503,7 @@ public class ZkConfigDAO {
      * @param zkPath     - ZooKeeper node path.
      * @param stat       - ZK Stat response.
      * @return - Created/Updated Config Path node.
-     * @throws ZkException
+     * @throws PersistenceException
      */
     private PersistedConfigMapNode saveKeyValueConfigNode(
             @Nonnull CuratorFramework client,
@@ -490,7 +512,7 @@ public class ZkConfigDAO {
             @Nonnull Principal user,
             @Nonnull Version version,
             String zkPath,
-            Stat stat) throws ZkException {
+            Stat stat) throws PersistenceException {
         try {
             ModifiedBy<String> modifiedBy = new ModifiedBy<>(user.getName());
 
@@ -516,7 +538,7 @@ public class ZkConfigDAO {
                     if (configNode.getCurrentVersion()
                                   .compareMinorVersion(zkNode.getNodeVersion()) <
                             0) {
-                        throw new ZkException(String.format(
+                        throw new PersistenceException(String.format(
                                 "Update Failed : Passed node version is stale. [expected=%s][actual=%s]",
                                 configNode.getCurrentVersion().toString(),
                                 zkNode.getNodeVersion().toString()));
@@ -533,7 +555,7 @@ public class ZkConfigDAO {
 
             return zkNode;
         } catch (Exception e) {
-            throw new ZkException(e);
+            throw new PersistenceException(e);
         }
     }
 
@@ -544,12 +566,13 @@ public class ZkConfigDAO {
      * @param configNode - Configuration node.
      * @param nodePath   - Node Path to read from.
      * @return - Read Path Config node.
-     * @throws ZkException
+     * @throws PersistenceException
      */
-    public PersistedConfigPathNode readZkConfigNode(
+    @Override
+    public PersistedConfigPathNode readConfigNode(
             @Nonnull CuratorFramework client,
             @Nonnull PersistedConfigNode configNode,
-            String nodePath) throws ZkException {
+            String nodePath) throws PersistenceException {
         try {
             String zkPath = ZkUtils.getZkPath(configNode, nodePath);
             Stat stat = client.checkExists().forPath(zkPath);
@@ -563,7 +586,7 @@ public class ZkConfigDAO {
             }
             return null;
         } catch (Exception e) {
-            throw new ZkException(e);
+            throw new PersistenceException(e);
         }
     }
 
@@ -574,11 +597,12 @@ public class ZkConfigDAO {
      * @param configNode - Configuration node.
      * @param nodePath   - Node Path to read from.
      * @return - Is Deleted?
-     * @throws ZkException
+     * @throws PersistenceException
      */
-    public boolean deleteZkConfigNode(@Nonnull CuratorFramework client,
-                                      @Nonnull PersistedConfigNode configNode,
-                                      String nodePath) throws ZkException {
+    @Override
+    public boolean deleteConfigNode(@Nonnull CuratorFramework client,
+                                    @Nonnull PersistedConfigNode configNode,
+                                    String nodePath) throws PersistenceException {
         try {
             String zkPath = ZkUtils.getZkPath(configNode, nodePath);
             Stat stat = client.checkExists().forPath(zkPath);
@@ -588,7 +612,7 @@ public class ZkConfigDAO {
             }
             return false;
         } catch (Exception e) {
-            throw new ZkException(e);
+            throw new PersistenceException(e);
         }
     }
 
@@ -599,11 +623,12 @@ public class ZkConfigDAO {
      * @param configNode - Configuration node.
      * @param nodePath   - Node Path to read from.
      * @return - List of child nodes (String)
-     * @throws ZkException
+     * @throws PersistenceException
      */
+    @Override
     public List<String> getChildren(@Nonnull CuratorFramework client,
                                     @Nonnull PersistedConfigNode configNode,
-                                    String nodePath) throws ZkException {
+                                    String nodePath) throws PersistenceException {
         try {
             String zkPath = ZkUtils.getZkPath(configNode, nodePath);
             Stat stat = client.checkExists().forPath(zkPath);
@@ -612,7 +637,7 @@ public class ZkConfigDAO {
             }
             return null;
         } catch (Exception e) {
-            throw new ZkException(e);
+            throw new PersistenceException(e);
         }
     }
 
@@ -622,11 +647,12 @@ public class ZkConfigDAO {
      * @param client    - Curator client handle.
      * @param groupName - Application Group name.
      * @return - Application Group instance.
-     * @throws ZkException
+     * @throws PersistenceException
      */
+    @Override
     public ApplicationGroup readApplicationGroup(@Nonnull CuratorFramework client,
                                                  @Nonnull String groupName)
-    throws ZkException {
+    throws PersistenceException {
         try {
             String zkPath = ZkUtils.getZkPath(groupName);
             Stat stat = client.checkExists().forPath(zkPath);
@@ -639,7 +665,7 @@ public class ZkConfigDAO {
             }
             return null;
         } catch (Exception e) {
-            throw new ZkException(e);
+            throw new PersistenceException(e);
         }
     }
 
@@ -650,12 +676,13 @@ public class ZkConfigDAO {
      * @param group  - Application Group
      * @param name   - Application name.
      * @return - Application  instance.
-     * @throws ZkException
+     * @throws PersistenceException
      */
+    @Override
     public Application readApplication(@Nonnull CuratorFramework client,
                                        @Nonnull ApplicationGroup group,
                                        @Nonnull String name)
-    throws ZkException {
+    throws PersistenceException {
         try {
             String zkPath = ZkUtils.getZkPath(group, name);
             Stat stat = client.checkExists().forPath(zkPath);
@@ -668,7 +695,7 @@ public class ZkConfigDAO {
             }
             return null;
         } catch (Exception e) {
-            throw new ZkException(e);
+            throw new PersistenceException(e);
         }
     }
 
@@ -678,16 +705,20 @@ public class ZkConfigDAO {
      * @param client      - Curator client handle.
      * @param application - Application
      * @param name        - Configuration name.
+     * @param version - Configuration Version
+     *
      * @return - Application  instance.
-     * @throws ZkException
+     * @throws PersistenceException
      */
+    @Override
     public PersistedConfigNode readConfigHeader(@Nonnull CuratorFramework client,
                                                 @Nonnull Application application,
-                                                @Nonnull String name)
-    throws ZkException {
+                                                @Nonnull String name,
+                                                @Nonnull Version version)
+    throws PersistenceException {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(name));
         try {
-            String zkPath = ZkUtils.getZkPath(application, name);
+            String zkPath = ZkUtils.getZkPath(application, name, version);
             Stat stat = client.checkExists().forPath(zkPath);
             if (stat != null) {
                 byte[] data = client.getData().forPath(zkPath);
@@ -698,7 +729,8 @@ public class ZkConfigDAO {
             }
             return null;
         } catch (Exception e) {
-            throw new ZkException(e);
+            throw new PersistenceException(e);
         }
     }
+
 }

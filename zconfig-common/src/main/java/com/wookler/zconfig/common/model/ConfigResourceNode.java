@@ -55,6 +55,18 @@ public abstract class ConfigResourceNode extends ConfigElementNode {
     private URI location;
 
     /**
+     * Constructor with Configuration and Parent node.
+     *
+     * @param configuration - Configuration this node belong to.
+     * @param parent        - Parent node.
+     */
+    public ConfigResourceNode(
+            Configuration configuration,
+            AbstractConfigNode parent) {
+        super(configuration, parent);
+    }
+
+    /**
      * Get the resource type of this node.
      *
      * @return - Resource type.

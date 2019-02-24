@@ -84,6 +84,18 @@ public class ConfigIncludeNode extends ConfigElementNode {
     private Version version;
 
     /**
+     * Constructor with Configuration and Parent node.
+     *
+     * @param configuration - Configuration this node belong to.
+     * @param parent        - Parent node.
+     */
+    public ConfigIncludeNode(
+            Configuration configuration,
+            AbstractConfigNode parent) {
+        super(configuration, parent);
+    }
+
+    /**
      * Get the name of this configuration.
      *
      * @return - Configuration name.

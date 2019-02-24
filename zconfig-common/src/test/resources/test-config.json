@@ -100,6 +100,13 @@
                 }
             ],
             "node_2": {
+                "@" : {
+                    "ATTRIBUTE_1" : "Attr One",
+                    "ATTRIBUTE_2" : "Attr Two",
+                    "ATTRIBUTE_3" : "Attr Three",
+                    "ATTRIBUTE_4" : "Attr Four",
+                    "ATTRIBUTE_5" : "Attr Five"
+                },
                 "description": "This is a test description",
                 "nodeVersion": 1,
                 "createdBy": {

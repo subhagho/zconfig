@@ -42,6 +42,17 @@ public abstract class ConfigListNode<T> extends ConfigElementNode {
     private List<T> values;
 
     /**
+     * Constructor with Configuration and Parent node.
+     *
+     * @param configuration - Configuration this node belong to.
+     * @param parent        - Parent node.
+     */
+    public ConfigListNode(Configuration configuration,
+                          AbstractConfigNode parent) {
+        super(configuration, parent);
+    }
+
+    /**
      * Get the list of element values.
      *
      * @return - List of element values.
@@ -73,7 +84,7 @@ public abstract class ConfigListNode<T> extends ConfigElementNode {
         if (values == null) {
             values = new ArrayList<>();
         } else {
-            for( T v : values) {
+            for (T v : values) {
 
             }
         }

@@ -62,7 +62,7 @@ public abstract class AbstractConfigParser {
     protected void doPostLoad() throws ConfigurationException {
         ConfigPathNode node = configuration.getRootConfigNode();
         if (node != null) {
-            Map<String, String> properties = new HashMap<>();
+            Map<String, ConfigValueNode> properties = new HashMap<>();
             nodePostLoad(node, properties);
         }
         // Mark the configuration has been loaded.
@@ -77,15 +77,15 @@ public abstract class AbstractConfigParser {
      * @throws ConfigurationException
      */
     private void nodePostLoad(AbstractConfigNode node,
-                              Map<String, String> inputProps)
+                              Map<String, ConfigValueNode> inputProps)
     throws ConfigurationException {
-        Map<String, String> properties = new HashMap<>(inputProps);
+        Map<String, ConfigValueNode> properties = new HashMap<>(inputProps);
         if (node instanceof ConfigPathNode) {
             // Get defined properties, if any.
             ConfigPathNode cp = (ConfigPathNode) node;
             ConfigPropertiesNode props = cp.properties();
             if (props != null) {
-                Map<String, String> pp = props.getKeyValues();
+                Map<String, ConfigValueNode> pp = props.getKeyValues();
                 if (pp != null && !pp.isEmpty()) {
                     properties.putAll(pp);
                 }
@@ -101,9 +101,9 @@ public abstract class AbstractConfigParser {
         } else if (node instanceof ConfigParametersNode) {
             // Check parameter value replacement.
             ConfigParametersNode params = (ConfigParametersNode) node;
-            Map<String, String> pp = params.getKeyValues();
+            Map<String, ConfigValueNode> pp = params.getKeyValues();
             for (String key : pp.keySet()) {
-                String value = pp.get(key);
+                String value = pp.get(key).getValue();
                 if (!Strings.isNullOrEmpty(value)) {
                     String nValue = replaceVariables(value, properties);
                     if (value.compareTo(nValue) != 0) {
@@ -146,16 +146,19 @@ public abstract class AbstractConfigParser {
      * @param properties - Property Map to lookup variable values.
      * @return - Replaced String
      */
-    private String replaceVariables(String value, Map<String, String> properties) {
+    private String replaceVariables(String value, Map<String, ConfigValueNode> properties) {
         if (!Strings.isNullOrEmpty(value)) {
             if (VariableRegexParser.hasVariable(value)) {
                 List<String> vars = VariableRegexParser.getVariables(value);
                 if (vars != null && !vars.isEmpty()) {
                     for (String var : vars) {
-                        String vv = properties.get(var);
-                        if (!Strings.isNullOrEmpty(vv)) {
-                            String rv = String.format("\\$\\{%s\\}", var);
-                            value = value.replaceAll(rv, vv);
+                        ConfigValueNode vn = properties.get(var);
+                        if (vn != null) {
+                            String vv = vn.getValue();
+                            if (!Strings.isNullOrEmpty(vv)) {
+                                String rv = String.format("\\$\\{%s\\}", var);
+                                value = value.replaceAll(rv, vv);
+                            }
                         }
                     }
                 }

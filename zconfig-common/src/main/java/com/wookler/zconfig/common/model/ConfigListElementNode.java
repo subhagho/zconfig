@@ -34,6 +34,19 @@ import java.util.List;
  * Class represents a configuration node that is a list of configuration elements.
  */
 public class ConfigListElementNode extends ConfigListNode<ConfigElementNode> {
+
+    /**
+     * Constructor with Configuration and Parent node.
+     *
+     * @param configuration - Configuration this node belong to.
+     * @param parent - Parent node.
+     */
+    public ConfigListElementNode(
+            Configuration configuration,
+            AbstractConfigNode parent) {
+        super(configuration, parent);
+    }
+
     /**
      * Override the add value method, set the parent of the node element being added to this node.
      *

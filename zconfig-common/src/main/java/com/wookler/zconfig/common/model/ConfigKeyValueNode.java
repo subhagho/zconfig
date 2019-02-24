@@ -41,14 +41,26 @@ public abstract class ConfigKeyValueNode extends ConfigElementNode {
     /**
      * Map containing the defined parameters within a node definition.
      */
-    private Map<String, String> keyValues;
+    private Map<String, ConfigValueNode> keyValues;
+
+    /**
+     * Constructor with Configuration and Parent node.
+     *
+     * @param configuration - Configuration this node belong to.
+     * @param parent        - Parent node.
+     */
+    public ConfigKeyValueNode(
+            Configuration configuration,
+            AbstractConfigNode parent) {
+        super(configuration, parent);
+    }
 
     /**
      * Get the defined parameters for a specific node.
      *
      * @return - Map of parameters.
      */
-    public Map<String, String> getKeyValues() {
+    public Map<String, ConfigValueNode> getKeyValues() {
         return keyValues;
     }
 
@@ -57,7 +69,7 @@ public abstract class ConfigKeyValueNode extends ConfigElementNode {
      *
      * @param keyValues - Map of parameters.
      */
-    public void setKeyValues(Map<String, String> keyValues) {
+    public void setKeyValues(Map<String, ConfigValueNode> keyValues) {
         updated();
         this.keyValues = keyValues;
     }
@@ -69,7 +81,7 @@ public abstract class ConfigKeyValueNode extends ConfigElementNode {
      * @return - Parameter value or NULL if not found.
      */
     @JsonIgnore
-    public String getValue(String key) {
+    public ConfigValueNode getValue(String key) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(key));
         if (keyValues != null) {
             return keyValues.get(key);
@@ -105,7 +117,7 @@ public abstract class ConfigKeyValueNode extends ConfigElementNode {
      *
      * @param map - Key/Value map.
      */
-    public void addAll(Map<String, String> map) {
+    public void addAll(Map<String, ConfigValueNode> map) {
         Preconditions.checkArgument(map != null);
         if (!map.isEmpty()) {
             if (keyValues == null) {
@@ -127,7 +139,13 @@ public abstract class ConfigKeyValueNode extends ConfigElementNode {
         if (keyValues == null) {
             keyValues = new HashMap<>();
         }
-        keyValues.put(key, value);
+        ConfigValueNode vn = new ConfigValueNode(getConfiguration(), getParent());
+        vn.setConfiguration(getConfiguration());
+        vn.setName(key);
+        vn.setParent(this);
+        vn.setValue(value);
+
+        keyValues.put(key, vn);
         updated();
     }
 
@@ -147,6 +165,57 @@ public abstract class ConfigKeyValueNode extends ConfigElementNode {
             }
         }
         return false;
+    }
+
+
+    /**
+     * Find the specified path under this configuration node.
+     *
+     * @param path - Dot separated path.
+     * @param abbr - Short hand notation for search
+     * @return - Node at path
+     */
+    protected AbstractConfigNode find(String path, String abbr) {
+        if (path.startsWith(abbr)) {
+            path = path.substring(1);
+        }
+        if (hasKey(path)) {
+            return getValue(path);
+        }
+        return null;
+    }
+
+
+    /**
+     * Find a configuration node specified by the path/index.
+     *
+     * @param path  - Tokenized Path array.
+     * @param index - Current index in the path array to search for.
+     * @param abbr  - Short hand notation for search
+     * @return - Configuration Node found.
+     */
+    public AbstractConfigNode find(String[] path, int index, String abbr) {
+        String key = path[index];
+        if (!Strings.isNullOrEmpty(key)) {
+            if (getName().compareTo(key) == 0) {
+                if (index == path.length - 1) {
+                    return this;
+                } else {
+                    String pname = path[index + 1];
+                    if (hasKey(pname)) {
+                        return getValue(pname);
+                    }
+                }
+            } else if (index == path.length - 1) {
+                if (key.startsWith(abbr)) {
+                    key = key.substring(1);
+                }
+                if (hasKey(key)) {
+                    return getValue(key);
+                }
+            }
+        }
+        return null;
     }
 
     /**

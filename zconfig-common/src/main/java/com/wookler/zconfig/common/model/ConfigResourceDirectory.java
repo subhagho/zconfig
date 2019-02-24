@@ -33,6 +33,19 @@ import java.io.File;
  * Configuration resource node for the type directory.
  */
 public class ConfigResourceDirectory extends ConfigResourceFile {
+
+    /**
+     * Constructor with Configuration and Parent node.
+     *
+     * @param configuration - Configuration this node belong to.
+     * @param parent        - Parent node.
+     */
+    public ConfigResourceDirectory(
+            Configuration configuration,
+            AbstractConfigNode parent) {
+        super(configuration, parent);
+    }
+
     /**
      * Override the set resource method to check if the specified file handle is a directory.
      *

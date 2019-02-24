@@ -17,17 +17,17 @@
  * under the License.
  *
  * Copyright (c) $year
- * Date: 16/2/19 12:13 PM
+ * Date: 18/2/19 8:21 AM
  * Subho Ghosh (subho dot ghosh at outlook.com)
  *
  */
 
-package com.wookler.zconfig.core.zookeeper;
+package com.wookler.zconfig.core;
 
 /**
  * Exception instance used to raise error with regards to ZooKeeper.
  */
-public class ZkException extends Exception {
+public class PersistenceException extends Exception {
     private static final String PREFIX = "ZooKeeper Error : %s";
 
     /**
@@ -35,7 +35,7 @@ public class ZkException extends Exception {
      *
      * @param s - Error message string.
      */
-    public ZkException(String s) {
+    public PersistenceException(String s) {
         super(String.format(PREFIX, s));
     }
 
@@ -45,7 +45,7 @@ public class ZkException extends Exception {
      * @param s         - Error message string.
      * @param throwable - Inner cause.
      */
-    public ZkException(String s, Throwable throwable) {
+    public PersistenceException(String s, Throwable throwable) {
         super(String.format(PREFIX, s), throwable);
     }
 
@@ -54,7 +54,7 @@ public class ZkException extends Exception {
      *
      * @param throwable - Inner cause.
      */
-    public ZkException(Throwable throwable) {
+    public PersistenceException(Throwable throwable) {
         super(String.format(PREFIX, throwable.getLocalizedMessage()), throwable);
     }
 }

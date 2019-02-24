@@ -381,7 +381,10 @@ public class Configuration {
 
         ConfigParametersNode pnode = parameters(node);
         if (pnode != null) {
-            return pnode.getValue(name);
+            ConfigValueNode vn = pnode.getValue(name);
+            if (vn != null) {
+                return vn.getValue();
+            }
         }
         return null;
     }
@@ -414,7 +417,10 @@ public class Configuration {
 
         ConfigPropertiesNode pnode = properties(node);
         if (pnode != null) {
-            return pnode.getValue(name);
+            ConfigValueNode vn = pnode.getValue(name);
+            if (vn != null) {
+                return vn.getValue();
+            }
         }
         return null;
     }
@@ -437,18 +443,19 @@ public class Configuration {
             if (pn != null) {
                 props = pn.copy();
             } else {
-                props = new ConfigPropertiesNode();
+                props = new ConfigPropertiesNode(this, cp);
                 props.setConfiguration(this);
             }
             if (node.getParent() != null) {
                 ConfigPropertiesNode pp = resolvedProperties(node.getParent());
                 if (pp != null && !pp.isEmpty()) {
-                    Map<String, String> pmap = pp.getKeyValues();
+                    Map<String, ConfigValueNode> pmap = pp.getKeyValues();
                     if (pmap != null && !pmap.isEmpty()) {
                         if (!props.isEmpty()) {
                             for (String key : pmap.keySet()) {
                                 if (!props.hasKey(key)) {
-                                    props.addKeyValue(key, pmap.get(key));
+                                    props.addKeyValue(key,
+                                                      pmap.get(key).getValue());
                                 }
                             }
                         } else {

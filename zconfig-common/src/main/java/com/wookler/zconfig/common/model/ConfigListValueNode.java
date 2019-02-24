@@ -34,7 +34,19 @@ import java.util.List;
 /**
  * Class represent a configuration node of type list with String values.
  */
-public class ConfigListValueNode extends ConfigListNode<ConfigValueNode>{
+public class ConfigListValueNode extends ConfigListNode<ConfigValueNode> {
+
+    /**
+     * Constructor with Configuration and Parent node.
+     *
+     * @param configuration - Configuration this node belong to.
+     * @param parent        - Parent node.
+     */
+    public ConfigListValueNode(
+            Configuration configuration,
+            AbstractConfigNode parent) {
+        super(configuration, parent);
+    }
 
     /**
      * Find the value node in the list with the specified name.

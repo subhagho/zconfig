@@ -105,12 +105,12 @@ class ConfigurationTest {
     @Test
     void findProperties() {
         try {
-            String path = "configuration.@";
+            String path = "configuration$";
             AbstractConfigNode node = configuration.find(path);
             assertNotNull(node);
             assertTrue(node instanceof ConfigPropertiesNode);
 
-            path = "@PROP_1";
+            path = "$PROP_1";
             node = configuration.find(node, path);
             assertTrue(node instanceof ConfigValueNode);
             String param = ((ConfigValueNode) node).getValue();
@@ -126,12 +126,33 @@ class ConfigurationTest {
     @Test
     void findParameters() {
         try {
-            String path = "configuration.node_1.#";
+            String path = "configuration.node_1#";
             AbstractConfigNode node = configuration.find(path);
             assertNotNull(node);
             assertTrue(node instanceof ConfigParametersNode);
 
             path = "#PARAM_1";
+            node = configuration.find(node, path);
+            assertTrue(node instanceof ConfigValueNode);
+            String param = ((ConfigValueNode) node).getValue();
+            assertFalse(Strings.isNullOrEmpty(param));
+            debug(getClass(),
+                  String.format("[path=%s] parameter value = %s", path, param));
+        } catch (Throwable e) {
+            error(getClass(), e);
+            fail(e);
+        }
+    }
+
+    @Test
+    void findAttribute() {
+        try {
+            String path = "configuration.node_1.node_2@";
+            AbstractConfigNode node = configuration.find(path);
+            assertNotNull(node);
+            assertTrue(node instanceof ConfigAttributesNode);
+
+            path = "@ATTRIBUTE_4";
             node = configuration.find(node, path);
             assertTrue(node instanceof ConfigValueNode);
             String param = ((ConfigValueNode) node).getValue();

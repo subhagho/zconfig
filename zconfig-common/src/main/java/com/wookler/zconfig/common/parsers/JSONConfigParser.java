@@ -223,7 +223,7 @@ public class JSONConfigParser extends AbstractConfigParser {
                     JsonNodeType.OBJECT.name(), node.getNodeType().name()));
         }
         // Read the root configuration node.
-        ConfigPathNode rootConfigNode = new ConfigPathNode();
+        ConfigPathNode rootConfigNode = new ConfigPathNode(configuration, null);
         rootConfigNode.setName(name);
         rootConfigNode.loading();
 
@@ -251,7 +251,7 @@ public class JSONConfigParser extends AbstractConfigParser {
             while (nodes.hasNext()) {
                 Map.Entry<String, JsonNode> nn = nodes.next();
                 if (nn.getKey()
-                             .compareTo(JSONConfigConstants.CONFIG_HEADER_DESC) ==
+                      .compareTo(JSONConfigConstants.CONFIG_HEADER_DESC) ==
                         0) {
                     JsonNode n = nn.getValue();
                     if (n.getNodeType() != JsonNodeType.STRING) {
@@ -287,7 +287,7 @@ public class JSONConfigParser extends AbstractConfigParser {
             if (parent instanceof ConfigKeyValueNode) {
                 ((ConfigKeyValueNode) parent).addKeyValue(name, node.textValue());
             } else {
-                ConfigValueNode cv = new ConfigValueNode();
+                ConfigValueNode cv = new ConfigValueNode(configuration, parent);
                 cv.setName(name);
                 cv.setParent(parent);
                 cv.setConfiguration(configuration);
@@ -339,10 +339,12 @@ public class JSONConfigParser extends AbstractConfigParser {
         }
         if (type != null) {
             if (type == JsonNodeType.STRING) {
-                ConfigListValueNode nn = new ConfigListValueNode();
+                ConfigListValueNode nn =
+                        new ConfigListValueNode(configuration, parent);
                 parseArrayNodes(name, nn, parent, arrayNode);
             } else if (type == JsonNodeType.OBJECT) {
-                ConfigListElementNode nn = new ConfigListElementNode();
+                ConfigListElementNode nn =
+                        new ConfigListElementNode(configuration, parent);
                 parseArrayNodes(name, nn, parent, arrayNode);
             } else {
                 throw new ConfigurationException(String.format(
@@ -479,19 +481,26 @@ public class JSONConfigParser extends AbstractConfigParser {
     throws ConfigurationException {
         AbstractConfigNode nn = null;
         if (name.compareTo(ConfigPropertiesNode.NODE_NAME) == 0) {
-            ConfigPropertiesNode pn = new ConfigPropertiesNode();
+            ConfigPropertiesNode pn =
+                    new ConfigPropertiesNode(configuration, parent);
             setupNodeWithChildren(name, parent, pn, node, false);
             nn = pn;
         } else if (name.compareTo(ConfigParametersNode.NODE_NAME) == 0) {
-            ConfigParametersNode pn = new ConfigParametersNode();
+            ConfigParametersNode pn =
+                    new ConfigParametersNode(configuration, parent);
+            setupNodeWithChildren(name, parent, pn, node, false);
+            nn = pn;
+        } else if (name.compareTo(ConfigAttributesNode.NODE_NAME) == 0) {
+            ConfigAttributesNode pn =
+                    new ConfigAttributesNode(configuration, parent);
             setupNodeWithChildren(name, parent, pn, node, false);
             nn = pn;
         } else if (name.compareTo(ConfigIncludeNode.NODE_NAME) == 0) {
-            ConfigIncludeNode pn = new ConfigIncludeNode();
+            ConfigIncludeNode pn = new ConfigIncludeNode(configuration, parent);
             setupIncludeNode(name, pn, parent, node);
             nn = pn;
         } else {
-            ConfigPathNode pn = new ConfigPathNode();
+            ConfigPathNode pn = new ConfigPathNode(configuration, parent);
             setupNodeWithChildren(name, parent, pn, node, true);
             nn = pn;
         }

@@ -53,6 +53,19 @@ public class ConfigParametersNode extends ConfigKeyValueNode {
      * Static Node name for the parameters node.
      */
     public static final String NODE_NAME = "parameters";
+    public static final String NODE_ABBR_PREFIX = "#";
+
+    /**
+     * Constructor with Configuration and Parent node.
+     *
+     * @param configuration - Configuration this node belong to.
+     * @param parent        - Parent node.
+     */
+    public ConfigParametersNode(
+            Configuration configuration,
+            AbstractConfigNode parent) {
+        super(configuration, parent);
+    }
 
     /**
      * Override the setName method to set the name to the static node name.
@@ -64,31 +77,28 @@ public class ConfigParametersNode extends ConfigKeyValueNode {
         super.setName(NODE_NAME);
     }
 
+
     /**
-     * Check if the path points to a configuration parameters. Will return a local
-     * instance of a configuration value node if attribute found..
+     * Find the specified path under this configuration node.
+     *
+     * @param path - Dot separated path.
+     * @return - Node at path
+     */
+    @Override
+    public AbstractConfigNode find(String path) {
+        return find(path, NODE_ABBR_PREFIX);
+    }
+
+
+    /**
+     * Find a configuration node specified by the path/index.
      *
      * @param path  - Tokenized Path array.
      * @param index - Current index in the path array to search for.
-     * @return - Local instance of a value node.
+     * @return - Configuration Node found.
      */
     @Override
     public AbstractConfigNode find(String[] path, int index) {
-        String key = path[index];
-        if (!Strings.isNullOrEmpty(key)) {
-            if (key.startsWith("#") && (index == path.length - 1)) {
-                key = key.substring(1);
-                if (Strings.isNullOrEmpty(key)) {
-                    return this;
-                } else if (hasKey(key)) {
-                    String value = getValue(key);
-                    ConfigValueNode cv = new ConfigValueNode();
-                    cv.setName(NODE_NAME);
-                    cv.setValue(value);
-                    return cv;
-                }
-            }
-        }
-        return null;
+        return find(path, index, NODE_ABBR_PREFIX);
     }
 }

@@ -29,6 +29,7 @@ import com.google.common.base.Strings;
 import com.wookler.zconfig.common.LogUtils;
 import com.wookler.zconfig.common.model.Configuration;
 import com.wookler.zconfig.common.model.Version;
+import com.wookler.zconfig.core.PersistenceException;
 import com.wookler.zconfig.core.ZConfigCoreEnv;
 import com.wookler.zconfig.core.ZConfigCoreInstance;
 import com.wookler.zconfig.core.model.Application;
@@ -69,14 +70,14 @@ public class ZkUtils {
      * Get a new instance of the Curator Client. Method will start() the client.
      *
      * @return - Curator Framework Client.
-     * @throws ZkException
+     * @throws PersistenceException
      */
-    public static final CuratorFramework getZkClient() throws ZkException {
+    public static final CuratorFramework getZkClient() throws PersistenceException {
         try {
             ZkConnectionConfig config =
                     ZConfigCoreEnv.get().getZkConnectionConfig();
             if (config == null) {
-                throw new ZkException(
+                throw new PersistenceException(
                         "ZooKeeper Connection configuration not set.");
             }
             RetryPolicy retryPolicy = null;
@@ -87,7 +88,7 @@ public class ZkUtils {
                 Class<?> type = Class.forName(config.getRetryClass());
                 if (type.equals(ExponentialBackoffRetry.class)) {
                     if (config.getSleepTime() <= 0 || config.getMaxRetries() < 0) {
-                        throw new ZkException(String.format(
+                        throw new PersistenceException(String.format(
                                 "Missing Retry Parameter(s) : [type=%s]",
                                 config.getRetryClass()));
                     }
@@ -103,7 +104,7 @@ public class ZkUtils {
             client.start();
             return client;
         } catch (Exception e) {
-            throw new ZkException(e);
+            throw new PersistenceException(e);
         }
     }
 
@@ -111,14 +112,14 @@ public class ZkUtils {
      * Get the ZooKeeper root path for this server.
      *
      * @return - ZooKeeper root path.
-     * @throws ZkException
+     * @throws PersistenceException
      */
-    public static final String getServerRootPath() throws ZkException {
+    public static final String getServerRootPath() throws PersistenceException {
         try {
             ZkConnectionConfig config =
                     ZConfigCoreEnv.get().getZkConnectionConfig();
             if (config == null) {
-                throw new ZkException(
+                throw new PersistenceException(
                         "ZooKeeper Connection configuration not set.");
             }
             String rp = config.getRootPath();
@@ -136,7 +137,7 @@ public class ZkUtils {
                         .format("%s/%s", SERVER_ROOT_PATH, instance.getName());
             }
         } catch (Exception e) {
-            throw new ZkException(e);
+            throw new PersistenceException(e);
         }
     }
 
@@ -146,12 +147,12 @@ public class ZkUtils {
      * @param client - Curator Framework client handle.
      * @param name   - Lock name.
      * @return - Lock instance.
-     * @throws ZkException
+     * @throws PersistenceException
      */
     public static final InterProcessMutex getZkLock(
             @Nonnull CuratorFramework client,
             @Nonnull String name)
-    throws ZkException {
+    throws PersistenceException {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(name));
         String path =
                 String.format("%s/%s/%s", getServerRootPath(), ZK_LOCK_PATH, name);
@@ -167,11 +168,11 @@ public class ZkUtils {
      *
      * @param client - Curator Framework client handle.
      * @return - Lock instance.
-     * @throws ZkException
+     * @throws PersistenceException
      */
     public static final InterProcessMutex getSystemLock(
             @Nonnull CuratorFramework client)
-    throws ZkException {
+    throws PersistenceException {
         return getZkLock(client, ZK_ROOT_LOCK);
     }
 
@@ -181,12 +182,12 @@ public class ZkUtils {
      * @param client - Curator Framework client handle.
      * @param group  - Application Group to Lock.
      * @return - Lock instance.
-     * @throws ZkException
+     * @throws PersistenceException
      */
     public static final InterProcessMutex getZkLock(
             @Nonnull CuratorFramework client,
             @Nonnull ApplicationGroup group)
-    throws ZkException {
+    throws PersistenceException {
         String path = group.getAbsolutePath();
         return getZkLock(client, path);
     }
@@ -197,12 +198,12 @@ public class ZkUtils {
      * @param client      - Curator Framework client handle.
      * @param application - Application to Lock.
      * @return - Lock instance.
-     * @throws ZkException
+     * @throws PersistenceException
      */
     public static final InterProcessMutex getZkLock(
             @Nonnull CuratorFramework client,
             @Nonnull Application application)
-    throws ZkException {
+    throws PersistenceException {
         String path = application.getAbsolutePath();
         return getZkLock(client, path);
     }
@@ -214,13 +215,13 @@ public class ZkUtils {
      * @param configuration - Configuration node to Lock.
      * @param version       - Configuration version to lock for.
      * @return - Lock instance.
-     * @throws ZkException
+     * @throws PersistenceException
      */
     public static final InterProcessMutex getZkLock(
             @Nonnull CuratorFramework client,
             @Nonnull PersistedConfigNode configuration,
             @Nonnull Version version)
-    throws ZkException {
+    throws PersistenceException {
         String path = String.format("%s/%d", configuration.getAbsolutePath(),
                                     version.getMajorVersion());
         return getZkLock(client, path);
@@ -231,10 +232,10 @@ public class ZkUtils {
      *
      * @param node - Node to get path for.
      * @return - ZooKeeper path.
-     * @throws ZkException
+     * @throws PersistenceException
      */
     public static final String getZkPath(@Nonnull IZkNode node)
-    throws ZkException {
+    throws PersistenceException {
         return String.format("%s/%s", getServerRootPath(), node.getAbsolutePath());
     }
 
@@ -245,11 +246,11 @@ public class ZkUtils {
      * @param configNode - Root configuration node.
      * @param path       - Path to append.
      * @return - Absolute Path
-     * @throws ZkException
+     * @throws PersistenceException
      */
     public static final String getZkPath(@Nonnull PersistedConfigNode configNode,
                                          @Nonnull String path)
-    throws ZkException {
+    throws PersistenceException {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(path));
         String p = getZkPath(configNode);
         StringBuilder buff = new StringBuilder(p);
@@ -267,14 +268,15 @@ public class ZkUtils {
      *
      * @param configuration - Configuration instance.
      * @return - ZooKeeper Path.
-     * @throws ZkException
+     * @throws PersistenceException
      */
     public static final String getZkPath(@Nonnull Configuration configuration)
-    throws ZkException {
+    throws PersistenceException {
         String path = String.format("%s/%s/%s", configuration.getApplicationGroup(),
                                     configuration.getApplication(),
                                     configuration.getName());
-        return String.format("%s/%s", getServerRootPath(), path);
+        return String.format("%s/%s/%d", getServerRootPath(), path,
+                             configuration.getVersion().getMajorVersion());
     }
 
     /**
@@ -282,10 +284,10 @@ public class ZkUtils {
      *
      * @param group - Application Group instance.
      * @return - ZooKeeper Path.
-     * @throws ZkException
+     * @throws PersistenceException
      */
     public static final String getZkPath(@Nonnull ApplicationGroup group)
-    throws ZkException {
+    throws PersistenceException {
         return String.format("%s%s", getServerRootPath(), group.getAbsolutePath());
     }
 
@@ -294,10 +296,10 @@ public class ZkUtils {
      *
      * @param application - Application instance.
      * @return - ZooKeeper Path.
-     * @throws ZkException
+     * @throws PersistenceException
      */
     public static final String getZkPath(@Nonnull Application application)
-    throws ZkException {
+    throws PersistenceException {
         return String
                 .format("%s%s", getServerRootPath(), application.getAbsolutePath());
     }
@@ -307,9 +309,10 @@ public class ZkUtils {
      *
      * @param group - Application Group name.
      * @return - ZooKeeper Path.
-     * @throws ZkException
+     * @throws PersistenceException
      */
-    public static final String getZkPath(@Nonnull String group) throws ZkException {
+    public static final String getZkPath(@Nonnull String group) throws
+                                                                PersistenceException {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(group));
         return String.format("%s/%s", getServerRootPath(), group);
     }
@@ -320,11 +323,11 @@ public class ZkUtils {
      * @param group       - Application Group instance.
      * @param application - Application name.
      * @return - ZooKeeper Path.
-     * @throws ZkException
+     * @throws PersistenceException
      */
     public static final String getZkPath(ApplicationGroup group,
                                          @Nonnull String application)
-    throws ZkException {
+    throws PersistenceException {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(application));
         return String
                 .format("%s%s/%s", getServerRootPath(), group.getAbsolutePath(),
@@ -337,15 +340,32 @@ public class ZkUtils {
      * @param application - Application instance.
      * @param configname  - Configuration name.
      * @return - ZooKeeper Path.
-     * @throws ZkException
+     * @throws PersistenceException
      */
-    public static final String getZkPath(Application application,
-                                         @Nonnull String configname)
-    throws ZkException {
+    public static final String getZkPath(@Nonnull Application application,
+                                         @Nonnull String configname,
+                                         @Nonnull Version version)
+    throws PersistenceException {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(configname));
         return String
-                .format("%s%s/%s", getServerRootPath(),
+                .format("%s%s/%s/%d", getServerRootPath(),
                         application.getAbsolutePath(),
-                        configname);
+                        configname, version.getMajorVersion());
+    }
+
+    /**
+     * Extract the node name from the path.
+     *
+     * @param path - ZooKeeper Path.
+     * @return - Extracted Node name.
+     */
+    public static final String getNodeNameFromPath(String path) {
+        if (!Strings.isNullOrEmpty(path)) {
+            String[] parts = path.split("/");
+            if (parts.length > 0) {
+                return parts[parts.length - 1];
+            }
+        }
+        return null;
     }
 }

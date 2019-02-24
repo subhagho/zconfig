@@ -38,6 +38,7 @@ import com.wookler.zconfig.common.ConfigurationException;
 import com.wookler.zconfig.common.DateTimeUtils;
 import com.wookler.zconfig.common.JSONConfigConstants;
 import com.wookler.zconfig.common.model.*;
+import com.wookler.zconfig.common.model.annotations.ConfigValue;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -201,10 +202,10 @@ public class JSONFileConfigWriter extends AbstractConfigWriter {
                     JSONConfigConstants.CONFIG_HEADER_NAME);
         }
         ObjectNode cnode = parent.putObject(node.getName());
-        Map<String, String> keyValues = node.getKeyValues();
+        Map<String, ConfigValueNode> keyValues = node.getKeyValues();
         if (keyValues != null && !keyValues.isEmpty()) {
             for (String key : keyValues.keySet()) {
-                cnode.put(key, keyValues.get(key));
+                cnode.put(key, keyValues.get(key).getValue());
             }
         }
     }

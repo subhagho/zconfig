@@ -55,6 +55,17 @@ public class ConfigPathNode extends ConfigElementNode {
     }
 
     /**
+     * Constructor with Configuration and Parent node.
+     *
+     * @param configuration - Configuration this node belong to.
+     * @param parent - Parent node.
+     */
+    public ConfigPathNode(Configuration configuration,
+                          AbstractConfigNode parent) {
+        super(configuration, parent);
+    }
+
+    /**
      * Set the map of child nodes for this path element.
      *
      * @param children - Map of child nodes.
@@ -143,6 +154,20 @@ public class ConfigPathNode extends ConfigElementNode {
     }
 
     /**
+     * Get the properties, if any for this path node.
+     *
+     * @return - Properties node, else NULL.
+     */
+    public ConfigAttributesNode attributes() {
+        if (children != null &&
+                children.containsKey(ConfigAttributesNode.NODE_NAME)) {
+            return (ConfigAttributesNode) children
+                    .get(ConfigAttributesNode.NODE_NAME);
+        }
+        return null;
+    }
+
+    /**
      * Search for the path under this node.
      *
      * @param path  - Tokenized Path array.
@@ -152,19 +177,122 @@ public class ConfigPathNode extends ConfigElementNode {
     @Override
     public AbstractConfigNode find(String[] path, int index) {
         String key = path[index];
-        if (getName().compareTo(key) == 0) {
-            if (index == path.length - 1) {
-                return this;
-            } else {
-                key = path[index + 1];
-                if (key.startsWith("#")) {
-                    key = ConfigParametersNode.NODE_NAME;
-                } else if (key.startsWith("@")) {
-                    key = ConfigPropertiesNode.NODE_NAME;
+        String pp = hasSubPath(getName(), key);
+        if (Strings.isNullOrEmpty(pp)) {
+            if (getName().compareTo(key) == 0) {
+                if (index == path.length - 1) {
+                    return this;
+                } else {
+                    String cname = path[index + 1];
+                    String[] pc = hasSubPath(cname);
+                    if (pc != null && pc.length == 2) {
+                        cname = pc[0];
+                        if (children.containsKey(cname)) {
+                            AbstractConfigNode node = children.get(cname);
+                            return node.find(pc[1]);
+                        }
+                    } else if (children.containsKey(cname)) {
+                        AbstractConfigNode node = children.get(cname);
+                        return node.find(path, index + 1);
+                    }
                 }
-                if (children.containsKey(key)) {
-                    AbstractConfigNode node = children.get(key);
-                    return node.find(path, index + 1);
+            }
+        } else if (index == path.length - 1) {
+            return find(pp);
+        }
+        return null;
+    }
+
+    /**
+     * Check if the passed node name contains sub-tags for parameters/attributes.
+     *
+     * @param name - Path element to parse.
+     * @return - Parsed path name, if tags are present, else NULL.
+     */
+    private String[] hasSubPath(String name) {
+        int index = name.indexOf("#");
+        if (index > 0) {
+            String[] parts = name.split("#");
+            if (parts.length == 1) {
+                return new String[]{parts[0], String
+                        .format("%s.%s", parts[0],
+                                ConfigParametersNode.NODE_NAME)};
+            }
+        }
+        index = name.indexOf("@");
+        if (index > 0) {
+            String[] parts = name.split("@");
+            if (parts.length == 1) {
+                return new String[]{parts[0], String
+                        .format("%s.%s", parts[0],
+                                ConfigAttributesNode.NODE_NAME)};
+            }
+        }
+        index = name.indexOf("$");
+        if (index > 0) {
+            String[] parts = name.split("\\$");
+            if (parts.length == 1) {
+                return new String[]{parts[0], String
+                        .format("%s.%s", parts[0],
+                                ConfigPropertiesNode.NODE_NAME)};
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Check if the passed node name contains sub-tags for parameters/attributes.
+     *
+     * @param nodeName - This node name.
+     * @param name     - Path element to parse.
+     * @return - Parsed path name, if tags are present, else NULL.
+     */
+    private String hasSubPath(String nodeName, String name) {
+        int index = name.indexOf("#");
+        if (index > 0) {
+            String[] parts = name.split("#");
+            if (nodeName.compareTo(parts[0]) == 0) {
+                if (parts.length == 1) {
+                    return String
+                            .format("%s.%s", parts[0],
+                                    ConfigParametersNode.NODE_NAME);
+                } else {
+                    return String
+                            .format("%s.%s.%s", parts[0],
+                                    ConfigParametersNode.NODE_NAME,
+                                    parts[1]);
+                }
+            }
+        }
+        index = name.indexOf("@");
+        if (index > 0) {
+            String[] parts = name.split("@");
+            if (nodeName.compareTo(parts[0]) == 0) {
+                if (parts.length == 1) {
+                    return String
+                            .format("%s.%s", parts[0],
+                                    ConfigAttributesNode.NODE_NAME);
+                } else {
+                    return String
+                            .format("%s.%s.%s", parts[0],
+                                    ConfigAttributesNode.NODE_NAME,
+                                    parts[1]);
+                }
+            }
+        }
+        index = name.indexOf("$");
+        if (index > 0) {
+            String[] parts = name.split("\\$");
+            if (nodeName.compareTo(parts[0]) == 0) {
+                if (parts.length == 1) {
+                    return String
+                            .format("%s.%s", parts[0],
+                                    ConfigPropertiesNode.NODE_NAME);
+                } else {
+                    return String
+                            .format("%s.%s.%s", parts[0],
+                                    ConfigPropertiesNode.NODE_NAME,
+                                    parts[1]);
                 }
             }
         }

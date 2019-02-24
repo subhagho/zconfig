@@ -142,7 +142,8 @@ public class ConfigurationAnnotationProcessor {
                         ConfigPathNode pathNode = (ConfigPathNode) node;
                         ConfigParametersNode params = pathNode.parmeters();
                         if (params != null && !params.isEmpty()) {
-                            value = params.getValue(name);
+                            if (params.hasKey(name))
+                                value = params.getValue(name).getValue();
                         }
                     }
                     if (!Strings.isNullOrEmpty(value)) {

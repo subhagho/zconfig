@@ -31,13 +31,24 @@ import java.io.File;
 
 /**
  * Configuration resource node for the type file.
- *
  */
 public class ConfigResourceFile extends ConfigResourceNode {
     /**
      * File handle to the file pointed to by the URI.
      */
     private File resourceHandle;
+
+    /**
+     * Constructor with Configuration and Parent node.
+     *
+     * @param configuration - Configuration this node belong to.
+     * @param parent        - Parent node.
+     */
+    public ConfigResourceFile(
+            Configuration configuration,
+            AbstractConfigNode parent) {
+        super(configuration, parent);
+    }
 
     /**
      * Get the file handle to the resource.
