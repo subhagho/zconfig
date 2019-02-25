@@ -1,8 +1,8 @@
 {
     "header": {
-        "id" : "UNIQUE-99918239012",
-        "group" : "TEST-APP-GROUP",
-        "application" : "TEST-APPLICATION",
+        "id": "UNIQUE-99918239012",
+        "group": "TEST-APP-GROUP",
+        "application": "TEST-APPLICATION",
         "name": "test-config",
         "description": "This is a test JSON configuration file.",
         "version": "0.2",
@@ -100,12 +100,12 @@
                 }
             ],
             "node_2": {
-                "@" : {
-                    "ATTRIBUTE_1" : "Attr One",
-                    "ATTRIBUTE_2" : "Attr Two",
-                    "ATTRIBUTE_3" : "Attr Three",
-                    "ATTRIBUTE_4" : "Attr Four",
-                    "ATTRIBUTE_5" : "Attr Five"
+                "@": {
+                    "ATTRIBUTE_1": "Attr One",
+                    "ATTRIBUTE_2": "Attr Two",
+                    "ATTRIBUTE_3": "Attr Three",
+                    "ATTRIBUTE_4": "Attr Four",
+                    "ATTRIBUTE_5": "Attr Five"
                 },
                 "description": "This is a test description",
                 "nodeVersion": 1,
@@ -127,6 +127,11 @@
                     "PARAM_2": "TEST_PARAM_2",
                     "PARAM_3": "TEST_PARAM_3",
                     "PARAM_4": "TEST_PARAM_4"
+                },
+                "remoteResource": {
+                    "type": "BLOB",
+                    "url": "https://github.com/subhagho/openriver-maven/blob/wookler-repo/com/wookler/common/1.0-SNAPSHOT/common-1.0-20171127.050926-1-javadoc.jar?raw=true",
+                    "resourceName": "common-1.0-20171127.050926-1-javadoc.jar"
                 },
                 "node_3": {
                     "nodeVersion": 1,
@@ -179,6 +184,11 @@
                             "-129814901",
                             "-134981490134"
                         ]
+                    },
+                    "remoteResource": {
+                        "type": "FILE",
+                        "url": "https://raw.githubusercontent.com/subhagho/zconfig/master/LICENSE",
+                        "resourceName": "LICENSE.txt"
                     }
                 }
             }

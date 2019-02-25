@@ -523,9 +523,23 @@ public class JSONConfigParser extends AbstractConfigParser {
             ConfigIncludeNode pn = new ConfigIncludeNode(configuration, parent);
             setupIncludeNode(name, pn, parent, node);
             nn = pn;
-        } else if (name.compareTo(ConfigResourceFile.NODE_NAME) == 0) {
-            ConfigResourceFile pn = new ConfigResourceFile(configuration, parent);
-            parseFileResourceNode(name, pn, parent, node);
+        } else if (name.compareTo(ConfigResourceNode.NODE_NAME) == 0) {
+            EResourceType type = parseResourceType(node);
+            if (type == null) {
+                throw ConfigurationException.propertyNotFoundException(
+                        ConfigResourceNode.NODE_RESOURCE_TYPE);
+            }
+            ConfigResourceFile pn = null;
+            if (type == EResourceType.FILE) {
+                pn = new ConfigResourceFile(configuration, parent);
+                parseFileResourceNode(name, pn, parent, node);
+            } else if (type == EResourceType.BLOB) {
+                pn = new ConfigResourceBlob(configuration, parent);
+                parseFileResourceNode(name, pn, parent, node);
+            } else if (type == EResourceType.DIRECTORY) {
+                pn = new ConfigResourceDirectory(configuration, parent);
+                parseFileResourceNode(name, pn, parent, node);
+            }
             nn = pn;
         } else {
             ConfigPathNode pn = new ConfigPathNode(configuration, parent);
@@ -547,8 +561,7 @@ public class JSONConfigParser extends AbstractConfigParser {
     private void parseFileResourceNode(String name, ConfigResourceFile node,
                                        AbstractConfigNode parent, JsonNode jsonNode)
     throws ConfigurationException {
-        Map<String, JsonNode> nodes =
-                parseResourceNode(name, node, parent, null, jsonNode);
+        parseResourceNode(name, node, parent, jsonNode);
         URI uri = node.getLocation();
         if (uri == null) {
             throw ConfigurationException.propertyNotFoundException("location");
@@ -588,6 +601,9 @@ public class JSONConfigParser extends AbstractConfigParser {
                                         "No bytes read for remote file. [url=%s]",
                                         uri.toString()));
                             }
+                            LogUtils.debug(getClass(), String.format(
+                                    "Downloaded remote file. [path=%s][size=%s]",
+                                    file.getAbsolutePath(), bread));
                         } catch (IOException e) {
                             throw new ConfigurationException(e);
                         }
@@ -598,27 +614,104 @@ public class JSONConfigParser extends AbstractConfigParser {
     }
 
     /**
+     * Parse a file resource node.
+     *
+     * @param name     - Node name.
+     * @param node     - Directory Resource Config node.
+     * @param parent   - Parent Config node.
+     * @param jsonNode - JSON Node.
+     * @throws ConfigurationException
+     */
+    private void parseFolderResourceNode(String name, ConfigResourceDirectory node,
+                                         AbstractConfigNode parent,
+                                         JsonNode jsonNode)
+    throws ConfigurationException {
+        parseResourceNode(name, node, parent, jsonNode);
+        URI uri = node.getLocation();
+        if (uri == null) {
+            throw ConfigurationException.propertyNotFoundException("location");
+        }
+        if (IOUtils.isLocalFile(uri)) {
+            File file = Paths.get(uri).toFile();
+            if (!file.exists()) {
+                throw new ConfigurationException(String.format(
+                        "Specified resource file not found : [path=%s]",
+                        file.getAbsolutePath()));
+            }
+            node.setResourceHandle(file);
+        } else {
+            String localFilePath = IOUtils.urlToLocalFilePath(uri);
+            if (Strings.isNullOrEmpty(localFilePath)) {
+                throw new ConfigurationException(String.format(
+                        "Error converting URI to local path. [uri=%s]",
+                        uri.toString()));
+            }
+            String tdir = configuration.getInstancePath(localFilePath);
+            String filename = String.format("%s/%s", tdir, node.getResourceName());
+            File file = new File(filename);
+            node.setResourceHandle(file);
+            if (!file.exists()) {
+                if (configuration.getSettings().getDownloadRemoteFiles() ==
+                        ConfigurationSettings.EStartupOptions.OnStartUp) {
+                    EReaderType type = EReaderType.parseFromUri(node.getLocation());
+                    Preconditions.checkNotNull(type);
+
+                    if (type == EReaderType.HTTP) {
+                        try {
+                            long bread = RemoteFileHelper
+                                    .downloadRemoteDirectory(node.getLocation(),
+                                                             node.getResourceHandle());
+                            if (bread <= 0) {
+                                throw new ConfigurationException(String.format(
+                                        "No bytes read for remote file. [url=%s]",
+                                        uri.toString()));
+                            }
+                        } catch (IOException e) {
+                            throw new ConfigurationException(e);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Extract and parse the resource node type.
+     *
+     * @param node - JsonNode to extract from.
+     * @return - Parsed Resource node type.
+     * @throws ConfigurationException
+     */
+    private EResourceType parseResourceType(JsonNode node)
+    throws ConfigurationException {
+        JsonNode nn = node.get(ConfigResourceNode.NODE_RESOURCE_TYPE);
+        if (nn == null) {
+            throw ConfigurationException.propertyNotFoundException(
+                    ConfigResourceNode.NODE_RESOURCE_TYPE);
+        }
+        String nt = nn.textValue();
+        if (Strings.isNullOrEmpty(nt)) {
+            throw ConfigurationException.propertyNotFoundException(
+                    ConfigResourceNode.NODE_RESOURCE_TYPE);
+        }
+        return EResourceType.valueOf(nt);
+    }
+
+    /**
      * Parse the Resource node parameters.
      *
      * @param name     - Node name.
      * @param node     - Resource node handle.
      * @param parent   - Parent Config node.
-     * @param names    - Array of node names to return.
      * @param jsonNode - JSON node.
-     * @return - Map of nodes for the names specified.
      * @throws ConfigurationException
      */
-    private Map<String, JsonNode> parseResourceNode(String name,
-                                                    ConfigResourceNode node,
-                                                    AbstractConfigNode parent,
-                                                    String[] names,
-                                                    JsonNode jsonNode)
+    private void parseResourceNode(String name,
+                                   ConfigResourceNode node,
+                                   AbstractConfigNode parent,
+                                   JsonNode jsonNode)
     throws ConfigurationException {
         setupNode(name, node, parent, jsonNode, false);
-        Map<String, JsonNode> values = null;
-        if (names != null && names.length > 0) {
-            values = new HashMap<>();
-        }
         Iterator<Map.Entry<String, JsonNode>> nnodes = jsonNode.fields();
         if (nnodes != null) {
             while (nnodes.hasNext()) {
@@ -628,13 +721,7 @@ public class JSONConfigParser extends AbstractConfigParser {
                 }
                 String nname = sn.getKey();
                 JsonNode cnode = sn.getValue();
-                if (names != null && names.length > 0) {
-                    for (String rn : names) {
-                        if (nname.compareTo(rn) == 0) {
-                            values.put(rn, cnode);
-                        }
-                    }
-                }
+
                 if (nname.compareTo(ConfigResourceNode.NODE_RESOURCE_TYPE) == 0) {
                     if (cnode.getNodeType() == JsonNodeType.STRING) {
                         String nt = cnode.textValue();
@@ -660,10 +747,17 @@ public class JSONConfigParser extends AbstractConfigParser {
                             }
                         }
                     }
+                } else if (nname.compareTo(ConfigResourceNode.NODE_RESOURCE_NAME) ==
+                        0) {
+                    if (cnode.getNodeType() == JsonNodeType.STRING) {
+                        String rname = cnode.textValue();
+                        if (!Strings.isNullOrEmpty(rname)) {
+                            node.setResourceName(rname);
+                        }
+                    }
                 }
             }
         }
-        return values;
     }
 
     /**

@@ -40,7 +40,7 @@ import java.util.Properties;
 import static com.wookler.zconfig.common.LogUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-class ConfigurationTest {
+class Test_JSONConfiguration {
     private static final String BASE_PROPS_FILE =
             "src/test/resources/test-config.properties";
     private static Configuration configuration = null;
@@ -64,8 +64,10 @@ class ConfigurationTest {
         assertNotNull(version);
 
         try (ConfigFileReader reader = new ConfigFileReader(filename)) {
-
-            parser.parse("test-config", reader, null, version);
+            ConfigurationSettings settings = new ConfigurationSettings();
+            settings.setDownloadRemoteFiles(
+                    ConfigurationSettings.EStartupOptions.OnStartUp);
+            parser.parse("test-config", reader, settings, version);
             configuration = parser.getConfiguration();
             assertNotNull(configuration);
         }

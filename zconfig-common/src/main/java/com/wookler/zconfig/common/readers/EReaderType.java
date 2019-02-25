@@ -82,6 +82,8 @@ public enum EReaderType {
                 return File;
             } else if (
                     scheme.compareToIgnoreCase(GlobalConstants.URI_SCHEME_HTTP) ==
+                            0 || scheme.compareToIgnoreCase(
+                            GlobalConstants.URI_SCHEME_HTTPS) ==
                             0) {
                 return HTTP;
             } else if (scheme.compareToIgnoreCase(GlobalConstants.URI_SCHEME_FTP) ==

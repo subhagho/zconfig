@@ -51,8 +51,10 @@ import java.net.URI;
  * }
  */
 public abstract class ConfigResourceNode extends ConfigElementNode {
+    public static final String NODE_NAME = "remoteResource";
     public static final String NODE_RESOURCE_TYPE = "type";
     public static final String NODE_RESOURCE_URL = "url";
+    public static final String NODE_RESOURCE_NAME = "resourceName";
 
     /**
      * Resource type of this node.

@@ -77,8 +77,7 @@ public class ConfigResourceBlob extends ConfigResourceFile {
         Preconditions.checkArgument(getResourceHandle() != null);
 
         try {
-            try (
-                    RandomAccessFile fis = new RandomAccessFile(
+            try (RandomAccessFile fis = new RandomAccessFile(
                             getResourceHandle().getAbsoluteFile(), "r")) {
                 FileReadResponse response =
                         new FileReadResponse(getResourceHandle().getAbsolutePath(),

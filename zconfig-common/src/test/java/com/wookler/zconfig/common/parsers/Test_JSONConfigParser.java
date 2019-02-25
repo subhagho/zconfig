@@ -39,7 +39,7 @@ import java.util.Properties;
 import static org.junit.jupiter.api.Assertions.*;
 import static com.wookler.zconfig.common.LogUtils.*;
 
-class JSONConfigParserTest {
+class Test_JSONConfigParser {
     private static final String BASIC_PROPS_FILE =
             "src/test/resources/test-config.properties";
     private static final String INCLUDED_PROPS_FILE =

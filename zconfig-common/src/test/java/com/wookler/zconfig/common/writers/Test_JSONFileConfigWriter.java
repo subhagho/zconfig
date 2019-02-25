@@ -42,7 +42,7 @@ import static com.wookler.zconfig.common.LogUtils.debug;
 import static com.wookler.zconfig.common.LogUtils.error;
 import static org.junit.jupiter.api.Assertions.*;
 
-class JSONFileConfigWriterTest {
+class Test_JSONFileConfigWriter {
     private static final String JSON_FILE =
             "src/test/resources/test-config.properties";
     private static final String TEMP_OUTDIR = "/tmp/zconfig/test/output";

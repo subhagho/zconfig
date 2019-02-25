@@ -47,6 +47,10 @@ public class GlobalConstants {
      */
     public static final String URI_SCHEME_HTTP = "http";
     /**
+     * URI Scheme constant for HTTPS.
+     */
+    public static final String URI_SCHEME_HTTPS = "https";
+    /**
      * URI Scheme constant for FTP.
      */
     public static final String URI_SCHEME_FTP = "ftp";

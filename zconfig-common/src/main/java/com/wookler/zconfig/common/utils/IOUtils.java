@@ -29,12 +29,13 @@ import com.wookler.zconfig.common.readers.EReaderType;
 
 import javax.annotation.Nonnull;
 import java.net.URI;
+import java.util.UUID;
 
 /**
  * Utility methods to perform IO.
  */
 public class IOUtils {
-    private static final String NON_ASCII_RANGE = "[^\\\\x00-\\\\x7F]";
+    private static final String NON_ASCII_RANGE = "[^\\x00-\\x7F]";
 
     /**
      * Check if the URI represent a local file (file://...)
@@ -64,22 +65,48 @@ public class IOUtils {
             String query = uri.getQuery();
             StringBuffer buffer = new StringBuffer();
             if (!Strings.isNullOrEmpty(host)) {
-                buffer.append(host.replaceAll(NON_ASCII_RANGE, "_"));
+                host = replacePathString(host);
+                buffer.append(host);
             }
             if (!Strings.isNullOrEmpty(path)) {
                 if (buffer.length() > 0) {
                     buffer.append("/");
                 }
-                buffer.append(path.replaceAll(NON_ASCII_RANGE, "_"));
+                path = replacePathString(path);
+                buffer.append(path);
             }
             if (!Strings.isNullOrEmpty(query)) {
                 if (buffer.length() > 0) {
                     buffer.append("/");
                 }
-                buffer.append(query.replaceAll(NON_ASCII_RANGE, "_"));
+                query = replacePathString(query);
+                buffer.append(query);
             }
             return buffer.toString();
         }
         return null;
+    }
+
+    /**
+     * Replace whitespaces and non-ascii chars in the input string.
+     *
+     * @param input - Input String
+     * @return - Replaced String.
+     */
+    private static String replacePathString(String input) {
+        input = input.replaceAll(NON_ASCII_RANGE, "_");
+        input = input.replaceAll("[\\s=.]", "_");
+
+        return input;
+    }
+
+    /**
+     * Get a new temporary file path.
+     *
+     * @return - Temp file path.
+     */
+    public static String getTempFile() {
+        return String.format("%s/zconfig/%s", System.getProperty("java.io.tempdir"),
+                             UUID.randomUUID().toString());
     }
 }
