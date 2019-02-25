@@ -37,20 +37,20 @@ import java.net.URL;
 import java.net.URLConnection;
 
 /**
- * Configuration reader to read from a remote URL location.
+ * Configuration reader to read from a remote HTTP location.
  */
 public class ConfigURLReader extends AbstractConfigReader {
     /**
-     * Formatted URL location to read from.
+     * Formatted HTTP location to read from.
      */
     private URL remoteURL;
 
     private URLConnection connection = null;
 
     /**
-     * Create this instance with the specified URL string.
+     * Create this instance with the specified HTTP string.
      *
-     * @param url - URL String
+     * @param url - HTTP String
      */
     public ConfigURLReader(String url) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(url));
@@ -62,9 +62,9 @@ public class ConfigURLReader extends AbstractConfigReader {
     }
 
     /**
-     * Create this instance with the specified URL.
+     * Create this instance with the specified HTTP.
      *
-     * @param url - Remote URL
+     * @param url - Remote HTTP
      */
     public ConfigURLReader(URL url) {
         Preconditions.checkArgument(url != null);

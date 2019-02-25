@@ -31,6 +31,7 @@ import com.wookler.zconfig.common.ConfigurationException;
 import com.wookler.zconfig.common.model.nodes.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
 
@@ -583,16 +584,22 @@ public class Configuration {
      * <p>
      * If temp directory doesn't exist, this call will create it.
      *
+     * @param subdir - Requested sub-directory.
      * @return - File path to temp directory.
      * @throws ConfigurationException
      */
-    public synchronized File getInstancePath() throws ConfigurationException {
-        String tmp = System.getProperty("java.io.tmpdir");
-        String path = String.format("%s/%s/%s", tmp, name, instanceId);
-        File fp = new File(path);
-        if (!fp.exists()) {
-            fp.mkdirs();
+    public synchronized String getInstancePath(String subdir)
+    throws ConfigurationException {
+        String dir =
+                String.format("%s/%s/%s/%s", applicationGroup, application, name,
+                              version.toString());
+        if (!Strings.isNullOrEmpty(subdir)) {
+            dir = String.format("%s/%s", dir, subdir);
         }
-        return fp;
+        try {
+            return settings.getConfigTempFolder(dir);
+        } catch (IOException e) {
+            throw new ConfigurationException(e);
+        }
     }
 }

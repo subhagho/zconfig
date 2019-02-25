@@ -25,6 +25,7 @@
 package com.wookler.zconfig.common.model.nodes;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.wookler.zconfig.common.ConfigurationException;
 import com.wookler.zconfig.common.model.Configuration;
 import com.wookler.zconfig.common.model.ENodeState;
@@ -50,6 +51,9 @@ import java.net.URI;
  * }
  */
 public abstract class ConfigResourceNode extends ConfigElementNode {
+    public static final String NODE_RESOURCE_TYPE = "type";
+    public static final String NODE_RESOURCE_URL = "url";
+
     /**
      * Resource type of this node.
      */
@@ -58,6 +62,10 @@ public abstract class ConfigResourceNode extends ConfigElementNode {
      * Resource location of the resource pointed to by this node.
      */
     private URI location;
+    /**
+     * Name to be used to reference this resource.
+     */
+    private String resourceName;
 
     /**
      * Default constructor - Initialize the state object.
@@ -116,6 +124,24 @@ public abstract class ConfigResourceNode extends ConfigElementNode {
     }
 
     /**
+     * Get the resource name.
+     *
+     * @return - Resource name.
+     */
+    public String getResourceName() {
+        return resourceName;
+    }
+
+    /**
+     * Set the resource name.
+     *
+     * @param resourceName - Resource name.
+     */
+    public void setResourceName(String resourceName) {
+        this.resourceName = resourceName;
+    }
+
+    /**
      * Check if this node if the terminal value specified in the path.
      *
      * @param path  - Tokenized Path array.
@@ -166,6 +192,9 @@ public abstract class ConfigResourceNode extends ConfigElementNode {
     @Override
     public void validate() throws ConfigurationException {
         super.validate();
+        if (Strings.isNullOrEmpty(resourceName)) {
+            throw ConfigurationException.propertyNotFoundException("resourceName");
+        }
         if (type == null) {
             throw ConfigurationException.propertyNotFoundException("type");
         }

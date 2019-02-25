@@ -35,6 +35,7 @@ import java.io.File;
  * Configuration resource node for the type directory.
  */
 public class ConfigResourceDirectory extends ConfigResourceFile {
+    public static final String NODE_NAME = "directory";
 
     /**
      * Default constructor - Initialize the state object.

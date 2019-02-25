@@ -140,6 +140,12 @@ class ConfigurationTest {
             assertFalse(Strings.isNullOrEmpty(param));
             debug(getClass(),
                   String.format("[path=%s] parameter value = %s", path, param));
+
+            path = "configuration.node_1.node_2#";
+            node = configuration.find(path);
+            assertNotNull(node);
+            assertTrue(node instanceof ConfigParametersNode);
+            debug(getClass(), node);
         } catch (Throwable e) {
             error(getClass(), e);
             fail(e);

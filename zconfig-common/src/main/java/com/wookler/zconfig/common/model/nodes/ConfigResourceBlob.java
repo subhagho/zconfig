@@ -38,6 +38,7 @@ import java.io.RandomAccessFile;
  * Configuration resource node for the type BLOB.
  */
 public class ConfigResourceBlob extends ConfigResourceFile {
+    public static final String NODE_NAME = "blobResource";
 
     /**
      * Constructor with Configuration and Parent node.

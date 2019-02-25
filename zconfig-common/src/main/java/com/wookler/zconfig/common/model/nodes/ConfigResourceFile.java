@@ -35,6 +35,9 @@ import java.io.File;
  * Configuration resource node for the type file.
  */
 public class ConfigResourceFile extends ConfigResourceNode {
+    public static final String NODE_NAME = "fileResource";
+    public static final String NODE_FILE_NAME = "file";
+
     /**
      * File handle to the file pointed to by the URI.
      */

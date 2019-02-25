@@ -123,7 +123,7 @@
                     "doubleValue": "99834.93948"
                 },
                 "parameters": {
-                    "PARAM_1": "This is a replacement test. ${PROP_1}",
+                    "PARAM_1": "This is a replacement test. ${PROP_1}${PROP_2}",
                     "PARAM_2": "TEST_PARAM_2",
                     "PARAM_3": "TEST_PARAM_3",
                     "PARAM_4": "TEST_PARAM_4"
@@ -138,7 +138,7 @@
                         "user": "subho",
                         "timestamp": "01.02.2019 12:32:19"
                     },
-                    "attributes": {
+                    "@": {
                         "ATTR_1": "TEST_ATTR_1",
                         "ATTR_2": "TEST_ATTR_2",
                         "ATTR_3": "TEST_ATTR_3",

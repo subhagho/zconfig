@@ -28,6 +28,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.wookler.zconfig.common.GlobalConstants;
 
+import javax.annotation.Nonnull;
 import java.net.URI;
 
 /**
@@ -39,9 +40,17 @@ public enum EReaderType {
      */
     File,
     /**
-     * Reader reads from a specified URL.
+     * Reader reads from a specified HTTP.
      */
-    URL;
+    HTTP,
+    /**
+     * Reader reads from a specified FTP location.
+     */
+    FTP,
+    /**
+     * Reader reads from a specified SFTP location.
+     */
+    SFTP;
 
     /**
      * Parse the reader type from the specified string value.
@@ -49,12 +58,12 @@ public enum EReaderType {
      * @param type - String value.
      * @return - Parsed Reader Type.
      */
-    public static EReaderType parse(String type) {
+    public static EReaderType parse(@Nonnull String type) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(type));
         if (type.compareToIgnoreCase(File.name()) == 0) {
             return File;
-        } else if (type.compareToIgnoreCase(URL.name()) == 0) {
-            return URL;
+        } else if (type.compareToIgnoreCase(HTTP.name()) == 0) {
+            return HTTP;
         }
         return null;
     }
@@ -65,14 +74,23 @@ public enum EReaderType {
      * @param uri - Specified URI
      * @return - Reader Type or NULL.
      */
-    public static EReaderType parseFromUri(URI uri) {
+    public static EReaderType parseFromUri(@Nonnull URI uri) {
         Preconditions.checkArgument(uri != null);
         String scheme = uri.getScheme();
         if (!Strings.isNullOrEmpty(scheme)) {
-            if (scheme.compareTo(GlobalConstants.URI_SCHEME_FILE) == 0) {
+            if (scheme.compareToIgnoreCase(GlobalConstants.URI_SCHEME_FILE) == 0) {
                 return File;
-            } else if (scheme.compareTo(GlobalConstants.URI_SCHEME_HTTP) == 0) {
-                return URL;
+            } else if (
+                    scheme.compareToIgnoreCase(GlobalConstants.URI_SCHEME_HTTP) ==
+                            0) {
+                return HTTP;
+            } else if (scheme.compareToIgnoreCase(GlobalConstants.URI_SCHEME_FTP) ==
+                    0) {
+                return FTP;
+            } else if (
+                    scheme.compareToIgnoreCase(GlobalConstants.URI_SCHEME_SFTP) ==
+                            0) {
+                return SFTP;
             }
         }
         return null;
@@ -86,10 +104,14 @@ public enum EReaderType {
      */
     public static String getURIScheme(EReaderType type) {
         switch (type) {
-            case URL:
+            case HTTP:
                 return GlobalConstants.URI_SCHEME_HTTP;
             case File:
                 return GlobalConstants.URI_SCHEME_FILE;
+            case FTP:
+                return GlobalConstants.URI_SCHEME_FTP;
+            case SFTP:
+                return GlobalConstants.URI_SCHEME_SFTP;
             default:
                 return null;
         }

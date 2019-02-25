@@ -68,7 +68,7 @@ public class ConfigIncludeNode extends ConfigElementNode {
      */
     private String configName;
     /**
-     * Path (URL/File) of the configuration.
+     * Path (HTTP/File) of the configuration.
      */
     private String path;
 

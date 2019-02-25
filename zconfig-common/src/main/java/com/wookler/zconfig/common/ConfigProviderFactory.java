@@ -136,7 +136,7 @@ public class ConfigProviderFactory {
     /**
      * Get a new instance of a Configuration reader. Type of reader is determined based on the
      * SCHEME of the URI.
-     * SCHEME = "http", TYPE = URL
+     * SCHEME = "http", TYPE = HTTP
      * SCHEME = "file", type = File
      *
      * @param uri - URI to get the input from.
@@ -149,7 +149,7 @@ public class ConfigProviderFactory {
         EReaderType type = EReaderType.parseFromUri(uri);
         try {
             if (type != null) {
-                if (type == EReaderType.URL) {
+                if (type == EReaderType.HTTP) {
                     URL url = uri.toURL();
                     return new ConfigURLReader(url);
                 } else if (type == EReaderType.File) {
