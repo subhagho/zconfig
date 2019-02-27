@@ -33,7 +33,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class TestJsonTree {
-    private static final String JSON_FILE = "zconfig-common/src/test/resources/test-tree.json";
+    private static final String JSON_FILE = "zconfig-common/src/test/resources/json/test-tree.json";
 
     private void parse() throws Exception {
         File pwd = new File(".");

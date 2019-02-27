@@ -47,7 +47,7 @@
                 "PARAM_4": "TEST_PARAM_4"
             },
             "include" : {
-                "path" : "src/test/resources/test-config-included.json",
+                "path" : "src/test/resources/json/test-config-included.json",
                 "configName" : "test-config-included",
                 "type" : "File",
                 "version": "0.2"

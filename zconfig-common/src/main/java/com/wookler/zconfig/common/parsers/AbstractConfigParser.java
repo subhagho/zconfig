@@ -31,6 +31,7 @@ import com.wookler.zconfig.common.model.*;
 import com.wookler.zconfig.common.model.nodes.*;
 import com.wookler.zconfig.common.readers.AbstractConfigReader;
 
+import java.io.Closeable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +39,7 @@ import java.util.Map;
 /**
  * Abstract base class for defining configuration parsers.
  */
-public abstract class AbstractConfigParser {
+public abstract class AbstractConfigParser implements Closeable {
     /**
      * Configuration settings to be used by this parser.
      */

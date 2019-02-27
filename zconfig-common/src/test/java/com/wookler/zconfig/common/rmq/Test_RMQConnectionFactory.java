@@ -39,9 +39,9 @@ import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class RMQConnectionFactoryTest {
+class Test_RMQConnectionFactory {
     private static final String CONFIG_FILE =
-            "src/test/resources/zconfig-client.json";
+            "src/test/resources/json/zconfig-client.json";
     private static final String CONFIG_VERSION = "0.0";
     private static final String CONFIG_NAME = "zconfig-client";
     private static Configuration configuration;

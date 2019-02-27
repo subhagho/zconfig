@@ -44,7 +44,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class Test_JSONFileConfigWriter {
     private static final String JSON_FILE =
-            "src/test/resources/test-config.properties";
+            "src/test/resources/json/test-config.properties";
     private static final String TEMP_OUTDIR = "/tmp/zconfig/test/output";
 
     private static Configuration configuration = null;

@@ -42,9 +42,9 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 import static com.wookler.zconfig.common.LogUtils.*;
 
-class ConfigurationAnnotationProcessorTest {
+class Test_ConfigurationAnnotationProcessor {
     private static final String BASE_PROPS_FILE =
-            "src/test/resources/test-config.properties";
+            "src/test/resources/json/test-config.properties";
     private static Configuration configuration = null;
 
     @ConfigPath(path = "configuration.node_1.node_2")

@@ -37,7 +37,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ReflectionUtilsTest {
+class Test_ReflectionUtils {
     static class TestList {
         private List<String> strings;
         private ArrayList<Integer> ints;

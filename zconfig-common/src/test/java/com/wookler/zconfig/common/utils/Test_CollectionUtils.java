@@ -34,7 +34,7 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class CollectionUtilsTest {
+class Test_CollectionUtils {
 
 
     @Test

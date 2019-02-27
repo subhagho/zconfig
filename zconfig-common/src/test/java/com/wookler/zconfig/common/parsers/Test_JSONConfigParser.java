@@ -41,9 +41,9 @@ import static com.wookler.zconfig.common.LogUtils.*;
 
 class Test_JSONConfigParser {
     private static final String BASIC_PROPS_FILE =
-            "src/test/resources/test-config.properties";
+            "src/test/resources/json/test-config.properties";
     private static final String INCLUDED_PROPS_FILE =
-            "src/test/resources/test-config-include.properties";
+            "src/test/resources/json/test-config-include.properties";
 
     @Test
     void parseFromFile() {

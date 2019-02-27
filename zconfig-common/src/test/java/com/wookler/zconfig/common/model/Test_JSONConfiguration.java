@@ -42,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class Test_JSONConfiguration {
     private static final String BASE_PROPS_FILE =
-            "src/test/resources/test-config.properties";
+            "src/test/resources/json/test-config.properties";
     private static Configuration configuration = null;
 
     @BeforeAll

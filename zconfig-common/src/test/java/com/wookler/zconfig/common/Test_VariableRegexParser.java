@@ -34,9 +34,9 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static com.wookler.zconfig.common.LogUtils.*;
 
-class VariableRegexParserTest {
+class Test_VariableRegexParser {
     private static final Logger
-            LOG = LoggerFactory.getLogger(VariableRegexParserTest.class);
+            LOG = LoggerFactory.getLogger(Test_VariableRegexParser.class);
 
     @Test
     void hasVarable() {
