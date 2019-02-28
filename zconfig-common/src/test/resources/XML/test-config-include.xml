@@ -71,11 +71,8 @@
                 <PARAM_3>TEST_PARAM_3</PARAM_3>
                 <PARAM_4>TEST_PARAM_4</PARAM_4>
             </parameters>
-            <include>
-                <path>src/test/resources/test-config-included.json</path>
-                <configName>test-config-included</configName>
-                <type>File</type>
-                <version>0.2</version>
+            <include path="src/test/resources/XML/test-config-included.xml" configName="test-config-included"
+                     type="File" version="0.*">
             </include>
         </node_1>
     </configuration>

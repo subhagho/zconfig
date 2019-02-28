@@ -1,4 +1,5 @@
 com.wookler.zconfig.client
+com.wookler.zconfig.client.factory
 com.wookler.zconfig.common
 com.wookler.zconfig.common.model
 com.wookler.zconfig.common.model.annotations

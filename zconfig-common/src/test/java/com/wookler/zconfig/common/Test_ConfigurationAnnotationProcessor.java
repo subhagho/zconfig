@@ -47,6 +47,38 @@ class Test_ConfigurationAnnotationProcessor {
             "src/test/resources/json/test-config.properties";
     private static Configuration configuration = null;
 
+    @ConfigPath(path = ".")
+    public static class ModifiedBy {
+        @ConfigValue(name = "user")
+        private String name;
+        @ConfigValue(name = "timestamp")
+        private String timestamp;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getTimestamp() {
+            return timestamp;
+        }
+
+        public void setTimestamp(String timestamp) {
+            this.timestamp = timestamp;
+        }
+
+        @Override
+        public String toString() {
+            return "ModifiedBy{" +
+                    "name='" + name + '\'' +
+                    ", timestamp='" + timestamp + '\'' +
+                    '}';
+        }
+    }
+
     @ConfigPath(path = "configuration.node_1.node_2")
     public static class ConfigAnnotationsTest {
         @ConfigValue(required = true)
@@ -59,6 +91,10 @@ class Test_ConfigurationAnnotationProcessor {
         private double doubleValue;
         @ConfigValue(name = "node_3.node_4.TEST_LONG_LIST")
         private Set<Long> longListSet;
+        @ConfigValue(name = "updatedBy")
+        private ModifiedBy updatedBy;
+        @ConfigValue(name = "createdBy")
+        private ModifiedBy createdBy;
 
         public String getNodeName() {
             return nodeName;
@@ -100,6 +136,24 @@ class Test_ConfigurationAnnotationProcessor {
             this.longListSet = longListSet;
         }
 
+        public ModifiedBy getUpdatedBy() {
+            return updatedBy;
+        }
+
+        public void setUpdatedBy(
+                ModifiedBy updatedBy) {
+            this.updatedBy = updatedBy;
+        }
+
+        public ModifiedBy getCreatedBy() {
+            return createdBy;
+        }
+
+        public void setCreatedBy(
+                ModifiedBy createdBy) {
+            this.createdBy = createdBy;
+        }
+
         @Override
         public String toString() {
             return "ConfigAnnotationsTest{" +
@@ -108,6 +162,8 @@ class Test_ConfigurationAnnotationProcessor {
                     ", longValue=" + longValue +
                     ", doubleValue=" + doubleValue +
                     ", longListSet=" + longListSet +
+                    ", updatedBy=" + updatedBy +
+                    ", createdBy=" + createdBy +
                     '}';
         }
     }
@@ -131,7 +187,6 @@ class Test_ConfigurationAnnotationProcessor {
         assertNotNull(version);
 
         try (ConfigFileReader reader = new ConfigFileReader(filename)) {
-
             parser.parse("test-config", reader, null, version);
             configuration = parser.getConfiguration();
             assertNotNull(configuration);

@@ -247,43 +247,10 @@ public class JSONConfigParser extends AbstractConfigParser {
         rootConfigNode.setName(name);
         rootConfigNode.loading();
 
-        parseNodeHeader(node, rootConfigNode);
         configuration.setRootConfigNode(rootConfigNode);
 
         // Read the child nodes.
         parseChildNodes(rootConfigNode, node);
-    }
-
-    /**
-     * Parse the configuration node header information.
-     *
-     * @param node       - JSON node to read from.
-     * @param configNode - Configuration node to set header for.
-     * @throws ConfigurationException
-     */
-    private void parseNodeHeader(JsonNode node, AbstractConfigNode configNode)
-    throws ConfigurationException {
-        if (!(configNode instanceof ConfigElementNode)) {
-            return;
-        }
-        Iterator<Map.Entry<String, JsonNode>> nodes = node.fields();
-        if (nodes != null) {
-            while (nodes.hasNext()) {
-                Map.Entry<String, JsonNode> nn = nodes.next();
-                if (nn.getKey()
-                      .compareTo(JSONConfigConstants.CONFIG_HEADER_DESC) ==
-                        0) {
-                    JsonNode n = nn.getValue();
-                    if (n.getNodeType() != JsonNodeType.STRING) {
-                        throw new ConfigurationException(String.format(
-                                "Invalid node value : [expected type=%s][actual type=%s]",
-                                JsonNodeType.STRING.name(),
-                                n.getNodeType().name()));
-                    }
-                    configNode.setDescription(n.textValue());
-                }
-            }
-        }
     }
 
     /**
@@ -390,7 +357,7 @@ public class JSONConfigParser extends AbstractConfigParser {
                                                                 AbstractConfigNode parent,
                                                                 ArrayNode arrayNode)
     throws ConfigurationException {
-        setupNode(name, listNode, parent, arrayNode, false);
+        setupNode(name, listNode, parent);
         if (arrayNode.size() > 0) {
             for (int ii = 0; ii < arrayNode.size(); ii++) {
                 JsonNode nn = arrayNode.get(ii);
@@ -407,23 +374,15 @@ public class JSONConfigParser extends AbstractConfigParser {
      * @param name       - Node name.
      * @param configNode - Config node handle.
      * @param parent     - Parent config node.
-     * @param node       - JSON node to parse from.
-     * @param withHeader - Parse the header data for this node.
      * @throws ConfigurationException
      */
     private void setupNode(String name, AbstractConfigNode configNode,
-                           AbstractConfigNode parent, JsonNode node,
-                           boolean withHeader)
+                           AbstractConfigNode parent)
     throws ConfigurationException {
         configNode.setName(name);
         configNode.setParent(parent);
         configNode.setConfiguration(configuration);
-
-        if (configNode instanceof ConfigElementNode) {
-            ((ConfigElementNode) configNode).loading();
-            if (withHeader)
-                parseNodeHeader(node, configNode);
-        }
+        configNode.loading();
         addToParentNode(parent, configNode);
     }
 
@@ -434,14 +393,12 @@ public class JSONConfigParser extends AbstractConfigParser {
      * @param parent     - Parent config node.
      * @param configNode - New list node to setup.
      * @param node       - JSON node to parse from.
-     * @param withHeader - Parse the header data for this node.
      * @throws ConfigurationException
      */
     private void setupNodeWithChildren(String name, AbstractConfigNode parent,
-                                       AbstractConfigNode configNode, JsonNode node,
-                                       boolean withHeader)
+                                       AbstractConfigNode configNode, JsonNode node)
     throws ConfigurationException {
-        setupNode(name, configNode, parent, node, withHeader);
+        setupNode(name, configNode, parent);
         parseChildNodes(configNode, node);
     }
 
@@ -505,19 +462,19 @@ public class JSONConfigParser extends AbstractConfigParser {
                 configuration.getSettings().getPropertiesNodeName()) == 0) {
             ConfigPropertiesNode pn =
                     new ConfigPropertiesNode(configuration, parent);
-            setupNodeWithChildren(name, parent, pn, node, false);
+            setupNodeWithChildren(name, parent, pn, node);
             nn = pn;
         } else if (name.compareTo(
                 configuration.getSettings().getParametersNodeName()) == 0) {
             ConfigParametersNode pn =
                     new ConfigParametersNode(configuration, parent);
-            setupNodeWithChildren(name, parent, pn, node, false);
+            setupNodeWithChildren(name, parent, pn, node);
             nn = pn;
         } else if (name.compareTo(
                 configuration.getSettings().getAttributesNodeName()) == 0) {
             ConfigAttributesNode pn =
                     new ConfigAttributesNode(configuration, parent);
-            setupNodeWithChildren(name, parent, pn, node, false);
+            setupNodeWithChildren(name, parent, pn, node);
             nn = pn;
         } else if (name.compareTo(ConfigIncludeNode.NODE_NAME) == 0) {
             ConfigIncludeNode pn = new ConfigIncludeNode(configuration, parent);
@@ -543,7 +500,7 @@ public class JSONConfigParser extends AbstractConfigParser {
             nn = pn;
         } else {
             ConfigPathNode pn = new ConfigPathNode(configuration, parent);
-            setupNodeWithChildren(name, parent, pn, node, true);
+            setupNodeWithChildren(name, parent, pn, node);
             nn = pn;
         }
         return nn;
@@ -711,7 +668,7 @@ public class JSONConfigParser extends AbstractConfigParser {
                                    AbstractConfigNode parent,
                                    JsonNode jsonNode)
     throws ConfigurationException {
-        setupNode(name, node, parent, jsonNode, false);
+        setupNode(name, node, parent);
         Iterator<Map.Entry<String, JsonNode>> nnodes = jsonNode.fields();
         if (nnodes != null) {
             while (nnodes.hasNext()) {
@@ -773,7 +730,7 @@ public class JSONConfigParser extends AbstractConfigParser {
     private void setupIncludeNode(String name, ConfigIncludeNode node,
                                   AbstractConfigNode parent,
                                   JsonNode jsonNode) throws ConfigurationException {
-        setupNode(name, node, parent, jsonNode, false);
+        setupNode(name, node, parent);
         Iterator<Map.Entry<String, JsonNode>> nnodes = jsonNode.fields();
         if (nnodes != null) {
             while (nnodes.hasNext()) {
@@ -873,8 +830,16 @@ public class JSONConfigParser extends AbstractConfigParser {
             if (nparser.configuration != null) {
                 ConfigPathNode configPathNode =
                         nparser.configuration.getRootConfigNode();
-                node.setNode(configPathNode);
-                configPathNode.changeConfiguration(configuration);
+                if (parent instanceof ConfigPathNode) {
+                    ((ConfigPathNode) parent).addChildNode(configPathNode);
+                    configPathNode.changeConfiguration(configuration);
+                    node.setNode(configPathNode);
+                } else {
+                    throw new ConfigurationException(String.format(
+                            "Error adding include node : [expected parent=%s][actual parent=%s]",
+                            ConfigPathNode.class.getCanonicalName(),
+                            parent.getClass().getCanonicalName()));
+                }
             } else {
                 throw new ConfigurationException(String.format(
                         "Error loading included configuration. [URI=%s]",
@@ -1047,5 +1012,10 @@ public class JSONConfigParser extends AbstractConfigParser {
         modifiedBy.setTimestamp(dt);
 
         return modifiedBy;
+    }
+
+    @Override
+    public void close() throws IOException {
+
     }
 }

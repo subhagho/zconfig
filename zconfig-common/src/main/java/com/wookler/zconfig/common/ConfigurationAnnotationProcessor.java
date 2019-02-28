@@ -315,16 +315,26 @@ public class ConfigurationAnnotationProcessor {
                         name = field.getName();
                     }
 
-                    if (!ReflectionUtils.isPrimitiveTypeOrString(field)) {
+                    if (!canSetFieldType(field)) {
                         Class<?> ftype = field.getType();
                         String path = hasConfigAnnotation(ftype);
                         if (!Strings.isNullOrEmpty(path) &&
                                 (node instanceof ConfigPathNode)) {
-                            Object value = ftype.newInstance();
-                            value = readConfigAnnotations(ftype,
-                                                          (ConfigPathNode) node,
-                                                          value);
-                            ReflectionUtils.setObjectValue(target, field, value);
+                            if (path.equals(".")) {
+                                path = name;
+                            } else {
+                                path = String.format("%s.%s", path, name);
+                            }
+                            AbstractConfigNode cnode = node.find(path);
+                            if (cnode != null &&
+                                    (cnode instanceof ConfigPathNode)) {
+                                Object value = ftype.newInstance();
+                                value = readConfigAnnotations(ftype,
+                                                              (ConfigPathNode) cnode,
+                                                              value);
+                                ReflectionUtils
+                                        .setObjectValue(target, field, value);
+                            }
                         } else {
                             throw new ConfigurationException(String.format(
                                     "Parameter cannot be set for field of type = %s",
@@ -407,6 +417,21 @@ public class ConfigurationAnnotationProcessor {
     private static boolean canProcessFieldType(Field field) throws Exception {
         if (ReflectionUtils.isPrimitiveTypeOrString(field)) {
             return true;
+        } else if (canSetFieldType(field)) {
+            return true;
+        } else {
+            Class<?> type = field.getType();
+            String ann = hasConfigAnnotation(type);
+            if (!Strings.isNullOrEmpty(ann)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean canSetFieldType(Field field) throws Exception {
+        if (ReflectionUtils.isPrimitiveTypeOrString(field)) {
+            return true;
         } else if (ReflectionUtils
                 .implementsInterface(List.class, field.getType())) {
             Class<?> itype = ReflectionUtils.getGenericListType(field);
@@ -427,12 +452,6 @@ public class ConfigurationAnnotationProcessor {
             } else if (itype.equals(BigInteger.class) ||
                     itype.equals(BigDecimal.class) || itype.equals(
                     Date.class)) {
-                return true;
-            }
-        } else {
-            Class<?> type = field.getType();
-            String ann = hasConfigAnnotation(type);
-            if (!Strings.isNullOrEmpty(ann)) {
                 return true;
             }
         }

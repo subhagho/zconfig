@@ -28,6 +28,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.wookler.zconfig.common.parsers.AbstractConfigParser;
 import com.wookler.zconfig.common.parsers.JSONConfigParser;
+import com.wookler.zconfig.common.parsers.XMLConfigParser;
 import com.wookler.zconfig.common.readers.AbstractConfigReader;
 import com.wookler.zconfig.common.readers.ConfigFileReader;
 import com.wookler.zconfig.common.readers.ConfigURLReader;
@@ -110,7 +111,7 @@ public class ConfigProviderFactory {
             case JSON:
                 return new JSONConfigParser();
             case XML:
-                return null;
+                return new XMLConfigParser();
             default:
                 return null;
         }

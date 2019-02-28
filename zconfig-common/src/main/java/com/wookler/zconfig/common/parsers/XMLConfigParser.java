@@ -31,6 +31,8 @@ import com.wookler.zconfig.common.model.*;
 import com.wookler.zconfig.common.model.nodes.*;
 import com.wookler.zconfig.common.readers.AbstractConfigReader;
 import com.wookler.zconfig.common.readers.EReaderType;
+import com.wookler.zconfig.common.utils.IOUtils;
+import com.wookler.zconfig.common.utils.RemoteFileHelper;
 import org.joda.time.DateTime;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -41,14 +43,17 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
 
 /**
  * Configuration Parser implementation that reads the configuration from a XML file.
  */
-public class XmlConfigParser extends AbstractConfigParser {
+public class XMLConfigParser extends AbstractConfigParser {
     /**
      * Parse and load the configuration instance using the specified properties.
      *
@@ -79,6 +84,7 @@ public class XmlConfigParser extends AbstractConfigParser {
 
             try (InputStream stream = reader.getInputStream()) {
                 DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+                dbf.setValidating(true);
                 DocumentBuilder db = dbf.newDocumentBuilder();
                 Document doc = db.parse(stream);
 
@@ -103,15 +109,14 @@ public class XmlConfigParser extends AbstractConfigParser {
                         continue;
                     }
                     if (!(nn instanceof Element)) {
-                        throw new ConfigurationException(String.format(
-                                "Invalid Configuration Node : [expected=%s][actual=%s]",
-                                Element.class.getCanonicalName(),
-                                nn.getClass().getCanonicalName()));
+                        continue;
                     }
                     parseBody((Element) nn);
                     break;
                 }
                 configuration.validate();
+                doPostLoad();
+
                 configuration.getRootConfigNode().updateState(ENodeState.Synced);
             }
         } catch (SAXException e) {
@@ -149,10 +154,7 @@ public class XmlConfigParser extends AbstractConfigParser {
             for (int ii = 0; ii < children.getLength(); ii++) {
                 Node nn = children.item(ii);
                 if (!(nn instanceof Element)) {
-                    throw new ConfigurationException(String.format(
-                            "Invalid Configuration Node : [expected=%s][actual=%s]",
-                            Element.class.getCanonicalName(),
-                            nn.getClass().getCanonicalName()));
+                    continue;
                 }
                 parseNode((Element) nn, rootNode);
             }
@@ -166,8 +168,9 @@ public class XmlConfigParser extends AbstractConfigParser {
      * @param parent - Parent Config Node.
      * @throws ConfigurationException
      */
-    private void parseNode(Node node, AbstractConfigNode parent)
+    private void parseNode(Element node, AbstractConfigNode parent)
     throws ConfigurationException {
+        String name = node.getNodeName();
         short nodeListType = isListNode(node);
         if (nodeListType == Node.ELEMENT_NODE) {
             if (!(parent instanceof ConfigPathNode)) {
@@ -186,7 +189,7 @@ public class XmlConfigParser extends AbstractConfigParser {
                     new ConfigListElementNode(configuration, parent);
             nodeList.setName(node.getNodeName());
             ((ConfigPathNode) parent).addChildNode(nodeList);
-            parseChildren((Element) node, nodeList);
+            parseChildren(node, nodeList);
         } else if (nodeListType == Node.TEXT_NODE) {
             if (!(parent instanceof ConfigPathNode)) {
                 throw new ConfigurationException(String.format(
@@ -204,48 +207,83 @@ public class XmlConfigParser extends AbstractConfigParser {
                     new ConfigListValueNode(configuration, parent);
             nodeList.setName(node.getNodeName());
             ((ConfigPathNode) parent).addChildNode(nodeList);
-            parseChildren((Element) node, nodeList);
-        } else if (node.getNodeType() == Node.ELEMENT_NODE) {
-            if (!(parent instanceof ConfigPathNode)) {
-                throw new ConfigurationException(String.format(
-                        "Cannot add Config Node to parent : [parent=%s][path=%s]",
-                        parent.getClass().getCanonicalName(),
-                        parent.getAbsolutePath()));
-            }
-
-            String nodeName = node.getNodeName();
-            if (nodeName.compareTo(settings.getPropertiesNodeName()) == 0) {
-                ConfigPropertiesNode pnode =
-                        new ConfigPropertiesNode(configuration, parent);
-                ((ConfigPathNode) parent).addChildNode(pnode);
-                parseChildren((Element) node, pnode);
-            } else if (nodeName.compareTo(settings.getParametersNodeName()) == 0) {
-                ConfigParametersNode pnode =
-                        new ConfigParametersNode(configuration, parent);
-                ((ConfigPathNode) parent).addChildNode(pnode);
-                parseChildren((Element) node, pnode);
-            } else if (nodeName.compareTo(settings.getAttributesNodeName()) == 0) {
-                ConfigAttributesNode pnode =
-                        new ConfigAttributesNode(configuration, parent);
-                ((ConfigPathNode) parent).addChildNode(pnode);
-                parseChildren((Element) node, pnode);
-            } else if (nodeName.compareTo(ConfigIncludeNode.NODE_NAME) == 0) {
-                ConfigIncludeNode pnode =
-                        new ConfigIncludeNode(configuration, parent);
-                ((ConfigPathNode) parent).addChildNode(pnode);
-                parseIncludeNode((Element) node, pnode);
-            } else {
-                ConfigPathNode pnode = new ConfigPathNode(configuration, parent);
+            parseChildren(node, nodeList);
+        } else if (node.getNodeType() == Node.ELEMENT_NODE && !isTextNode(node)) {
+            if (parent instanceof ConfigListElementNode) {
+                ConfigPathNode pnode =
+                        new ConfigPathNode(configuration, parent);
                 pnode.setName(node.getNodeName());
-                ((ConfigPathNode) parent).addChildNode(pnode);
-                parseChildren((Element) node, pnode);
+                ((ConfigListElementNode) parent).addValue(pnode);
+                parseChildren(node, pnode);
+            } else {
+                if (!(parent instanceof ConfigPathNode)) {
+                    throw new ConfigurationException(String.format(
+                            "Cannot add Config Node to parent : [parent=%s][path=%s]",
+                            parent.getClass().getCanonicalName(),
+                            parent.getAbsolutePath()));
+                }
+
+                String nodeName = node.getNodeName();
+                if (nodeName.compareTo(settings.getPropertiesNodeName()) == 0) {
+                    ConfigPropertiesNode pnode =
+                            new ConfigPropertiesNode(configuration, parent);
+                    pnode.setName(settings.getPropertiesNodeName());
+                    ((ConfigPathNode) parent).addChildNode(pnode);
+                    parseChildren(node, pnode);
+                } else if (nodeName.compareTo(settings.getParametersNodeName()) ==
+                        0) {
+                    ConfigParametersNode pnode =
+                            new ConfigParametersNode(configuration, parent);
+                    pnode.setName(settings.getParametersNodeName());
+                    ((ConfigPathNode) parent).addChildNode(pnode);
+                    parseChildren(node, pnode);
+                } else if (nodeName.compareTo(settings.getAttributesNodeName()) ==
+                        0) {
+                    ConfigAttributesNode pnode =
+                            new ConfigAttributesNode(configuration, parent);
+                    pnode.setName(settings.getAttributesNodeName());
+                    ((ConfigPathNode) parent).addChildNode(pnode);
+                    parseChildren(node, pnode);
+                } else if (nodeName.compareTo(ConfigIncludeNode.NODE_NAME) == 0) {
+                    ConfigIncludeNode pnode =
+                            new ConfigIncludeNode(configuration, parent);
+                    ((ConfigPathNode) parent).addChildNode(pnode);
+                    parseIncludeNode(node, pnode);
+                } else if (nodeName.compareTo(ConfigResourceNode.NODE_NAME) == 0) {
+                    EResourceType type = parseResourceType(node);
+                    if (type == null) {
+                        throw ConfigurationException.propertyNotFoundException(
+                                ConfigResourceNode.NODE_RESOURCE_TYPE);
+                    }
+                    ConfigResourceFile pnode = null;
+                    if (type == EResourceType.FILE) {
+                        pnode = new ConfigResourceFile(configuration, parent);
+                        ((ConfigPathNode) parent).addChildNode(pnode);
+                        parseResourceFileNode(node, pnode);
+                    } else if (type == EResourceType.BLOB) {
+                        pnode = new ConfigResourceBlob(configuration, parent);
+                        ((ConfigPathNode) parent).addChildNode(pnode);
+                        parseResourceFileNode(node, pnode);
+                    } else if (type == EResourceType.DIRECTORY) {
+                        pnode = new ConfigResourceDirectory(configuration, parent);
+                        ((ConfigPathNode) parent).addChildNode(pnode);
+                        parseResourceDirNode(node, (ConfigResourceDirectory) pnode);
+                    }
+                    pnode.setName(nodeName);
+                } else {
+                    ConfigPathNode pnode =
+                            new ConfigPathNode(configuration, parent);
+                    pnode.setName(node.getNodeName());
+                    ((ConfigPathNode) parent).addChildNode(pnode);
+                    parseChildren(node, pnode);
+                }
             }
-        } else if (node.getNodeType() == Node.TEXT_NODE) {
+        } else if (node.getNodeType() == Node.ELEMENT_NODE && isTextNode(node)) {
             ConfigValueNode vn = new ConfigValueNode(configuration, parent);
             vn.setName(node.getNodeName());
-            String value = vn.getValue();
+            String value = node.getTextContent();
+            value = value.trim();
             if (!Strings.isNullOrEmpty(value)) {
-                value = value.trim();
                 vn.setValue(value);
             }
             if (parent instanceof ConfigPathNode) {
@@ -260,6 +298,209 @@ public class XmlConfigParser extends AbstractConfigParser {
                         "Cannot add ConfigValue to parent : [parent=%s][path=%s]",
                         parent.getClass().getCanonicalName(),
                         parent.getAbsolutePath()));
+            }
+        }
+    }
+
+    /**
+     * Extract and parse the resource node type.
+     *
+     * @param node - JsonNode to extract from.
+     * @return - Parsed Resource node type.
+     * @throws ConfigurationException
+     */
+    private EResourceType parseResourceType(Element node)
+    throws ConfigurationException {
+        String nt = node.getAttribute(ConfigResourceNode.NODE_RESOURCE_TYPE);
+        if (Strings.isNullOrEmpty(nt)) {
+            throw ConfigurationException.propertyNotFoundException(
+                    ConfigResourceNode.NODE_RESOURCE_TYPE);
+        }
+        return EResourceType.valueOf(nt);
+    }
+
+    /**
+     * Parse a Resource Directory node.
+     *
+     * @param node     - XML Node to parse
+     * @param resource - Config Directory resource handle.
+     * @throws ConfigurationException
+     */
+    private void parseResourceDirNode(Element node,
+                                      ConfigResourceDirectory resource)
+    throws ConfigurationException {
+        setupResourceNode(node, resource);
+        URI uri = resource.getLocation();
+        if (uri == null) {
+            throw ConfigurationException.propertyNotFoundException("location");
+        }
+        if (IOUtils.isLocalFile(uri)) {
+            File file = Paths.get(uri).toFile();
+            if (!file.exists()) {
+                throw new ConfigurationException(String.format(
+                        "Specified resource file not found : [path=%s]",
+                        file.getAbsolutePath()));
+            }
+            resource.setResourceHandle(file);
+        } else {
+            String localFilePath = IOUtils.urlToLocalFilePath(uri);
+            if (Strings.isNullOrEmpty(localFilePath)) {
+                throw new ConfigurationException(String.format(
+                        "Error converting URI to local path. [uri=%s]",
+                        uri.toString()));
+            }
+            String tdir = configuration.getInstancePath(localFilePath);
+            String filename =
+                    String.format("%s/%s", tdir, resource.getResourceName());
+            File file = new File(filename);
+            resource.setResourceHandle(file);
+            if (!file.exists()) {
+                if (configuration.getSettings().getDownloadRemoteFiles() ==
+                        ConfigurationSettings.EStartupOptions.OnStartUp) {
+                    EReaderType type =
+                            EReaderType.parseFromUri(resource.getLocation());
+                    Preconditions.checkNotNull(type);
+
+                    if (type == EReaderType.HTTP) {
+                        try {
+                            long bread = RemoteFileHelper
+                                    .downloadRemoteDirectory(resource.getLocation(),
+                                                             resource.getResourceHandle());
+                            if (bread <= 0) {
+                                throw new ConfigurationException(String.format(
+                                        "No bytes read for remote file. [url=%s]",
+                                        uri.toString()));
+                            }
+                        } catch (IOException e) {
+                            throw new ConfigurationException(e);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Parse a Resource File/Blob node.
+     *
+     * @param node     - XML Node to parse
+     * @param resource - Config File/Blob resource handle.
+     * @throws ConfigurationException
+     */
+    private void parseResourceFileNode(Element node, ConfigResourceFile resource)
+    throws ConfigurationException {
+        setupResourceNode(node, resource);
+        URI uri = resource.getLocation();
+        if (uri == null) {
+            throw ConfigurationException.propertyNotFoundException("location");
+        }
+        if (IOUtils.isLocalFile(uri)) {
+            File file = Paths.get(uri).toFile();
+            if (!file.exists()) {
+                throw new ConfigurationException(String.format(
+                        "Specified resource file not found : [path=%s]",
+                        file.getAbsolutePath()));
+            }
+            resource.setResourceHandle(file);
+        } else {
+            String localFilePath = IOUtils.urlToLocalFilePath(uri);
+            if (Strings.isNullOrEmpty(localFilePath)) {
+                throw new ConfigurationException(String.format(
+                        "Error converting URI to local path. [uri=%s]",
+                        uri.toString()));
+            }
+            String tdir = configuration.getInstancePath(localFilePath);
+            String filename =
+                    String.format("%s/%s", tdir, resource.getResourceName());
+            File file = new File(filename);
+            resource.setResourceHandle(file);
+            if (!file.exists()) {
+                if (configuration.getSettings().getDownloadRemoteFiles() ==
+                        ConfigurationSettings.EStartupOptions.OnStartUp) {
+                    EReaderType type =
+                            EReaderType.parseFromUri(resource.getLocation());
+                    Preconditions.checkNotNull(type);
+
+                    if (type == EReaderType.HTTP) {
+                        try {
+                            long bread = RemoteFileHelper
+                                    .downloadRemoteFile(resource.getLocation(),
+                                                        resource.getResourceHandle());
+                            if (bread <= 0) {
+                                throw new ConfigurationException(String.format(
+                                        "No bytes read for remote file. [url=%s]",
+                                        uri.toString()));
+                            }
+                            LogUtils.debug(getClass(), String.format(
+                                    "Downloaded remote file. [path=%s][size=%s]",
+                                    file.getAbsolutePath(), bread));
+                        } catch (IOException e) {
+                            throw new ConfigurationException(e);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Setup the common resource information.
+     *
+     * @param node     - XML Node to parse
+     * @param resource - Config resource handle.
+     * @throws ConfigurationException
+     */
+    private void setupResourceNode(Element node, ConfigResourceNode resource)
+    throws ConfigurationException {
+        if (!node.hasAttributes()) {
+            throw new ConfigurationException(
+                    String.format("No attributes found : [path=%s]",
+                                  node.toString()));
+        }
+        String attr = node.getAttribute(ConfigResourceNode.NODE_RESOURCE_TYPE);
+        if (Strings.isNullOrEmpty(attr)) {
+            throw ConfigurationException.propertyNotFoundException(
+                    ConfigResourceNode.NODE_RESOURCE_TYPE);
+        }
+        EResourceType type = EResourceType.valueOf(attr);
+        if (type == null) {
+            throw new ConfigurationException(String.format(
+                    "Invalid Resource Type : [type=%s]", attr));
+        }
+        resource.setType(type);
+
+        attr = node.getAttribute(ConfigResourceNode.NODE_RESOURCE_NAME);
+        if (Strings.isNullOrEmpty(attr)) {
+            throw ConfigurationException.propertyNotFoundException(
+                    ConfigResourceNode.NODE_RESOURCE_NAME);
+        }
+        resource.setResourceName(attr);
+        if (!node.hasChildNodes()) {
+            throw new ConfigurationException(
+                    String.format("No child nodes found : [path=%s]",
+                                  node.toString()));
+        }
+        NodeList children = node.getChildNodes();
+        for (int ii = 0; ii < children.getLength(); ii++) {
+            Node cnode = children.item(ii);
+            if (!isTextNode(cnode)) {
+                continue;
+            }
+            if (node instanceof Element) {
+                String name = cnode.getNodeName();
+                if (name.compareTo(ConfigResourceNode.NODE_RESOURCE_URL) == 0) {
+                    String url = cnode.getTextContent().trim();
+                    if (Strings.isNullOrEmpty(url)) {
+                        throw ConfigurationException.propertyNotFoundException(
+                                ConfigResourceNode.NODE_RESOURCE_URL);
+                    }
+                    try {
+                        resource.setLocation(new URI(url));
+                    } catch (URISyntaxException e) {
+                        throw new ConfigurationException(e);
+                    }
+                    break;
+                }
             }
         }
     }
@@ -321,7 +562,7 @@ public class XmlConfigParser extends AbstractConfigParser {
                     String.format("Error getting reader instance : [URI=%s]",
                                   uri.toString()));
         }
-        XmlConfigParser nparser = new XmlConfigParser();
+        XMLConfigParser nparser = new XMLConfigParser();
         nparser.parse(parent.getConfigName(), reader, settings,
                       parent.getVersion());
         if (nparser.configuration != null) {
@@ -349,9 +590,34 @@ public class XmlConfigParser extends AbstractConfigParser {
             NodeList nodeList = node.getChildNodes();
             for (int ii = 0; ii < nodeList.getLength(); ii++) {
                 Node nn = nodeList.item(ii);
-                parseNode(nn, parent);
+                if (nn.getNodeType() != Node.ELEMENT_NODE) {
+                    continue;
+                }
+                parseNode((Element) nn, parent);
             }
         }
+    }
+
+    /**
+     * Check if the node is basically a Text Node wrapper.
+     *
+     * @param node - Node to check.
+     * @return - Is Text Node?
+     */
+    private boolean isTextNode(Node node) {
+        if ((node instanceof Element) && node.hasChildNodes()) {
+            NodeList children = node.getChildNodes();
+            if (children.getLength() == 1) {
+                if (children.item(0).getNodeType() == Node.TEXT_NODE) {
+                    String value = children.item(0).getTextContent();
+                    // Empty element nodes also have empty text
+                    value = value.trim();
+                    if (!Strings.isNullOrEmpty(value))
+                        return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -372,20 +638,35 @@ public class XmlConfigParser extends AbstractConfigParser {
             if (children.getLength() > 1) {
                 short nodeType = -1;
                 String name = null;
+                int count = 0;
                 for (int ii = 0; ii < children.getLength(); ii++) {
                     Node nn = children.item(ii);
+                    if (nn.getNodeType() != Node.ELEMENT_NODE) {
+                        continue;
+                    }
+                    if (!nn.hasChildNodes()) {
+                        return -1;
+                    }
                     if (Strings.isNullOrEmpty(name)) {
                         name = nn.getNodeName();
                         nodeType = nn.getNodeType();
+                        if (isTextNode(nn)) {
+                            nodeType = Node.TEXT_NODE;
+                        }
                         continue;
                     }
                     short nt = nn.getNodeType();
+                    if (isTextNode(nn)) {
+                        nt = Node.TEXT_NODE;
+                    }
                     String nname = nn.getNodeName();
                     if (nodeType != nt || name.compareTo(nname) != 0) {
                         return -1;
                     }
+                    count++;
                 }
-                return nodeType;
+                if (count > 0)
+                    return nodeType;
             }
         }
         return -1;
@@ -520,5 +801,10 @@ public class XmlConfigParser extends AbstractConfigParser {
             return mb;
         }
         return null;
+    }
+
+    @Override
+    public void close() throws IOException {
+
     }
 }

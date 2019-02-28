@@ -120,7 +120,7 @@
                         "user": "subho",
                         "timestamp": "01.02.2019 12:32:19"
                     },
-                    "attributes": {
+                    "@": {
                         "ATTR_1": "TEST_ATTR_1",
                         "ATTR_2": "TEST_ATTR_2",
                         "ATTR_3": "TEST_ATTR_3",

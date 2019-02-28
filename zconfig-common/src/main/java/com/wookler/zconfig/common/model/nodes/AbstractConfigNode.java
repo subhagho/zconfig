@@ -32,6 +32,8 @@ import com.wookler.zconfig.common.model.Configuration;
 import com.wookler.zconfig.common.model.ENodeState;
 import com.wookler.zconfig.common.model.NodeState;
 
+import javax.annotation.Nonnull;
+
 /**
  * Abstract base node for defining configuration elements.
  */
@@ -59,11 +61,6 @@ public abstract class AbstractConfigNode {
      * Note: Name must be unique for a path.
      */
     private String name;
-
-    /**
-     * Description of this configuration element.
-     */
-    private String description;
 
 
     /**
@@ -115,24 +112,6 @@ public abstract class AbstractConfigNode {
      */
     public String getName() {
         return name;
-    }
-
-    /**
-     * Get the node description.
-     *
-     * @return - Node description.
-     */
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * Set the node description.
-     *
-     * @param description - Node description.
-     */
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     /**
@@ -219,7 +198,14 @@ public abstract class AbstractConfigNode {
      * @param path - Dot separated path.
      * @return - Node at path
      */
-    public AbstractConfigNode find(String path) {
+    public AbstractConfigNode find(@Nonnull String path) {
+        path = path.trim();
+        if (path.equals(".")) {
+            return this;
+        } else if (path.startsWith(".")) {
+            path = String.format("%s%s", getName(), path);
+        }
+
         String[] parts = path.split("\\.");
         if (parts.length > 0) {
             if (parts[0].compareTo(this.name) != 0) {

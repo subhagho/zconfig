@@ -232,7 +232,7 @@ public abstract class ConfigKeyValueNode extends ConfigElementNode {
      */
     @Override
     public String toString() {
-        return String.format("%s:[key/values=%s]", keyValues);
+        return String.format("%s:[key/values=%s]", getName(), keyValues);
     }
 
     /**

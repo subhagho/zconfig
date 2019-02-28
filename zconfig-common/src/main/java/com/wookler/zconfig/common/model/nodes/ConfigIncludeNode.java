@@ -90,6 +90,7 @@ public class ConfigIncludeNode extends ConfigElementNode {
      * Default constructor - Initialize the state object.
      */
     public ConfigIncludeNode() {
+        setName(NODE_NAME);
     }
 
     /**
@@ -102,6 +103,7 @@ public class ConfigIncludeNode extends ConfigElementNode {
             Configuration configuration,
             AbstractConfigNode parent) {
         super(configuration, parent);
+        setName(NODE_NAME);
     }
 
     /**

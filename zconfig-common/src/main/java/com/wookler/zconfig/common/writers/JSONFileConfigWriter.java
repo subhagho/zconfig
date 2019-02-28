@@ -224,7 +224,6 @@ public class JSONFileConfigWriter extends AbstractConfigWriter {
                     JSONConfigConstants.CONFIG_HEADER_NAME);
         }
         ObjectNode cnode = parent.putObject(node.getName());
-        addNodeHeader(node, cnode);
 
         if (node.getChildren() != null) {
             Map<String, AbstractConfigNode> nodes = node.getChildren();
@@ -243,7 +242,6 @@ public class JSONFileConfigWriter extends AbstractConfigWriter {
                     JSONConfigConstants.CONFIG_HEADER_NAME);
         }
         ObjectNode onode = parent.addObject();
-        addNodeHeader(node, onode);
         if (node.getChildren() != null) {
             Map<String, AbstractConfigNode> nodes = node.getChildren();
             if (!nodes.isEmpty()) {
@@ -296,20 +294,6 @@ public class JSONFileConfigWriter extends AbstractConfigWriter {
                     "Cannot add node to parent. [config node=%s][parent=%s]",
                     value.getClass().getCanonicalName(),
                     node.getNodeType().name()));
-        }
-    }
-
-    /**
-     * Add the header properties to the parent element for this node.
-     *
-     * @param node  - Configuration node.
-     * @param jnode - Parent Header node.
-     */
-    private void addNodeHeader(ConfigElementNode node, ObjectNode jnode) {
-
-        String desc = node.getDescription();
-        if (!Strings.isNullOrEmpty(desc)) {
-            jnode.put(JSONConfigConstants.CONFIG_HEADER_DESC, desc);
         }
     }
 
