@@ -290,11 +290,31 @@ public class ZConfigClientEnv extends ZConfigEnv {
     throws ConfigurationException {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(configName));
         Preconditions.checkArgument(version != null);
+        Preconditions.checkArgument(configType != null);
 
         String configPath =
                 getRemoteConfigurationPath(configName, version, configType);
         return configurationManager
                 .load(configName, configPath, configType, version);
+    }
+
+    /**
+     * Get an auto-wired instance of the specified type.
+     *
+     * @param type         - Auto-wired instance type.
+     * @param configName   - Configuration name to auto-wire from.
+     * @param relativePath - Relative search path.
+     * @param <T>          - Type to instantiate.
+     * @return - Auto-wired instance.
+     * @throws ConfigurationException
+     */
+    public <T> T autowireType(@Nonnull Class<T> type, @Nonnull String configName,
+                              String relativePath)
+    throws ConfigurationException {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(configName));
+        Preconditions.checkArgument(type != null);
+
+        return configurationManager.autowireType(type, configName, relativePath);
     }
 
     /**

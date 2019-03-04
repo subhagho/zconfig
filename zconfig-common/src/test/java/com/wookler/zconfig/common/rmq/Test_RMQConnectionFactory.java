@@ -29,6 +29,8 @@ import com.wookler.zconfig.common.ConfigurationException;
 import com.wookler.zconfig.common.LogUtils;
 import com.wookler.zconfig.common.model.Configuration;
 import com.wookler.zconfig.common.model.Version;
+import com.wookler.zconfig.common.model.nodes.AbstractConfigNode;
+import com.wookler.zconfig.common.model.nodes.ConfigPathNode;
 import com.wookler.zconfig.common.parsers.AbstractConfigParser;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -44,6 +46,7 @@ class Test_RMQConnectionFactory {
             "src/test/resources/json/zconfig-client.json";
     private static final String CONFIG_VERSION = "0.0";
     private static final String CONFIG_NAME = "zconfig-client";
+    private static final String CONFIG_RMQ_PATH = "zconfig.client";
     private static Configuration configuration;
 
     @BeforeAll
@@ -68,8 +71,12 @@ class Test_RMQConnectionFactory {
     @Test
     void open() {
         try {
+            AbstractConfigNode node = configuration.find(CONFIG_RMQ_PATH);
+            if (!(node instanceof ConfigPathNode)) {
+                throw new Exception("Invalid configuration node type.");
+            }
             RMQConnectionFactory factory = new RMQConnectionFactory();
-            factory.configure(configuration);
+            factory.configure((ConfigPathNode) node);
             factory.open("guest", "guest");
         } catch (Exception e) {
             LogUtils.error(getClass(), e);

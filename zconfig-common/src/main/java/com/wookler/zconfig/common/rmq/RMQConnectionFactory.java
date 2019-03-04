@@ -37,6 +37,8 @@ import com.wookler.zconfig.common.LogUtils;
 import com.wookler.zconfig.common.model.Configuration;
 import com.wookler.zconfig.common.model.annotations.ConfigParam;
 import com.wookler.zconfig.common.model.annotations.ConfigPath;
+import com.wookler.zconfig.common.model.nodes.ConfigPathNode;
+import org.apache.commons.lang3.NotImplementedException;
 
 import javax.annotation.Nonnull;
 import java.io.Closeable;
@@ -45,7 +47,7 @@ import java.io.IOException;
 /**
  * RabbitMQ Connection Factory - Class abstracts the RabbitMQ Connection.
  */
-@ConfigPath(path = "zconfig.client.rmq.settings")
+@ConfigPath(path = "*.rmq.settings")
 public class RMQConnectionFactory implements IConfigurable, Closeable {
     /**
      * Default Virtual Host value.
@@ -84,31 +86,41 @@ public class RMQConnectionFactory implements IConfigurable, Closeable {
     /**
      * Configure this type instance.
      *
-     * @param configuration - Handle to the configuration instance.
+     * @param node - Handle to the configuration node.
      * @throws ConfigurationException
      */
     @Override
-    public void configure(@Nonnull Configuration configuration)
+    public void configure(@Nonnull ConfigPathNode node)
     throws ConfigurationException {
-        Preconditions.checkArgument(configuration != null);
+        Preconditions.checkArgument(node != null);
         try {
             ConfigurationAnnotationProcessor
-                    .readConfigAnnotations(getClass(), configuration, this);
-            if (Strings.isNullOrEmpty(virtualHost)) {
-                virtualHost = DEFAULT_VIRTUAL_HOST;
-            }
-            if (Strings.isNullOrEmpty(hostname)) {
-                throw new ConfigurationException(
-                        String.format("Missing configuration parameter : [%s]",
-                                      "hostname"));
-            }
-            if (port <= 0) {
-                port = DEFAULT_PORT;
-            }
+                    .readConfigAnnotations(getClass(), node, this);
+            setup();
+
             state.setState(EClientState.Initialized);
         } catch (Exception e) {
             state.setError(e);
             throw new ConfigurationException(e);
+        }
+    }
+
+    /**
+     * Setup this factory instance.
+     *
+     * @throws ConfigurationException
+     */
+    private void setup() throws ConfigurationException {
+        if (Strings.isNullOrEmpty(virtualHost)) {
+            virtualHost = DEFAULT_VIRTUAL_HOST;
+        }
+        if (Strings.isNullOrEmpty(hostname)) {
+            throw new ConfigurationException(
+                    String.format("Missing configuration parameter : [%s]",
+                                  "hostname"));
+        }
+        if (port <= 0) {
+            port = DEFAULT_PORT;
         }
     }
 

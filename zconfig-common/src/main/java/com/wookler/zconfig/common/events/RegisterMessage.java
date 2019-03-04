@@ -17,27 +17,39 @@
  * under the License.
  *
  * Copyright (c) $year
- * Date: 10/2/19 6:34 PM
+ * Date: 4/3/19 9:54 PM
  * Subho Ghosh (subho dot ghosh at outlook.com)
  *
  */
 
-package com.wookler.zconfig.common;
+package com.wookler.zconfig.common.events;
 
-import com.wookler.zconfig.common.model.nodes.ConfigPathNode;
-
-import javax.annotation.Nonnull;
+import com.wookler.zconfig.common.ZConfigInstance;
 
 /**
- * Interface to be implemented by types that can be configurable using a configuration
- * instance.
+ * Message Body to be send during instance registration.
  */
-public interface IConfigurable {
+public class RegisterMessage {
     /**
-     * Configure this type instance.
-     *
-     * @param node - Handle to the configuration node.
-     * @throws ConfigurationException
+     * Instance handle.
      */
-    void configure(@Nonnull ConfigPathNode node) throws ConfigurationException;
+    private ZConfigInstance instance;
+
+    /**
+     * Get instance handle.
+     *
+     * @return - Instance handle.
+     */
+    public ZConfigInstance getInstance() {
+        return instance;
+    }
+
+    /**
+     * Set instance handle.
+     *
+     * @param instance - Instance handle.
+     */
+    public void setInstance(ZConfigInstance instance) {
+        this.instance = instance;
+    }
 }

@@ -29,6 +29,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.wookler.zconfig.common.model.*;
 import com.wookler.zconfig.common.model.nodes.*;
+import com.wookler.zconfig.common.utils.ConfigUtils;
 import com.wookler.zconfig.common.utils.IUniqueIDGenerator;
 import com.wookler.zconfig.core.IConfigDAO;
 import com.wookler.zconfig.core.PersistenceException;
@@ -412,7 +413,9 @@ public class ZkConfigDAO implements IConfigDAO {
         IUniqueIDGenerator idGenerator = ZConfigCoreEnv.get().getIdGenerator();
         zkNode.setId(idGenerator.generateStringId(null));
         zkNode.setName(node.getName());
-        zkNode.setDescription(node.getDescription());
+        String desc = ConfigUtils.getDescription(node);
+        if (!Strings.isNullOrEmpty(desc))
+            zkNode.setDescription(desc);
         zkNode.setParent(configNode);
         zkNode.setOwner(owner);
         zkNode.setUpdated(owner);

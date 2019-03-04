@@ -227,14 +227,6 @@ public abstract class AbstractConfigNode {
             if (parts[0].equals("*")) {
                 parts[0] = this.name;
             }
-            if (parts[0].compareTo(this.name) != 0) {
-                String[] nparts = new String[parts.length + 1];
-                nparts[0] = this.name;
-                for (int ii = 0; ii < parts.length; ii++) {
-                    nparts[ii + 1] = parts[ii];
-                }
-                parts = nparts;
-            }
             return find(parts, 0);
         }
         return null;

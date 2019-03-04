@@ -17,16 +17,16 @@
  * under the License.
  *
  * Copyright (c) $year
- * Date: 4/3/19 2:50 PM
+ * Date: 4/3/19 8:01 PM
  * Subho Ghosh (subho dot ghosh at outlook.com)
  *
  */
 
-package com.wookler.zconfig.client;
+package com.wookler.zconfig.client.listeners;
 
+import com.wookler.zconfig.client.ZConfigClientEnv;
 import com.wookler.zconfig.client.factory.ConfigurationManager;
-import com.wookler.zconfig.common.ConfigurationException;
-import com.wookler.zconfig.common.LogUtils;
+import com.wookler.zconfig.common.*;
 import com.wookler.zconfig.common.events.ConfigUpdateBatch;
 import com.wookler.zconfig.common.model.Configuration;
 import com.wookler.zconfig.common.model.ESyncMode;
@@ -36,7 +36,8 @@ import javax.annotation.Nonnull;
 /**
  * Abstract base class to define configuration update listeners.
  */
-public abstract class AbstractUpdateListener implements Runnable {
+public abstract class AbstractUpdateListener implements Runnable, IConfigurable {
+    protected ClientState state = new ClientState();
 
     /**
      * Execute the batch update.
@@ -56,5 +57,9 @@ public abstract class AbstractUpdateListener implements Runnable {
         } catch (Exception e) {
             LogUtils.error(getClass(), e);
         }
+    }
+
+    public void shutdown() {
+        state.setState(EClientState.Disposed);
     }
 }
