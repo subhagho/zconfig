@@ -81,6 +81,7 @@ class Test_JSONConfiguration {
             assertNotNull(node);
             assertTrue(node instanceof ConfigListElementNode);
             assertEquals(4, ((ConfigListElementNode) node).size());
+            assertEquals(path, node.getSearchPath());
             LogUtils.debug(getClass(), node.getAbsolutePath());
         } catch (Throwable e) {
             error(getClass(), e);
@@ -96,6 +97,7 @@ class Test_JSONConfiguration {
             AbstractConfigNode node = configuration.find(path);
             assertNotNull(node);
             assertTrue(node instanceof ConfigListValueNode);
+            assertEquals(path, node.getSearchPath());
 
             ConfigListValueNode nl = (ConfigListValueNode) node;
             assertEquals(8, nl.size());
@@ -113,6 +115,7 @@ class Test_JSONConfiguration {
             AbstractConfigNode node = configuration.find(path);
             assertNotNull(node);
             assertTrue(node instanceof ConfigPropertiesNode);
+            assertEquals(path, node.getSearchPath());
 
             path = "$PROP_1";
             node = configuration.find(node, path);
@@ -134,6 +137,7 @@ class Test_JSONConfiguration {
             AbstractConfigNode node = configuration.find(path);
             assertNotNull(node);
             assertTrue(node instanceof ConfigParametersNode);
+            assertEquals(path, node.getSearchPath());
 
             path = "#PARAM_1";
             node = configuration.find(node, path);
@@ -161,6 +165,7 @@ class Test_JSONConfiguration {
             AbstractConfigNode node = configuration.find(path);
             assertNotNull(node);
             assertTrue(node instanceof ConfigAttributesNode);
+            assertEquals(path, node.getSearchPath());
 
             path = "@ATTRIBUTE_4";
             node = configuration.find(node, path);
@@ -182,6 +187,7 @@ class Test_JSONConfiguration {
             AbstractConfigNode node = configuration.find(path);
             assertNotNull(node);
             assertTrue(node instanceof ConfigListElementNode);
+            assertEquals(path, node.getSearchPath());
             assertEquals(4, ((ConfigListElementNode) node).size());
 
             path = "TEST_ELEMENT_LIST.2.string_2";

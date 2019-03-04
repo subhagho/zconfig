@@ -183,6 +183,22 @@ public abstract class AbstractConfigNode {
     }
 
     /**
+     * Get the Search path to reach this node.
+     *
+     * @return - Node search path.
+     */
+    public String getSearchPath() {
+        String path = null;
+        if (parent != null) {
+            path = parent.getSearchPath();
+            path = String.format("%s.%s", path, name);
+        } else {
+            path = String.format("%s", name);
+        }
+        return path;
+    }
+
+    /**
      * Override default toString().
      *
      * @return - Node name.

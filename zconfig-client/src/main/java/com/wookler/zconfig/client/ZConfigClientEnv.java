@@ -26,6 +26,7 @@ package com.wookler.zconfig.client;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.wookler.zconfig.client.factory.ConfigurationManager;
 import com.wookler.zconfig.common.*;
 import com.wookler.zconfig.common.model.Version;
 import com.wookler.zconfig.common.parsers.AbstractConfigParser;
@@ -45,6 +46,17 @@ public class ZConfigClientEnv extends ZConfigEnv {
      * Client instance handle.
      */
     private ZConfigClientInstance instance;
+
+    /**
+     * Configuration manager instance.
+     */
+    private ConfigurationManager configurationManager = new ConfigurationManager();
+
+    /**
+     * Update listener instance.
+     */
+    private ConfigurationUpdateHandler updateHandler =
+            new ConfigurationUpdateHandler();
 
     /**
      * Default constructor - Sets the name of the config.
@@ -79,6 +91,24 @@ public class ZConfigClientEnv extends ZConfigEnv {
         } catch (Exception e) {
             throw new ConfigurationException(e);
         }
+    }
+
+    /**
+     * Get the handle to the configuration manager.
+     *
+     * @return - Configuration Manager instance.
+     */
+    public ConfigurationManager getConfigurationManager() {
+        return configurationManager;
+    }
+
+    /**
+     * Get the handle to the configuration update listener.
+     *
+     * @return - Configuration Update Listener.
+     */
+    public ConfigurationUpdateHandler getUpdateHandler() {
+        return updateHandler;
     }
 
     /**

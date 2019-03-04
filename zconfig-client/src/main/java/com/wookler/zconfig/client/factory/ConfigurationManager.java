@@ -25,15 +25,19 @@
 package com.wookler.zconfig.client.factory;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.*;
 import com.wookler.zconfig.common.ConfigProviderFactory;
 import com.wookler.zconfig.common.ConfigurationAnnotationProcessor;
 import com.wookler.zconfig.common.ConfigurationException;
 import com.wookler.zconfig.common.model.Configuration;
 import com.wookler.zconfig.common.model.ConfigurationSettings;
+import com.wookler.zconfig.common.model.ESyncMode;
 import com.wookler.zconfig.common.model.Version;
 
 import javax.annotation.Nonnull;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -41,11 +45,18 @@ import java.util.concurrent.locks.ReentrantLock;
  * Class loads and manages configuration instances and annotated class instances.
  */
 public class ConfigurationManager {
+    private static class AutowiredType {
+        public String relativePath;
+        public Class<?> type;
+    }
+
     private ConfigurationLoader loader = new ConfigurationLoader();
     private Map<String, Configuration> loadedConfigs = new HashMap<>();
-    private Map<Class<?>, Object> autowiredInstances = new HashMap<>();
+    private Map<String, Object> autowiredInstances = new HashMap<>();
     private ReentrantLock configCacheLock = new ReentrantLock();
     private ReentrantLock autowireCacheLock = new ReentrantLock();
+    private Map<String, ReentrantLock> configInstanceLocks = new HashMap<>();
+    private Multimap<String, AutowiredType> autowiredIndex = HashMultimap.create();
 
     /**
      * Load configuration from the specified URI.
@@ -77,6 +88,7 @@ public class ConfigurationManager {
                                   settings);
                     if (configuration != null) {
                         loadedConfigs.put(configName, configuration);
+                        configInstanceLocks.put(configName, new ReentrantLock());
                     } else {
                         throw new ConfigurationException(String.format(
                                 "Configuration not found : [name=%s][uri=%s][version=%s]",
@@ -136,6 +148,7 @@ public class ConfigurationManager {
                             .load(configName, filename, version, settings);
                     if (configuration != null) {
                         loadedConfigs.put(configName, configuration);
+                        configInstanceLocks.put(configName, new ReentrantLock());
                     } else {
                         throw new ConfigurationException(String.format(
                                 "Configuration not found : [name=%s][file=%s][version=%s]",
@@ -180,51 +193,222 @@ public class ConfigurationManager {
     }
 
     /**
+     * Get a configuration handle and lock it for updates.
+     *
+     * @param configName - Configuration name.
+     * @return - Configuration handle.
+     */
+    public Configuration getWithLock(@Nonnull String configName) {
+        Configuration config = get(configName);
+        if (config != null) {
+            ReentrantLock lock = configInstanceLocks.get(configName);
+            lock.lock();
+        }
+        return config;
+    }
+
+    /**
+     * Unlock the configuration lock handle.
+     *
+     * @param configName - Configuration name.
+     * @return - Was unlocked?
+     * @throws ConfigurationException
+     */
+    public boolean releaseLock(String configName) {
+        ReentrantLock lock = configInstanceLocks.get(configName);
+        if (lock != null) {
+            if (lock.isLocked()) {
+                if (lock.isHeldByCurrentThread()) {
+                    lock.unlock();
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Apply configuration updates to any registered Auto-wired types.
+     *
+     * @param configName - Configuration name.
+     * @param paths      - List of updated paths.
+     * @throws ConfigurationException
+     */
+    public void applyConfigurationUpdates(String configName, List<String> paths)
+    throws ConfigurationException {
+        Configuration config = loadedConfigs.get(configName);
+        if (config != null && config.getSyncMode() == ESyncMode.EVENTS) {
+            Map<String, AutowiredType> updated = getUpdatedTypes(configName, paths);
+            if (updated != null && !updated.isEmpty()) {
+                for (String key : updated.keySet()) {
+                    AutowiredType type = updated.get(key);
+                    autowireType(type.type, configName, type.relativePath, true);
+                }
+            }
+        }
+    }
+
+    /**
+     * Resolve the auto-wired types that need to be updated due to the configuration updates.
+     *
+     * @param configName - Configuration name.
+     * @param paths      - List of updated node paths.
+     * @return - Map of types needing update.
+     */
+    private Map<String, AutowiredType> getUpdatedTypes(String configName,
+                                                       List<String> paths) {
+        Map<String, AutowiredType> map = new HashMap<>();
+        for (String path : paths) {
+            String indexKey = getTypeIndexKey(path, configName);
+            if (autowiredIndex.containsKey(indexKey)) {
+                Collection<AutowiredType> types = autowiredIndex.get(indexKey);
+                for (AutowiredType type : types) {
+                    String key =
+                            String.format("%s::%s", type.type.getCanonicalName(),
+                                          type.relativePath);
+                    if (!map.containsKey(key)) {
+                        map.put(key, type);
+                    }
+                }
+            }
+        }
+        return map;
+    }
+
+    /**
      * Create a new instance or Get a cached copy of the specified type. Types are
      * expected to be POJOs with empty constructors.
      *
-     * @param type       - Class type to create instance of.
-     * @param configName - Configuration name to autowire from.
-     * @param <T>        - Type.
+     * @param type         - Class type to create instance of.
+     * @param configName   - Configuration name to autowire from.
+     * @param relativePath - Relative Search path to prepend to the search.
+     * @param <T>          - Type.
+     * @return - Type instance.
+     * @throws ConfigurationException
+     */
+    public <T> T autowireType(@Nonnull Class<? extends T> type,
+                              @Nonnull String configName,
+                              String relativePath)
+    throws ConfigurationException {
+        return autowireType(type, configName, relativePath, false);
+    }
+
+    /**
+     * Create a new instance or Get a cached copy of the specified type. Types are
+     * expected to be POJOs with empty constructors.
+     *
+     * @param type         - Class type to create instance of.
+     * @param configName   - Configuration name to autowire from.
+     * @param relativePath - Relative Search path to prepend to the search.
+     * @param update       - Update the autowired instance.
+     * @param <T>          - Type.
      * @return - Type instance.
      * @throws ConfigurationException
      */
     @SuppressWarnings("unchecked")
-    public <T> T autowireType(Class<? extends T> type, String configName)
+    private <T> T autowireType(@Nonnull Class<? extends T> type,
+                               @Nonnull String configName,
+                               String relativePath,
+                               boolean update)
     throws ConfigurationException {
-        if (autowiredInstances.containsKey(type)) {
-            return (T) autowiredInstances.get(type);
-        }
-        try {
-            autowireCacheLock.lock();
-            try {
-                if (autowiredInstances.containsKey(type)) {
-                    return (T) autowiredInstances.get(type);
-                }
-                Configuration config = loadedConfigs.get(configName);
-                if (config != null) {
-                    String path =
-                            ConfigurationAnnotationProcessor
-                                    .hasConfigAnnotation(type);
-                    if (!Strings.isNullOrEmpty(path)) {
-                        T value = type.newInstance();
-                        ConfigurationAnnotationProcessor
-                                .readConfigAnnotations(type, config, value);
-                        autowiredInstances.put(type, value);
-                        return value;
-                    }
-                } else {
-                    throw new ConfigurationException(String.format(
-                            "Specified configuration not found. [name=%s]",
-                            configName));
-                }
-            } finally {
-                autowireCacheLock.unlock();
+        String key = getTypeKey(type, relativePath, configName);
+        if (!Strings.isNullOrEmpty(key)) {
+            if (!update && autowiredInstances.containsKey(key)) {
+                return (T) autowiredInstances.get(key);
             }
-        } catch (IllegalAccessException e) {
-            throw new ConfigurationException(e);
-        } catch (InstantiationException e) {
-            throw new ConfigurationException(e);
+            try {
+                autowireCacheLock.lock();
+                try {
+                    if (autowiredInstances.containsKey(key) && !update) {
+                        return (T) autowiredInstances.get(key);
+                    }
+                    Configuration config = loadedConfigs.get(configName);
+                    if (config != null) {
+                        String path =
+                                getSearchPath(type, relativePath);
+                        if (!Strings.isNullOrEmpty(path)) {
+                            T value = null;
+                            if (update) {
+                                value = (T) autowiredInstances.get(key);
+                            } else
+                                value = type.newInstance();
+                            ConfigurationAnnotationProcessor
+                                    .readConfigAnnotations(type, config, value);
+                            autowiredInstances.put(key, value);
+                            if (config.getSyncMode() == ESyncMode.EVENTS &&
+                                    !update) {
+                                AutowiredType at = new AutowiredType();
+                                at.relativePath = relativePath;
+                                at.type = type;
+                                autowiredIndex
+                                        .put(getTypeIndexKey(path, configName),
+                                             at);
+                            }
+                            return value;
+                        }
+                    } else {
+                        throw new ConfigurationException(String.format(
+                                "Specified configuration not found. [name=%s]",
+                                configName));
+                    }
+                } finally {
+                    autowireCacheLock.unlock();
+                }
+            } catch (IllegalAccessException e) {
+                throw new ConfigurationException(e);
+            } catch (InstantiationException e) {
+                throw new ConfigurationException(e);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get the index key to index this type instance for updates.
+     *
+     * @param path       - Search path for this type instance.
+     * @param configname - Configuration name.
+     * @return - Index Key.
+     */
+    private String getTypeIndexKey(String path, String configname) {
+        return String.format("%s::%s", configname, path);
+    }
+
+    /**
+     * Get the key to add this autowired instance to.
+     *
+     * @param type         - Object type.
+     * @param reletivePath - Relative path to search from.
+     * @param configname   - Configuration instance name.
+     * @return - Index Key.
+     */
+    private String getTypeKey(Class<?> type, String reletivePath,
+                              String configname) {
+        String path = getSearchPath(type, reletivePath);
+        if (!Strings.isNullOrEmpty(path)) {
+            return String
+                    .format("%s::%s::%s", type.getCanonicalName(), configname,
+                            path);
+        }
+        return null;
+    }
+
+    /**
+     * Get the search path for this type.
+     *
+     * @param type         - Type instance to autowire.
+     * @param reletivePath - Relative search path.
+     * @return - Search path.
+     */
+    private String getSearchPath(Class<?> type, String reletivePath) {
+        String path = ConfigurationAnnotationProcessor
+                .hasConfigAnnotation(type);
+        if (!Strings.isNullOrEmpty(path)) {
+            if (Strings.isNullOrEmpty(reletivePath)) {
+                return path;
+            } else {
+                return String.format("%s.%s", path, reletivePath);
+            }
         }
         return null;
     }

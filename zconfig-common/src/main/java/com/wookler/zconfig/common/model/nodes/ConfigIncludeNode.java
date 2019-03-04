@@ -294,4 +294,17 @@ public class ConfigIncludeNode extends ConfigElementNode {
     public void changeConfiguration(Configuration configuration) {
         setConfiguration(configuration);
     }
+
+    /**
+     * Get the Search path to reach this node.
+     *
+     * @return - Node search path.
+     */
+    @Override
+    public String getSearchPath() {
+        Preconditions.checkNotNull(getParent());
+        Preconditions.checkNotNull(node);
+        String path = getParent().getSearchPath();
+        return String.format("%s.%s", path, node.getName());
+    }
 }

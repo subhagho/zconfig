@@ -133,4 +133,16 @@ public class ConfigPropertiesNode extends ConfigKeyValueNode {
     public AbstractConfigNode find(String[] path, int index) {
         return find(path, index, NODE_ABBR_PREFIX);
     }
+
+    /**
+     * Get the Search path to reach this node.
+     *
+     * @return - Node search path.
+     */
+    @Override
+    public String getSearchPath() {
+        Preconditions.checkNotNull(getParent());
+        String path = getParent().getSearchPath();
+        return String.format("%s%s", path, NODE_ABBR_PREFIX);
+    }
 }
