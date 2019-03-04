@@ -25,10 +25,12 @@
 package com.wookler.zconfig.core.controller;
 
 import com.wookler.zconfig.common.ConfigurationException;
+import com.wookler.zconfig.common.events.AbstractConfigUpdateEvent;
+import com.wookler.zconfig.common.events.ConfigServerUpdateBatch;
+import com.wookler.zconfig.common.events.ConfigServerUpdateEvent;
 import com.wookler.zconfig.common.model.Configuration;
 import com.wookler.zconfig.common.model.Version;
 import com.wookler.zconfig.common.utils.IUniqueIDGenerator;
-import com.wookler.zconfig.common.utils.ReflectionUtils;
 import com.wookler.zconfig.core.*;
 import com.wookler.zconfig.core.model.*;
 import com.wookler.zconfig.core.model.nodes.PersistedConfigListValueNode;
@@ -142,47 +144,49 @@ public class ZConfigPersistenceController {
 
     }
 
-    public int update(@Nonnull String transactionId, @Nonnull String group,
-                      @Nonnull String application,
-                      @Nonnull String config,
-                      @Nonnull String version,
-                      @Nonnull List<ConfigUpdateEvent> eventBatch,
+    public int update(@Nonnull ConfigServerUpdateBatch batch,
                       @Nonnull Principal user) throws PersistenceException {
         try {
-            if (eventBatch.size() > 0) {
-                Version v = Version.parse(version);
+            if (batch.size() > 0) {
+                Version v = Version.parse(batch.getHeader().getPreVersion());
                 try (CuratorFramework client = ZkUtils.getZkClient()) {
                     ApplicationGroup appGroup =
-                            configDAO.readApplicationGroup(client, group);
+                            configDAO.readApplicationGroup(client, batch.getHeader()
+                                                                        .getGroup());
                     if (appGroup == null) {
                         throw new PersistenceException(
                                 String.format(
                                         "Application Group not found. [group=%s]",
-                                        group));
+                                        batch.getHeader().getGroup()));
                     }
                     Application app =
                             configDAO
-                                    .readApplication(client, appGroup, application);
+                                    .readApplication(client, appGroup,
+                                                     batch.getHeader()
+                                                          .getApplication());
                     if (app == null) {
                         throw new PersistenceException(
                                 String.format(
                                         "Application not found. [application=%s]",
-                                        application));
+                                        batch.getHeader().getApplication()));
                     }
                     PersistedConfigNode configNode =
-                            configDAO.readConfigHeader(client, app, config, v);
+                            configDAO.readConfigHeader(client, app,
+                                                       batch.getHeader()
+                                                            .getConfigName(), v);
                     if (configNode == null) {
                         throw new PersistenceException(
                                 String.format(
                                         "Configuration not found. [configuration=%s][version=%s]",
-                                        application, v.toString()));
+                                        batch.getHeader().getConfigName(),
+                                        v.toString()));
                     }
                     int updateCount = 0;
                     Version updateVersion = new Version(
                             configNode.getCurrentVersion().getMajorVersion(),
                             configNode.getCurrentVersion().getMajorVersion() + 1);
 
-                    for (ConfigUpdateEvent event : eventBatch) {
+                    for (ConfigServerUpdateEvent event : batch.getEvents()) {
                         if (event.getGroup().compareTo(appGroup.getName()) != 0) {
                             throw new PersistenceException(String.format(
                                     "Invalid Update Event : Application Group doesn't match. [expected=%s][actual=%s]",
@@ -193,35 +197,35 @@ public class ZConfigPersistenceController {
                                     "Invalid Update Event : Application doesn't match. [expected=%s][actual=%s]",
                                     app.getName(), event.getApplication()));
                         }
-                        if (event.getConfig().compareTo(configNode.getName()) !=
+                        if (event.getConfigName().compareTo(configNode.getName()) !=
                                 0) {
                             throw new PersistenceException(String.format(
                                     "Invalid Update Event : Configuration doesn't match. [expected=%s][actual=%s]",
-                                    configNode.getName(), event.getConfig()));
+                                    configNode.getName(), event.getConfigName()));
                         }
-                        Version ev = Version.parse(event.getVersion());
+                        Version ev = Version.parse(event.getPreVersion());
                         if (!ev.equals(v)) {
                             throw new PersistenceException(String.format(
                                     "Invalid Update Event : Version doesn't match. [expected=%s][actual=%s]",
                                     v.toString(), ev.toString()));
                         }
                         boolean ret = false;
-                        switch (event.getOperation()) {
-                            case ADD:
+                        switch (event.getEventType()) {
+                            case Add:
                                 ret =
                                         addConfigNode(client, appGroup, app,
                                                       configNode, updateVersion,
                                                       event, user);
                                 if (ret) updateCount++;
                                 break;
-                            case UPDATE:
+                            case Update:
                                 ret =
                                         updateConfigNode(client, appGroup, app,
                                                          configNode, updateVersion,
                                                          event, user);
                                 if (ret) updateCount++;
                                 break;
-                            case DELETE:
+                            case Remove:
                                 ret =
                                         deleteConfigNode(client, appGroup, app,
                                                          configNode,
@@ -255,7 +259,7 @@ public class ZConfigPersistenceController {
                                   @Nonnull Application application,
                                   @Nonnull PersistedConfigNode configNode,
                                   @Nonnull Version updateVersion,
-                                  @Nonnull ConfigUpdateEvent event,
+                                  @Nonnull ConfigServerUpdateEvent event,
                                   @Nonnull Principal user)
     throws PersistenceException {
         try {
@@ -311,7 +315,7 @@ public class ZConfigPersistenceController {
 
     private void setupNodeInfo(PersistedConfigPathNode node,
                                PersistedConfigNode configNode,
-                               ConfigUpdateEvent event, Principal user,
+                               ConfigServerUpdateEvent event, Principal user,
                                Version updateVersion) throws ServiceEnvException {
         IUniqueIDGenerator idGenerator = ZConfigCoreEnv.get().getIdGenerator();
         ModifiedBy<String> owner = new ModifiedBy<>(user.getName());
@@ -329,7 +333,7 @@ public class ZConfigPersistenceController {
                                      @Nonnull Application application,
                                      @Nonnull PersistedConfigNode configNode,
                                      @Nonnull Version updateVersion,
-                                     @Nonnull ConfigUpdateEvent event,
+                                     @Nonnull ConfigServerUpdateEvent event,
                                      @Nonnull Principal user)
     throws PersistenceException {
         try {
@@ -376,7 +380,8 @@ public class ZConfigPersistenceController {
                                      @Nonnull ApplicationGroup group,
                                      @Nonnull Application application,
                                      @Nonnull PersistedConfigNode configNode,
-                                     ConfigUpdateEvent event, Principal user)
+                                     AbstractConfigUpdateEvent event,
+                                     Principal user)
     throws PersistenceException {
         return false;
     }

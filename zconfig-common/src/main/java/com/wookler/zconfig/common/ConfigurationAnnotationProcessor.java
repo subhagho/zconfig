@@ -204,7 +204,7 @@ public class ConfigurationAnnotationProcessor {
                                          Field field)
     throws ConfigurationException {
         try {
-            if (canProcessFieldType(field)) {
+            if (canProcessFieldType(field) || field.getType().isEnum()) {
                 if (field.isAnnotationPresent(ConfigParam.class)) {
                     if (!ReflectionUtils.isPrimitiveTypeOrString(field)) {
                         throw new ConfigurationException(String.format(
@@ -356,7 +356,8 @@ public class ConfigurationAnnotationProcessor {
                             }
                         }
                         if (!Strings.isNullOrEmpty(value)) {
-                            if (!ReflectionUtils.isPrimitiveTypeOrString(field)) {
+                            if (!ReflectionUtils.isPrimitiveTypeOrString(field) &&
+                                    !field.getType().isEnum()) {
                                 throw new ConfigurationException(String.format(
                                         "Parameter cannot be set for field of type = %s",
                                         field.getType().getCanonicalName()));
@@ -430,7 +431,8 @@ public class ConfigurationAnnotationProcessor {
     }
 
     private static boolean canSetFieldType(Field field) throws Exception {
-        if (ReflectionUtils.isPrimitiveTypeOrString(field)) {
+        if (ReflectionUtils.isPrimitiveTypeOrString(field) ||
+                field.getType().isEnum()) {
             return true;
         } else if (ReflectionUtils
                 .implementsInterface(List.class, field.getType())) {

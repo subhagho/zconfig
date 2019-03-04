@@ -23,11 +23,11 @@
   -->
 
 <configuration>
-    <property name="LOGDIR" value="/tmp/wookler/zconfig/test/log" />
-    <property name="APP" value="zconfig-test" />
+    <property applicationName="LOGDIR" value="/tmp/wookler/zconfig/test/log" />
+    <property applicationName="APP" value="zconfig-test" />
 
     <contextName>wookler-test</contextName>
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender applicationName="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOGDIR}/${APP}.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
             <fileNamePattern>${LOGDIR}/${APP}.%i.log.zip</fileNamePattern>
@@ -43,7 +43,7 @@
         </encoder>
     </appender>
 
-    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <appender applicationName="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{35} : %msg%n</pattern>
         </encoder>

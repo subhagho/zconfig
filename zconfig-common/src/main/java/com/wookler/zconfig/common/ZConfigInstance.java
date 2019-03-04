@@ -36,10 +36,15 @@ public class ZConfigInstance {
      */
     private String id;
     /**
-     * Client name (or service name).
+     * Client application group (or service application group).
+     */
+    @ConfigValue(name = "group", required = true)
+    private String applicationGroup;
+    /**
+     * Client application Name (or service application Name).
      */
     @ConfigValue(name = "name", required = true)
-    private String name;
+    private String applicationName;
     /**
      * Client hostname.
      */
@@ -72,21 +77,39 @@ public class ZConfigInstance {
     }
 
     /**
-     * Get the client name.
+     * Get the Application Group
      *
-     * @return - Client name.
+     * @return - Application Group
      */
-    public String getName() {
-        return name;
+    public String getApplicationGroup() {
+        return applicationGroup;
     }
 
     /**
-     * Set the client name.
+     * Set the Application Group
      *
-     * @param name - Client name.
+     * @param applicationGroup - Application Group
      */
-    public void setName(String name) {
-        this.name = name;
+    public void setApplicationGroup(String applicationGroup) {
+        this.applicationGroup = applicationGroup;
+    }
+
+    /**
+     * Get the client applicationName.
+     *
+     * @return - Client applicationName.
+     */
+    public String getApplicationName() {
+        return applicationName;
+    }
+
+    /**
+     * Set the client applicationName.
+     *
+     * @param applicationName - Client applicationName.
+     */
+    public void setApplicationName(String applicationName) {
+        this.applicationName = applicationName;
     }
 
     /**

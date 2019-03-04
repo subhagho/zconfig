@@ -75,7 +75,7 @@ public class ConfigAttributesNode extends ConfigKeyValueNode {
     }
 
     /**
-     * Override the setName method to set the name to the static node name.
+     * Override the setApplicationName method to set the name to the static node name.
      *
      * @param name - Configuration node name.
      */

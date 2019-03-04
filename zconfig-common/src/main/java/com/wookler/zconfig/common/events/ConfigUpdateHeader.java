@@ -26,12 +26,18 @@ package com.wookler.zconfig.common.events;
 
 import org.joda.time.DateTime;
 
-import java.util.List;
-
 /**
  * Class to define the header of a configuration update transaction batch.
  */
 public class ConfigUpdateHeader {
+    /**
+     * Application Group name.
+     */
+    private String group;
+    /**
+     * Application name.
+     */
+    private String application;
     /**
      * Configuration name this batch is for.
      */
@@ -52,6 +58,43 @@ public class ConfigUpdateHeader {
      * Timestamp of the update.
      */
     private DateTime timestamp;
+
+
+    /**
+     * Get the application Group name.
+     *
+     * @return - Application Group name.
+     */
+    public String getGroup() {
+        return group;
+    }
+
+    /**
+     * Set the application Group name.
+     *
+     * @param group - Application Group name.
+     */
+    public void setGroup(String group) {
+        this.group = group;
+    }
+
+    /**
+     * Get the application name.
+     *
+     * @return - Application name.
+     */
+    public String getApplication() {
+        return application;
+    }
+
+    /**
+     * Set the application name.
+     *
+     * @param application - Application name.
+     */
+    public void setApplication(String application) {
+        this.application = application;
+    }
 
     /**
      * Get the configuration name.

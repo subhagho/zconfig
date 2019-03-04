@@ -130,11 +130,11 @@ public class ZkUtils {
                 ZConfigCoreInstance instance = ZConfigCoreEnv.get().getInstance();
                 return String
                         .format("%s%s/%s", SERVER_ROOT_PATH, rp,
-                                instance.getName());
+                                instance.getApplicationName());
             } else {
                 ZConfigCoreInstance instance = ZConfigCoreEnv.get().getInstance();
                 return String
-                        .format("%s/%s", SERVER_ROOT_PATH, instance.getName());
+                        .format("%s/%s", SERVER_ROOT_PATH, instance.getApplicationName());
             }
         } catch (Exception e) {
             throw new PersistenceException(e);

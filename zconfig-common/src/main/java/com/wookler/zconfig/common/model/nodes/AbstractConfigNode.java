@@ -224,6 +224,9 @@ public abstract class AbstractConfigNode {
 
         String[] parts = path.split("\\.");
         if (parts.length > 0) {
+            if (parts[0].equals("*")) {
+                parts[0] = this.name;
+            }
             if (parts[0].compareTo(this.name) != 0) {
                 String[] nparts = new String[parts.length + 1];
                 nparts[0] = this.name;

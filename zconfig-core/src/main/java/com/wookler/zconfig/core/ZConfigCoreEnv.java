@@ -56,18 +56,12 @@ public class ZConfigCoreEnv extends ZConfigEnv {
     }
 
     /**
-     * Initialize this client environment from the specified configuration file and version
-     * using the configuration parser.
+     * Perform post-initialisation tasks if any.
      *
-     * @param parser     - Configuration parser to use.
-     * @param configfile - Configuration file path.
-     * @param version    - Configuration version (expected)
      * @throws ConfigurationException
      */
-    protected void init(AbstractConfigParser parser, String configfile,
-                        Version version)
-    throws ConfigurationException {
-        super.init(parser, configfile, version);
+    @Override
+    public void postInit() throws ConfigurationException {
         instance = new ZConfigCoreInstance();
         setupInstance(ZConfigCoreInstance.class, instance);
         LogUtils.debug(getClass(), instance);
@@ -77,9 +71,6 @@ public class ZConfigCoreEnv extends ZConfigEnv {
                 .readConfigAnnotations(ZkConnectionConfig.class, getConfiguration(),
                                        zkConnectionConfig);
         LogUtils.debug(getClass(), zkConnectionConfig);
-
-
-        updateState(EEnvState.Initialized);
         LogUtils.info(getClass(),
                       "Core environment successfully initialized...");
     }

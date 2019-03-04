@@ -17,40 +17,23 @@
  * under the License.
  *
  * Copyright (c) $year
- * Date: 18/2/19 10:03 AM
+ * Date: 4/3/19 4:53 PM
  * Subho Ghosh (subho dot ghosh at outlook.com)
  *
  */
 
-package com.wookler.zconfig.core;
+package com.wookler.zconfig.common.events;
 
-import com.wookler.zconfig.common.EEnvState;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+import com.wookler.zconfig.common.ConfigurationException;
+import com.wookler.zconfig.common.model.Version;
 
 /**
- * Config update event type.
+ * Class defines a batch of configuration update event to be sent to the server. All events in the
+ * batch are expected to be for the same configuration and transaction.
  */
-public enum EEventType {
-    /**
-     * Add a new node/value.
-     */
-    ADD,
-    /**
-     * Update node value.
-     */
-    UPDATE,
-    /**
-     * Delete node value.
-     */
-    DELETE;
+public class ConfigServerUpdateBatch
+        extends AbstractConfigUpdateBatch<ConfigServerUpdateEvent> {
 
-    /**
-     * Parse the input String as the Event Type.
-     *
-     * @param value - Value to parse.
-     * @return - Parsed Event Type.
-     */
-    public static EEventType parse(String value) {
-        value = value.toUpperCase();
-        return EEventType.valueOf(value);
-    }
 }

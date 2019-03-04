@@ -35,10 +35,7 @@ import com.wookler.zconfig.common.model.ESyncMode;
 import com.wookler.zconfig.common.model.Version;
 
 import javax.annotation.Nonnull;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -50,13 +47,41 @@ public class ConfigurationManager {
         public Class<?> type;
     }
 
+    /**
+     * Instance of the configuration loader.
+     */
     private ConfigurationLoader loader = new ConfigurationLoader();
+    /**
+     * Map of Loaded configurations. Only one version of a specific configuration
+     * can be loaded per client instance.
+     */
     private Map<String, Configuration> loadedConfigs = new HashMap<>();
+    /**
+     * Map of auto-wired object instances. This is to update these instances
+     * upon configuration updates.
+     */
     private Map<String, Object> autowiredInstances = new HashMap<>();
+    /**
+     * Lock to be used for synchronizing configuration loads.
+     */
     private ReentrantLock configCacheLock = new ReentrantLock();
+    /**
+     * Lock to be used to update/add auto-wired instances.
+     */
     private ReentrantLock autowireCacheLock = new ReentrantLock();
+    /**
+     * Lock to be used to synchronize specific configuration updates.
+     */
     private Map<String, ReentrantLock> configInstanceLocks = new HashMap<>();
+    /**
+     * Index map for reading auto-wired instances impacted by a specific update.
+     */
     private Multimap<String, AutowiredType> autowiredIndex = HashMultimap.create();
+    /**
+     * Registered application Groups for which configurations has been loaded.
+     */
+    private Multimap<String, Configuration> applicationGroups =
+            HashMultimap.create();
 
     /**
      * Load configuration from the specified URI.
@@ -87,8 +112,7 @@ public class ConfigurationManager {
                             .load(configName, configUri, configType, version,
                                   settings);
                     if (configuration != null) {
-                        loadedConfigs.put(configName, configuration);
-                        configInstanceLocks.put(configName, new ReentrantLock());
+                        postConfigurationLoad(configuration);
                     } else {
                         throw new ConfigurationException(String.format(
                                 "Configuration not found : [name=%s][uri=%s][version=%s]",
@@ -147,8 +171,7 @@ public class ConfigurationManager {
                     configuration = loader
                             .load(configName, filename, version, settings);
                     if (configuration != null) {
-                        loadedConfigs.put(configName, configuration);
-                        configInstanceLocks.put(configName, new ReentrantLock());
+                        postConfigurationLoad(configuration);
                     } else {
                         throw new ConfigurationException(String.format(
                                 "Configuration not found : [name=%s][file=%s][version=%s]",
@@ -160,6 +183,20 @@ public class ConfigurationManager {
             }
         }
         return configuration;
+    }
+
+    /**
+     * Update maps based on the loaded configuration.
+     *
+     * @param configuration - Loaded configuration instance.
+     */
+    private void postConfigurationLoad(Configuration configuration) {
+        if (configuration != null) {
+            loadedConfigs.put(configuration.getName(), configuration);
+            configInstanceLocks.put(configuration.getName(), new ReentrantLock());
+            applicationGroups.put(configuration.getApplicationGroup(),
+                                  configuration);
+        }
     }
 
     /**
@@ -225,6 +262,15 @@ public class ConfigurationManager {
             }
         }
         return false;
+    }
+
+    /**
+     * Get all the registered Application Groups.
+     *
+     * @return - Set of Application Groups.
+     */
+    public Set<String> getApplicationGroups() {
+        return applicationGroups.keySet();
     }
 
     /**

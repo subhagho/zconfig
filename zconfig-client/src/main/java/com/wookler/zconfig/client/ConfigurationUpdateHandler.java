@@ -25,10 +25,10 @@
 package com.wookler.zconfig.client;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 import com.wookler.zconfig.client.factory.ConfigurationManager;
 import com.wookler.zconfig.common.ConfigurationException;
 import com.wookler.zconfig.common.LogUtils;
+import com.wookler.zconfig.common.events.AbstractConfigUpdateEvent;
 import com.wookler.zconfig.common.events.ConfigUpdateBatch;
 import com.wookler.zconfig.common.events.ConfigUpdateEvent;
 import com.wookler.zconfig.common.model.Configuration;

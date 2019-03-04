@@ -24,10 +24,16 @@
 
 package com.wookler.zconfig.client;
 
+import com.wookler.zconfig.common.ConfigurationException;
+import com.wookler.zconfig.common.IConfigurable;
 import com.wookler.zconfig.common.ZConfigInstance;
+import com.wookler.zconfig.common.model.Configuration;
 import com.wookler.zconfig.common.model.annotations.ConfigPath;
 import com.wookler.zconfig.common.model.annotations.ConfigValue;
+import com.wookler.zconfig.common.model.nodes.ConfigPathNode;
 import org.joda.time.DateTime;
+
+import java.net.URI;
 
 /**
  * Instance object of a client connecting to the configuration server.

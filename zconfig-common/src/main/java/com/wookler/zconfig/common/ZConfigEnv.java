@@ -70,7 +70,7 @@ public abstract class ZConfigEnv {
      * @param version    - Configuration version (expected)
      * @throws ConfigurationException
      */
-    protected void init(String configfile, Version version)
+    protected final void init(String configfile, Version version)
     throws ConfigurationException {
         try {
             AbstractConfigParser parser = ConfigProviderFactory.parser(configfile);
@@ -94,7 +94,7 @@ public abstract class ZConfigEnv {
      * @param version    - Configuration version (expected)
      * @throws ConfigurationException
      */
-    protected void init(String configfile, ConfigProviderFactory.EConfigType type,
+    protected final void init(String configfile, ConfigProviderFactory.EConfigType type,
                         Version version)
     throws ConfigurationException {
         try {
@@ -120,7 +120,7 @@ public abstract class ZConfigEnv {
      * @param version    - Configuration version (expected)
      * @throws ConfigurationException
      */
-    protected void init(AbstractConfigParser parser, String configfile,
+    protected final void init(AbstractConfigParser parser, String configfile,
                         Version version)
     throws ConfigurationException {
         try {
@@ -138,8 +138,9 @@ public abstract class ZConfigEnv {
                         configfile));
             }
 
-            LogUtils.info(getClass(),
-                          "Client environment successfully initialized...");
+            postInit();
+
+            updateState(EEnvState.Initialized);
         } catch (Exception e) {
             throw new ConfigurationException(e);
         }
@@ -216,4 +217,11 @@ public abstract class ZConfigEnv {
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         return mapper;
     }
+
+    /**
+     * Perform post-initialisation tasks if any.
+     *
+     * @throws ConfigurationException
+     */
+    public abstract void postInit() throws ConfigurationException;
 }

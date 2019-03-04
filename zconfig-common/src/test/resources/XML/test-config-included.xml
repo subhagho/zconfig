@@ -28,7 +28,7 @@
         <id>UNIQUE-99918239014</id>
         <group>TEST-APP-GROUP</group>
         <application>TEST-APPLICATION</application>
-        <name>test-config-included</name>
+        <applicationName>test-config-included</applicationName>
         <description>This is a test JSON configuration file.</description>
         <version>0.2</version>
         <createdBy>

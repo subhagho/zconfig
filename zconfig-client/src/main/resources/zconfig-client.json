@@ -1,8 +1,8 @@
 {
     "header": {
-        "id" : "UNIQUE-99918239021",
-        "group" : "TEST-APP-GROUP",
-        "application" : "TEST-APPLICATION",
+        "id": "UNIQUE-99918239021",
+        "group": "TEST-APP-GROUP",
+        "application": "TEST-APPLICATION",
         "name": "zconfig-client",
         "description": "This is a Sample ZConfig Client configuration.",
         "version": "0.0",
@@ -16,8 +16,13 @@
         }
     },
     "zconfig": {
-        "instance" : {
-            "name" : "TEST-ZCLIENT"
+        "instance": {
+            "name": "TEST-ZCLIENT",
+            "group": "TEST-APPLICATION-GROUP"
+        },
+        "configurationSettings": {
+            "downloadOption": "OnDemand",
+            "tempDir": "/tmp/zconfig"
         },
         "client": {
             "rmq": {
@@ -29,6 +34,10 @@
                     }
                 }
             }
+        },
+        "server": {
+            "type": "file",
+            "basePath": "/tmp/zconfig/configs"
         }
     }
 }

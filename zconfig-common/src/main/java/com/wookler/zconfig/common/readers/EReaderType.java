@@ -44,6 +44,10 @@ public enum EReaderType {
      */
     HTTP,
     /**
+     * Reader reads from a specified HTTPS.
+     */
+    HTTPS,
+    /**
      * Reader reads from a specified FTP location.
      */
     FTP,
@@ -64,6 +68,8 @@ public enum EReaderType {
             return File;
         } else if (type.compareToIgnoreCase(HTTP.name()) == 0) {
             return HTTP;
+        } else if (type.compareToIgnoreCase(HTTPS.name()) == 0) {
+            return HTTPS;
         }
         return null;
     }
@@ -82,10 +88,12 @@ public enum EReaderType {
                 return File;
             } else if (
                     scheme.compareToIgnoreCase(GlobalConstants.URI_SCHEME_HTTP) ==
-                            0 || scheme.compareToIgnoreCase(
-                            GlobalConstants.URI_SCHEME_HTTPS) ==
                             0) {
                 return HTTP;
+            } else if (
+                    scheme.compareToIgnoreCase(GlobalConstants.URI_SCHEME_HTTPS) ==
+                            0) {
+                return HTTPS;
             } else if (scheme.compareToIgnoreCase(GlobalConstants.URI_SCHEME_FTP) ==
                     0) {
                 return FTP;
@@ -108,6 +116,8 @@ public enum EReaderType {
         switch (type) {
             case HTTP:
                 return GlobalConstants.URI_SCHEME_HTTP;
+            case HTTPS:
+                return GlobalConstants.URI_SCHEME_HTTPS;
             case File:
                 return GlobalConstants.URI_SCHEME_FILE;
             case FTP:

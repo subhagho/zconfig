@@ -28,7 +28,12 @@ import com.google.common.base.Strings;
 import com.wookler.zconfig.common.readers.EReaderType;
 
 import javax.annotation.Nonnull;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URI;
+import java.nio.channels.FileChannel;
 import java.util.UUID;
 
 /**
@@ -108,5 +113,28 @@ public class IOUtils {
     public static String getTempFile() {
         return String.format("%s/zconfig/%s", System.getProperty("java.io.tempdir"),
                              UUID.randomUUID().toString());
+    }
+
+    /**
+     * Utility method to copy a file to a destination folder.
+     *
+     * @param source  - Source File handle.
+     * @param destDir - Destination directory.
+     * @throws IOException
+     */
+    public static void copyFile(File source, File destDir) throws IOException {
+        FileChannel sourceChannel = null;
+        FileChannel destChannel = null;
+        String destFile =
+                String.format("%s/%s", destDir.getAbsolutePath(), source.getName());
+        File dest = new File(destFile);
+        try {
+            sourceChannel = new FileInputStream(source).getChannel();
+            destChannel = new FileOutputStream(dest).getChannel();
+            destChannel.transferFrom(sourceChannel, 0, sourceChannel.size());
+        } finally {
+            sourceChannel.close();
+            destChannel.close();
+        }
     }
 }

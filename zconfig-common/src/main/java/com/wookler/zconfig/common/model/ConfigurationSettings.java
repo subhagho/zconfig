@@ -25,6 +25,8 @@
 package com.wookler.zconfig.common.model;
 
 import com.google.common.base.Strings;
+import com.wookler.zconfig.common.model.annotations.ConfigPath;
+import com.wookler.zconfig.common.model.annotations.ConfigValue;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,6 +34,7 @@ import java.io.IOException;
 /**
  * Settings definition for parsing/writing configurations.
  */
+@ConfigPath(path = "*.configurationSettings")
 public class ConfigurationSettings {
     /**
      * Enum to specify startup action options.
@@ -45,7 +48,6 @@ public class ConfigurationSettings {
          * Perform action on demand.
          */
         OnDemand
-
     }
 
     /**
@@ -71,11 +73,17 @@ public class ConfigurationSettings {
     private static final String DEFAULT_ATTR_NAME = "@";
     private static final String DEFAULT_PARAMS_NAME = "parameters";
 
+    @ConfigValue(name = "propertiesTag")
     private String propertiesNodeName = DEFAULT_PROPS_NAME;
+    @ConfigValue(name = "parametersTag")
     private String parametersNodeName = DEFAULT_PARAMS_NAME;
+    @ConfigValue(name = "attributesTag")
     private String attributesNodeName = DEFAULT_ATTR_NAME;
+    @ConfigValue(name = "tempDir")
     private String tempDirectory = System.getProperty("java.io.tmpdir");
+    @ConfigValue(name = "downloadOption")
     private EStartupOptions downloadRemoteFiles = EStartupOptions.OnStartUp;
+    @ConfigValue(name = "shutdownOption")
     private EShutdownOptions clearTempFolder = EShutdownOptions.ReuseData;
 
     /**

@@ -28,15 +28,49 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.wookler.zconfig.client.factory.ConfigurationManager;
 import com.wookler.zconfig.common.*;
+import com.wookler.zconfig.common.model.Configuration;
+import com.wookler.zconfig.common.model.ConfigurationSettings;
+import com.wookler.zconfig.common.model.EResourceType;
 import com.wookler.zconfig.common.model.Version;
+import com.wookler.zconfig.common.model.nodes.AbstractConfigNode;
+import com.wookler.zconfig.common.model.nodes.ConfigPathNode;
+import com.wookler.zconfig.common.model.nodes.ConfigValueNode;
 import com.wookler.zconfig.common.parsers.AbstractConfigParser;
+import com.wookler.zconfig.common.readers.EReaderType;
 
 import javax.annotation.Nonnull;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * Singleton class to define and expose environment settings.
  */
 public class ZConfigClientEnv extends ZConfigEnv {
+    /**
+     * Root configuration node for the client.
+     */
+    public static final String CONFIG_NODE_ZCONFIG = "zconfig";
+    /**
+     * Configuration server configuration node.
+     */
+    public static final String CONFIG_NODE_SERVER = "server";
+    /**
+     * Type of the configuration server URI. (file/http(s))
+     */
+    public static final String CONFIG_NODE_SERVER_TYPE = "server.type";
+    /**
+     * Host IP/name of the configuration server (required if type is HTTP(s))
+     */
+    public static final String CONFIG_NODE_SERVER_HOST = "server.host";
+    /**
+     * Host port of the configuration server (optional if type is HTTP(s))
+     */
+    public static final String CONFIG_NODE_SERVER_PORT = "server.port";
+    /**
+     * Base path of the configuration server
+     */
+    public static final String CONFIG_NODE_SERVER_BASE_PATH = "server.basePath";
+
     /**
      * Configuration name for ZConfig Client configurations.
      */
@@ -59,38 +93,208 @@ public class ZConfigClientEnv extends ZConfigEnv {
             new ConfigurationUpdateHandler();
 
     /**
+     * URI of the host configuration server or local folder where configuration(s) are
+     * loaded from.
+     */
+    private URI serverUri;
+
+    /**
+     * Configuration settings to use for parsing.
+     */
+    private ConfigurationSettings settings;
+
+    /**
      * Default constructor - Sets the name of the config.
      */
-    public ZConfigClientEnv() {
+    private ZConfigClientEnv() {
         super(CONFIG_NAME);
     }
 
     /**
-     * Initialize this client environment from the specified configuration file and version
-     * using the configuration parser.
+     * Perform post-initialisation tasks if any.
      *
-     * @param parser     - Configuration parser to use.
-     * @param configfile - Configuration file path.
-     * @param version    - Configuration version (expected)
      * @throws ConfigurationException
      */
     @Override
-    protected void init(AbstractConfigParser parser, String configfile,
-                        Version version)
-    throws ConfigurationException {
+    public void postInit() throws ConfigurationException {
+        instance = new ZConfigClientInstance();
+        setupInstance(ZConfigClientInstance.class, instance);
+        LogUtils.debug(getClass(), instance);
+
+        parseServerUri();
+
+        AbstractConfigNode node = getConfiguration().find(CONFIG_NODE_ZCONFIG);
+        if (!(node instanceof ConfigPathNode)) {
+            throw new ConfigurationException(
+                    String.format("Base configuration node not found. [node=%s]",
+                                  CONFIG_NODE_ZCONFIG));
+        }
+        settings = new ConfigurationSettings();
+        ConfigurationAnnotationProcessor
+                .readConfigAnnotations(ConfigurationSettings.class,
+                                       (ConfigPathNode) node, settings);
+        LogUtils.debug(getClass(), settings);
+        LogUtils.info(getClass(),
+                      "Client environment successfully initialized...");
+    }
+
+    /**
+     * Parse he configuration server information.
+     *
+     * @throws ConfigurationException
+     */
+    private void parseServerUri() throws ConfigurationException {
         try {
-            super.init(parser, configfile, version);
-            instance = new ZConfigClientInstance();
-            setupInstance(ZConfigClientInstance.class, instance);
-            LogUtils.debug(getClass(), instance);
+            String path =
+                    String.format("%s.%s", CONFIG_NODE_ZCONFIG, CONFIG_NODE_SERVER);
+            AbstractConfigNode node = getConfiguration().find(path);
+            if ((node instanceof ConfigPathNode)) {
+                ConfigPathNode pathNode = (ConfigPathNode) node;
+                AbstractConfigNode configNode =
+                        pathNode.find(CONFIG_NODE_SERVER_TYPE);
+                if (!(configNode instanceof ConfigValueNode)) {
+                    throw ConfigurationException
+                            .propertyNotFoundException(CONFIG_NODE_SERVER_TYPE);
+                }
+                ConfigValueNode vn = (ConfigValueNode) configNode;
+                String type = vn.getValue();
+                if (Strings.isNullOrEmpty(type)) {
+                    throw ConfigurationException
+                            .propertyNotFoundException(CONFIG_NODE_SERVER_TYPE);
+                }
+                EReaderType readerType = EReaderType.parse(type);
+                if (readerType == null) {
+                    throw new ConfigurationException(
+                            String.format("Invalid Server Type : [type=%s]", type));
+                }
 
-
-            updateState(EEnvState.Initialized);
-            LogUtils.info(getClass(),
-                          "Client environment successfully initialized...");
-        } catch (Exception e) {
+                configNode = pathNode.find(CONFIG_NODE_SERVER_BASE_PATH);
+                if (!(configNode instanceof ConfigValueNode)) {
+                    throw ConfigurationException
+                            .propertyNotFoundException(
+                                    CONFIG_NODE_SERVER_BASE_PATH);
+                }
+                vn = (ConfigValueNode) configNode;
+                String basePath = vn.getValue();
+                if (Strings.isNullOrEmpty(basePath)) {
+                    throw ConfigurationException
+                            .propertyNotFoundException(
+                                    CONFIG_NODE_SERVER_BASE_PATH);
+                }
+                if (readerType == EReaderType.File) {
+                    String uri = String.format("%s://%s",
+                                               EReaderType.getURIScheme(readerType),
+                                               basePath);
+                    serverUri = new URI(uri);
+                } else if (readerType == EReaderType.HTTP ||
+                        readerType == EReaderType.HTTPS) {
+                    configNode = pathNode.find(CONFIG_NODE_SERVER_HOST);
+                    if (!(configNode instanceof ConfigValueNode)) {
+                        throw ConfigurationException
+                                .propertyNotFoundException(
+                                        CONFIG_NODE_SERVER_HOST);
+                    }
+                    vn = (ConfigValueNode) configNode;
+                    String host = vn.getValue();
+                    if (Strings.isNullOrEmpty(host)) {
+                        throw ConfigurationException
+                                .propertyNotFoundException(
+                                        CONFIG_NODE_SERVER_HOST);
+                    }
+                    configNode = pathNode.find(CONFIG_NODE_SERVER_PORT);
+                    if (!(configNode instanceof ConfigValueNode)) {
+                        throw ConfigurationException
+                                .propertyNotFoundException(
+                                        CONFIG_NODE_SERVER_PORT);
+                    }
+                    vn = (ConfigValueNode) configNode;
+                    String port = vn.getValue();
+                    if (!Strings.isNullOrEmpty(port)) {
+                        String uri = String.format("%s://%s:%s/%s", EReaderType
+                                .getURIScheme(readerType), host, port, basePath);
+                        serverUri = new URI(uri);
+                    } else {
+                        String uri = String.format("%s://%s/%s", EReaderType
+                                .getURIScheme(readerType), host, basePath);
+                        serverUri = new URI(uri);
+                    }
+                }
+            } else {
+                throw new ConfigurationException(String.format(
+                        "Configuration server settings not found: [path=%s]",
+                        path));
+            }
+        } catch (URISyntaxException e) {
             throw new ConfigurationException(e);
         }
+    }
+
+    /**
+     * Get the request URI for the specified configuration/version.
+     *
+     * @param configName - Configuration name.
+     * @param version    - Configuration Version.
+     * @param configType - Type of configuration file.
+     * @return - request URI path.
+     */
+    public String getRemoteConfigurationPath(@Nonnull String configName,
+                                             @Nonnull Version version,
+                                             @Nonnull
+                                                     ConfigProviderFactory.EConfigType configType) {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(configName));
+        Preconditions.checkArgument(version != null);
+        String path = getRelativeConfigurationPath(configName, version, configType);
+        if (serverUri.getScheme().equals(GlobalConstants.URI_SCHEME_FILE)) {
+            path = String.format("%s/%s.%s", path, configName,
+                                 configType.name().toLowerCase());
+        } else {
+            path = String.format("%s/%s", path,
+                                 configType.name().toLowerCase());
+        }
+        return String.format("%s%s", serverUri.toString(), path);
+    }
+
+    /**
+     * Get the relative URI path for the specified configuration/version.
+     *
+     * @param configName - Configuration name.
+     * @param version    - Configuration Version.
+     * @param configType - Type of configuration file.
+     * @return - request URI path.
+     */
+    public String getRelativeConfigurationPath(@Nonnull String configName,
+                                               @Nonnull Version version,
+                                               @Nonnull
+                                                       ConfigProviderFactory.EConfigType configType) {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(configName));
+        Preconditions.checkArgument(version != null);
+        return String.format("/%s/%s/%s/%d", instance.getApplicationGroup(),
+                             instance.getApplicationName(), configName,
+                             version.getMajorVersion());
+    }
+
+    /**
+     * Get a configuration instance handle. If the configuration isn't yet loaded
+     * it will be attempted to load.
+     *
+     * @param configName - Configuration Name.
+     * @param version    - Requested Configuration version.
+     * @param configType - Configuration type.
+     * @return - Configuration instance.
+     * @throws ConfigurationException
+     */
+    public Configuration getConfiguration(@Nonnull String configName,
+                                          @Nonnull Version version,
+                                          @Nonnull
+                                                  ConfigProviderFactory.EConfigType configType)
+    throws ConfigurationException {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(configName));
+        Preconditions.checkArgument(version != null);
+
+        String configPath =
+                getRemoteConfigurationPath(configName, version, configType);
+        return configurationManager
+                .load(configName, configPath, configType, version);
     }
 
     /**

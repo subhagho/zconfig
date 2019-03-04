@@ -150,7 +150,7 @@ public class ConfigProviderFactory {
         EReaderType type = EReaderType.parseFromUri(uri);
         try {
             if (type != null) {
-                if (type == EReaderType.HTTP) {
+                if (type == EReaderType.HTTP || type == EReaderType.HTTPS) {
                     URL url = uri.toURL();
                     return new ConfigURLReader(url);
                 } else if (type == EReaderType.File) {
