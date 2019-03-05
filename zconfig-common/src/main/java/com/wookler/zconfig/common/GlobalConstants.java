@@ -29,14 +29,24 @@ package com.wookler.zconfig.common;
  */
 public class GlobalConstants {
     /**
-     * Default date format to parse/print dates.
+     * Default Joda date format to parse/print dates.
      */
-    public static final String DEFAULT_DATE_FORMAT = "M.d.y";
+    public static final String DEFAULT_JODA_DATE_FORMAT = "M.d.y";
     /**
-     * Default data/time format to parse/print date/time.
+     * Default Joda data/time format to parse/print date/time.
+     */
+    public static final String DEFAULT_JODA_DATETIME_FORMAT =
+            String.format("%s H:m:s", DEFAULT_JODA_DATE_FORMAT);
+
+    /**
+     * Default Joda date format to parse/print dates.
+     */
+    public static final String DEFAULT_DATE_FORMAT = "MM.dd.yyyy";
+    /**
+     * Default Joda data/time format to parse/print date/time.
      */
     public static final String DEFAULT_DATETIME_FORMAT =
-            String.format("%s H:m:s", DEFAULT_DATE_FORMAT);
+            String.format("%s HH:mm:ss", DEFAULT_DATE_FORMAT);
 
     /**
      * URI Scheme constant for file.

@@ -56,7 +56,7 @@ public class DateTimeUtils {
      * @return - Parsed DateTime.
      */
     public static DateTime parseDate(String date) {
-        return parse(date, GlobalConstants.DEFAULT_DATE_FORMAT);
+        return parse(date, GlobalConstants.DEFAULT_JODA_DATE_FORMAT);
     }
 
     /**
@@ -66,7 +66,7 @@ public class DateTimeUtils {
      * @return - Parsed DateTime.
      */
     public static DateTime parse(String datetime) {
-        return parse(datetime, GlobalConstants.DEFAULT_DATETIME_FORMAT);
+        return parse(datetime, GlobalConstants.DEFAULT_JODA_DATETIME_FORMAT);
     }
 
     /**
@@ -77,7 +77,7 @@ public class DateTimeUtils {
      */
     public static String toDateString(DateTime dateTime) {
         Preconditions.checkArgument(dateTime != null);
-        return dateTime.toString(GlobalConstants.DEFAULT_DATE_FORMAT);
+        return dateTime.toString(GlobalConstants.DEFAULT_JODA_DATE_FORMAT);
     }
 
     /**
@@ -88,6 +88,6 @@ public class DateTimeUtils {
      */
     public static String toString(DateTime dateTime) {
         Preconditions.checkArgument(dateTime != null);
-        return dateTime.toString(GlobalConstants.DEFAULT_DATETIME_FORMAT);
+        return dateTime.toString(GlobalConstants.DEFAULT_JODA_DATETIME_FORMAT);
     }
 }

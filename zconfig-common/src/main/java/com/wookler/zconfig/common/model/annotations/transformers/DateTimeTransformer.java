@@ -17,7 +17,7 @@
  * under the License.
  *
  * Copyright (c) $year
- * Date: 5/3/19 9:14 AM
+ * Date: 5/3/19 10:39 AM
  * Subho Ghosh (subho dot ghosh at outlook.com)
  *
  */
@@ -27,16 +27,17 @@ package com.wookler.zconfig.common.model.annotations.transformers;
 import com.google.common.base.Strings;
 import com.wookler.zconfig.common.GlobalConstants;
 import com.wookler.zconfig.common.model.annotations.ITransformer;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 
 /**
- * Default transformer for transforming from string to JodaTime.
+ * Default transformer for transforming from string to java Date.
  */
-public class JodaTimeTransformer implements ITransformer<DateTime, String> {
-    protected String dateFormat = GlobalConstants.DEFAULT_JODA_DATETIME_FORMAT;
+public class DateTimeTransformer implements ITransformer<Date, String> {
+    protected String dateFormat = GlobalConstants.DEFAULT_DATETIME_FORMAT;
 
     /**
      * Transform the source value to the target type.
@@ -46,10 +47,14 @@ public class JodaTimeTransformer implements ITransformer<DateTime, String> {
      * @throws TransformationException
      */
     @Override
-    public DateTime transform(String source) throws TransformationException {
+    public Date transform(String source) throws TransformationException {
         if (!Strings.isNullOrEmpty(source)) {
-            DateTimeFormatter formatter = DateTimeFormat.forPattern(dateFormat);
-            return formatter.parseDateTime(source);
+            try {
+                SimpleDateFormat format = new SimpleDateFormat(dateFormat);
+                return format.parse(source);
+            } catch (ParseException e) {
+                throw new TransformationException(e);
+            }
         }
         return null;
     }
@@ -62,10 +67,10 @@ public class JodaTimeTransformer implements ITransformer<DateTime, String> {
      * @throws TransformationException
      */
     @Override
-    public String reverse(DateTime source) throws TransformationException {
+    public String reverse(Date source) throws TransformationException {
         if (source != null) {
-            DateTimeFormatter formatter = DateTimeFormat.forPattern(dateFormat);
-            return source.toString(formatter);
+            SimpleDateFormat format = new SimpleDateFormat(dateFormat);
+            return format.format(source);
         }
         return null;
     }

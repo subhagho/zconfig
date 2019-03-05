@@ -78,12 +78,14 @@ class Test_JSONIncludedConfiguration {
     @Test
     void find() {
         try {
-            String path = "configuration.node_1.root-node.node_1.node_2.node_3.node_4$";
+            String path =
+                    "configuration.node_1.root-node.node_1.node_2.node_3.node_4$";
             AbstractConfigNode node = configuration.find(path);
             assertNotNull(node);
             assertTrue(node instanceof ConfigPropertiesNode);
             assertEquals(3, ((ConfigPropertiesNode) node).getKeyValues().size());
             LogUtils.debug(getClass(), node.getAbsolutePath());
+            LogUtils.debug(getClass(), node);
         } catch (Throwable e) {
             error(getClass(), e);
             fail(e);

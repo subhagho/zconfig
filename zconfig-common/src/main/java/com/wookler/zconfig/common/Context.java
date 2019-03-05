@@ -227,6 +227,6 @@ public class Context {
      * @return - DateTime Value.
      */
     public DateTime getDateParam(@Nonnull String key) {
-        return getDateParam(key, GlobalConstants.DEFAULT_DATETIME_FORMAT);
+        return getDateParam(key, GlobalConstants.DEFAULT_JODA_DATETIME_FORMAT);
     }
 }

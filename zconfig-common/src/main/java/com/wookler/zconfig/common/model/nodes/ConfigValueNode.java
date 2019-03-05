@@ -189,7 +189,7 @@ public class ConfigValueNode extends AbstractConfigNode
 
     /**
      * Get the value parsed as DateTime (Joda). This will use the
-     * com.wookler.zconfig.common.GlobalConstants#DEFAULT_DATE_FORMAT for parsing the date.
+     * com.wookler.zconfig.common.GlobalConstants#DEFAULT_JODA_DATE_FORMAT for parsing the date.
      *
      * <p>
      * Note: If value string is NULL/Empty will return null.
@@ -200,7 +200,7 @@ public class ConfigValueNode extends AbstractConfigNode
     public DateTime getDateValue() {
         if (!Strings.isNullOrEmpty(value)) {
             DateTimeFormatter formatter =
-                    DateTimeFormat.forPattern(GlobalConstants.DEFAULT_DATE_FORMAT);
+                    DateTimeFormat.forPattern(GlobalConstants.DEFAULT_JODA_DATE_FORMAT);
             return DateTime.parse(value, formatter);
         }
         return null;
@@ -228,7 +228,7 @@ public class ConfigValueNode extends AbstractConfigNode
 
     /**
      * Get the value parsed as DateTime (Joda). This will use the
-     * com.wookler.zconfig.common.GlobalConstants#DEFAULT_DATETIME_FORMAT for parsing the date.
+     * com.wookler.zconfig.common.GlobalConstants#DEFAULT_JODA_DATETIME_FORMAT for parsing the date.
      *
      * <p>
      * Note: If value string is NULL/Empty will return null.
@@ -240,7 +240,7 @@ public class ConfigValueNode extends AbstractConfigNode
         if (!Strings.isNullOrEmpty(value)) {
             DateTimeFormatter formatter =
                     DateTimeFormat
-                            .forPattern(GlobalConstants.DEFAULT_DATETIME_FORMAT);
+                            .forPattern(GlobalConstants.DEFAULT_JODA_DATETIME_FORMAT);
             return DateTime.parse(value, formatter);
         }
         return null;
