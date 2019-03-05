@@ -32,6 +32,7 @@ import com.wookler.zconfig.common.model.Version;
 import com.wookler.zconfig.common.parsers.AbstractConfigParser;
 import com.wookler.zconfig.common.utils.ResourceReaderUtils;
 import com.wookler.zconfig.core.IConfigDAO;
+import com.wookler.zconfig.core.PersistenceException;
 import com.wookler.zconfig.core.ZConfigCoreEnv;
 import com.wookler.zconfig.core.model.Application;
 import com.wookler.zconfig.core.model.ApplicationGroup;
@@ -126,11 +127,14 @@ class ZkConfigDAOTest {
 
                     dao.saveApplication(client, application, user);
                 }
-
+                Version current = getSavedConfigVersion(client, dao, application,
+                                                        configuration.getName(),
+                                                        configuration.getVersion());
+                configuration.setVersion(current);
                 PersistedConfigNode configNode =
                         dao.saveConfigHeader(client, configuration, new Version(
-                                                     configuration.getVersion().getMajorVersion(),
-                                                     configuration.getVersion().getMinorVersion() + 1),
+                                                     current.getMajorVersion(),
+                                                     current.getMinorVersion() + 1),
                                              user);
 
                 assertNotNull(configNode);
@@ -145,6 +149,15 @@ class ZkConfigDAOTest {
             LogUtils.error(getClass(), t);
             fail(t.getLocalizedMessage());
         }
+    }
+
+    private Version getSavedConfigVersion(CuratorFramework client, IConfigDAO dao,
+                                          Application application,
+                                          String name, Version version) throws
+                                                                        PersistenceException {
+        PersistedConfigNode node =
+                dao.readConfigHeader(client, application, name, version);
+        return node.getCurrentVersion();
     }
 
     private static Configuration readConfiguration() throws Exception {

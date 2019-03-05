@@ -24,6 +24,8 @@
 
 package com.wookler.zconfig.common.model.annotations;
 
+import com.wookler.zconfig.common.model.annotations.transformers.NullTransformer;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -53,4 +55,12 @@ public @interface ConfigAttribute {
      * @return - Is mandatory?
      */
     boolean required() default false;
+
+
+    /**
+     * Specify the transformation class if any.
+     *
+     * @return - Transformation class.
+     */
+    Class<? extends ITransformer> transformer() default NullTransformer.class;
 }

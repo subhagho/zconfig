@@ -29,6 +29,7 @@ import com.google.common.base.Strings;
 import com.wookler.zconfig.common.model.Configuration;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -130,7 +131,7 @@ public class ConfigPropertiesNode extends ConfigKeyValueNode {
      * @return - Configuration Node found.
      */
     @Override
-    public AbstractConfigNode find(String[] path, int index) {
+    public AbstractConfigNode find(List<String> path, int index) {
         return find(path, index, NODE_ABBR_PREFIX);
     }
 

@@ -30,6 +30,8 @@ import com.wookler.zconfig.common.model.Configuration;
 import com.wookler.zconfig.common.model.nodes.AbstractConfigNode;
 import com.wookler.zconfig.common.model.nodes.ConfigKeyValueNode;
 
+import java.util.List;
+
 /**
  * Configuration node representing parameters to be specified for a path node.
  * Parameters are specified as key/value pairs enclosed in a {parameters} block.
@@ -112,7 +114,7 @@ public class ConfigParametersNode extends ConfigKeyValueNode {
      * @return - Configuration Node found.
      */
     @Override
-    public AbstractConfigNode find(String[] path, int index) {
+    public AbstractConfigNode find(List<String> path, int index) {
         return find(path, index, NODE_ABBR_PREFIX);
     }
 

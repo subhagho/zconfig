@@ -32,6 +32,7 @@ import com.wookler.zconfig.common.model.Configuration;
 import com.wookler.zconfig.common.model.ENodeState;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -201,19 +202,19 @@ public abstract class ConfigKeyValueNode extends ConfigElementNode {
      * @param abbr  - Short hand notation for search
      * @return - Configuration Node found.
      */
-    public AbstractConfigNode find(String[] path, int index, String abbr) {
-        String key = path[index];
+    public AbstractConfigNode find(List<String> path, int index, String abbr) {
+        String key = path.get(index);
         if (!Strings.isNullOrEmpty(key)) {
             if (getName().compareTo(key) == 0) {
-                if (index == path.length - 1) {
+                if (index == path.size() - 1) {
                     return this;
                 } else {
-                    String pname = path[index + 1];
+                    String pname = path.get(index + 1);
                     if (hasKey(pname)) {
                         return getValue(pname);
                     }
                 }
-            } else if (index == path.length - 1) {
+            } else if (index == path.size() - 1) {
                 if (key.startsWith(abbr)) {
                     key = key.substring(1);
                 }

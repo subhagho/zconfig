@@ -24,6 +24,8 @@
 
 package com.wookler.zconfig.common.model.annotations;
 
+import com.wookler.zconfig.common.model.annotations.transformers.NullTransformer;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -35,7 +37,7 @@ import java.lang.annotation.Target;
  * Created by subho on 16/11/15.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD })
+@Target({ElementType.FIELD})
 public @interface ConfigValue {
     /**
      * Get the configuration parameter name. By default it maps to defined
@@ -53,4 +55,12 @@ public @interface ConfigValue {
      * @return - Is mandatory?
      */
     boolean required() default false;
+
+
+    /**
+     * Specify the transformation class if any.
+     *
+     * @return - Transformation class.
+     */
+    Class<? extends ITransformer> transformer() default NullTransformer.class;
 }

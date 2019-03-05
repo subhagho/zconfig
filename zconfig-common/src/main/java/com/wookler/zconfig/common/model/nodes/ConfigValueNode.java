@@ -35,6 +35,8 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import java.util.List;
+
 /**
  * Class represents a configuration value element. All configuration values are treated as String values
  * and converters provided to get a specific value type.
@@ -252,9 +254,9 @@ public class ConfigValueNode extends AbstractConfigNode
      * @return - This instance or NULL.
      */
     @Override
-    public AbstractConfigNode find(String[] path, int index) {
-        String key = path[index];
-        if (getName().compareTo(key) == 0 && (index == path.length - 1)) {
+    public AbstractConfigNode find(List<String> path, int index) {
+        String key = path.get(index);
+        if (getName().compareTo(key) == 0 && (index == path.size() - 1)) {
             return this;
         }
         return null;

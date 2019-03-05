@@ -33,6 +33,8 @@ import com.wookler.zconfig.common.model.ENodeState;
 import com.wookler.zconfig.common.model.NodeState;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Abstract base node for defining configuration elements.
@@ -224,10 +226,16 @@ public abstract class AbstractConfigNode {
 
         String[] parts = path.split("\\.");
         if (parts.length > 0) {
+            List<String> stack = new ArrayList<>(parts.length);
             if (parts[0].equals("*")) {
                 parts[0] = this.name;
+            } else if (!getName().equals(parts[0])) {
+                stack.add(getName());
             }
-            return find(parts, 0);
+            for (String part : parts) {
+                stack.add(part);
+            }
+            return find(stack, 0);
         }
         return null;
     }
@@ -239,7 +247,7 @@ public abstract class AbstractConfigNode {
      * @param index - Current index in the path array to search for.
      * @return - Configuration Node found.
      */
-    public abstract AbstractConfigNode find(String[] path, int index);
+    public abstract AbstractConfigNode find(List<String> path, int index);
 
     /**
      * Indicate this node has been updated.

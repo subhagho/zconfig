@@ -38,12 +38,10 @@ public class ZConfigInstance {
     /**
      * Client application group (or service application group).
      */
-    @ConfigValue(name = "group", required = true)
     private String applicationGroup;
     /**
      * Client application Name (or service application Name).
      */
-    @ConfigValue(name = "name", required = true)
     private String applicationName;
     /**
      * Client hostname.

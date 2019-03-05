@@ -28,6 +28,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.wookler.zconfig.common.model.Configuration;
 
+import java.util.List;
+
 /**
  * Configuration node representing attributes to be specified for a path node.
  * Parameters are specified as key/value pairs enclosed in a {attributes} block
@@ -109,7 +111,7 @@ public class ConfigAttributesNode extends ConfigKeyValueNode {
      * @return - Configuration Node found.
      */
     @Override
-    public AbstractConfigNode find(String[] path, int index) {
+    public AbstractConfigNode find(List<String> path, int index) {
         return find(path, index, NODE_ABBR_PREFIX);
     }
 

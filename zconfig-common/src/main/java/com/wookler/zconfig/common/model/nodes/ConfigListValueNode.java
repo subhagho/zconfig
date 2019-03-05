@@ -81,10 +81,10 @@ public class ConfigListValueNode extends ConfigListNode<ConfigValueNode> {
      * @return - Node found or NULL.
      */
     @Override
-    public AbstractConfigNode find(String[] path, int index) {
-        String key = path[index];
+    public AbstractConfigNode find(List<String> path, int index) {
+        String key = path.get(index);
         if (getName().compareTo(key) == 0) {
-            if (index == path.length - 1) {
+            if (index == path.size() - 1) {
                 return this;
             } else if (!isEmpty()) {
                 index = index + 1;

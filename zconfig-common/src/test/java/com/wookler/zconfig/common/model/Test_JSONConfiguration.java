@@ -76,12 +76,15 @@ class Test_JSONConfiguration {
     @Test
     void find() {
         try {
-            String path = "configuration.node_1.TEST_ELEMENT_LIST";
+            String path = "configuration.node_1";
             AbstractConfigNode node = configuration.find(path);
             assertNotNull(node);
+            assertEquals(path, node.getSearchPath());
+            path = "TEST_ELEMENT_LIST";
+            node = node.find(path);
             assertTrue(node instanceof ConfigListElementNode);
             assertEquals(4, ((ConfigListElementNode) node).size());
-            assertEquals(path, node.getSearchPath());
+            assertEquals(path, node.getName());
             LogUtils.debug(getClass(), node.getAbsolutePath());
         } catch (Throwable e) {
             error(getClass(), e);

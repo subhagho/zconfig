@@ -5,7 +5,7 @@
         "application" : "TEST-APPLICATION",
         "name": "test-config",
         "description": "This is a test JSON configuration file.",
-        "version": "0.5",
+        "version": "0.6",
         "createdBy": {
             "user": "subho",
             "timestamp": "12.31.2018 12:32:19"

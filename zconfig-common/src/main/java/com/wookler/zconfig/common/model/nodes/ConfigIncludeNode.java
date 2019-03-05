@@ -34,6 +34,7 @@ import com.wookler.zconfig.common.readers.EReaderType;
 
 import java.io.File;
 import java.net.URI;
+import java.util.List;
 
 /**
  * Configuration node that represents an external configuration set to be included
@@ -206,7 +207,7 @@ public class ConfigIncludeNode extends ConfigElementNode {
      * @return - Node found or NULL.
      */
     @Override
-    public AbstractConfigNode find(String[] path, int index) {
+    public AbstractConfigNode find(List<String> path, int index) {
         return node.find(path, index);
     }
 

@@ -30,8 +30,10 @@ import com.wookler.zconfig.common.model.Version;
 import com.wookler.zconfig.common.model.annotations.ConfigParam;
 import com.wookler.zconfig.common.model.annotations.ConfigPath;
 import com.wookler.zconfig.common.model.annotations.ConfigValue;
+import com.wookler.zconfig.common.model.annotations.transformers.JodaTimeTransformer;
 import com.wookler.zconfig.common.parsers.JSONConfigParser;
 import com.wookler.zconfig.common.readers.ConfigFileReader;
+import org.joda.time.DateTime;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -40,7 +42,6 @@ import java.util.Properties;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static com.wookler.zconfig.common.LogUtils.*;
 
 class Test_ConfigurationAnnotationProcessor {
     private static final String BASE_PROPS_FILE =
@@ -51,8 +52,8 @@ class Test_ConfigurationAnnotationProcessor {
     public static class ModifiedBy {
         @ConfigValue(name = "user")
         private String name;
-        @ConfigValue(name = "timestamp")
-        private String timestamp;
+        @ConfigValue(name = "timestamp", transformer = JodaTimeTransformer.class)
+        private DateTime timestamp;
 
         public String getName() {
             return name;
@@ -62,11 +63,11 @@ class Test_ConfigurationAnnotationProcessor {
             this.name = name;
         }
 
-        public String getTimestamp() {
+        public DateTime getTimestamp() {
             return timestamp;
         }
 
-        public void setTimestamp(String timestamp) {
+        public void setTimestamp(DateTime timestamp) {
             this.timestamp = timestamp;
         }
 
@@ -201,9 +202,9 @@ class Test_ConfigurationAnnotationProcessor {
             value = ConfigurationAnnotationProcessor
                     .readConfigAnnotations(ConfigAnnotationsTest.class,
                                            configuration, value);
-            debug(getClass(), value.toString());
+            LogUtils.debug(getClass(), value);
         } catch (Throwable t) {
-            error(getClass(), t);
+            LogUtils.error(getClass(), t);
             fail(t.getLocalizedMessage());
         }
     }

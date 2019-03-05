@@ -189,24 +189,29 @@ public class ConfigPathNode extends ConfigElementNode {
      * @return - Node found or NULL.
      */
     @Override
-    public AbstractConfigNode find(String[] path, int index) {
-        String key = path[index];
+    public AbstractConfigNode find(List<String> path, int index) {
+        String key = path.get(index);
         String pp = hasSubPath(getName(), key);
         if (Strings.isNullOrEmpty(pp)) {
             if (getName().compareTo(key) == 0) {
-                if (index == path.length - 1) {
+                if (index == path.size() - 1) {
                     return this;
                 } else {
                     return findChild(path, index);
                 }
             } else if (ConfigurationSettings.isWildcard(key)) {
-                if (index == path.length - 1) {
+                if (index == path.size() - 1) {
                     return this;
                 } else {
                     return findChild(path, index);
                 }
+            } else if (index == 0 && children.containsKey(key)) {
+                if (path.size() == 1) {
+                    return children.get(key);
+                } else
+                    return findChild(path, index);
             }
-        } else if (index == path.length - 1) {
+        } else if (index == path.size() - 1) {
             return find(pp);
         }
         return null;
@@ -219,8 +224,8 @@ public class ConfigPathNode extends ConfigElementNode {
      * @param index - Index in the path array.
      * @return - Found node or NULL.
      */
-    public AbstractConfigNode findChild(String[] path, int index) {
-        String cname = path[index + 1];
+    public AbstractConfigNode findChild(List<String> path, int index) {
+        String cname = path.get(index + 1);
         String[] pc = hasSubPath(cname);
         if (pc != null && pc.length == 2) {
             cname = pc[0];

@@ -75,7 +75,11 @@ public class ConfigSearchListNode extends ConfigListNode<AbstractConfigNode> {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(path));
         String[] parts = path.split("\\.");
         if (parts != null && parts.length > 0) {
-            return find(parts, 0);
+            List<String> stack = new ArrayList<>(parts.length);
+            for (String part : parts) {
+                stack.add(part);
+            }
+            return find(stack, 0);
         }
         return null;
     }
@@ -88,7 +92,7 @@ public class ConfigSearchListNode extends ConfigListNode<AbstractConfigNode> {
      * @return - Configuration Node found.
      */
     @Override
-    public AbstractConfigNode find(String[] path, int index) {
+    public AbstractConfigNode find(List<String> path, int index) {
         List<AbstractConfigNode> values = getValues();
         if (values != null && !values.isEmpty()) {
             List<AbstractConfigNode> result = new ArrayList<>();

@@ -32,6 +32,8 @@ import com.wookler.zconfig.common.model.nodes.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -368,7 +370,11 @@ public class Configuration {
 
         String[] parts = path.split("\\.");
         if (parts.length > 0) {
-            return node.find(parts, 0);
+            List<String> stack = new ArrayList<>(parts.length);
+            for (String part : parts) {
+                stack.add(part);
+            }
+            return node.find(stack, 0);
         }
         return null;
     }
