@@ -43,13 +43,15 @@ import java.util.List;
  * XML:
  * <resource name="name" URI="uri" type="type" />
  * <p>
+ * <pre>
  * JSON:
- * resource : {
- * name : "name",
- * URI : "uri",
- * type : "type",
- * ...
- * }
+ *      resource : {
+ *          name : "name",
+ *          URI : "uri",
+ *          type : "type",
+ *          ...
+ *      }
+ * </pre>
  */
 public abstract class ConfigResourceNode extends ConfigElementNode {
     public static final String NODE_NAME = "remoteResource";
