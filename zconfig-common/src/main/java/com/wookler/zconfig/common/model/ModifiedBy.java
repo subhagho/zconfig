@@ -41,7 +41,7 @@ public class ModifiedBy {
     /**
      * Timestamp of the modification.
      */
-    private DateTime timestamp;
+    private long timestamp;
 
     /**
      * Get the modified by User ID.
@@ -67,7 +67,7 @@ public class ModifiedBy {
      *
      * @return - Modified at timestamp.
      */
-    public DateTime getTimestamp() {
+    public long getTimestamp() {
         return timestamp;
     }
 
@@ -76,7 +76,7 @@ public class ModifiedBy {
      *
      * @param timestamp - Modified at timestamp.
      */
-    public void setTimestamp(DateTime timestamp) {
+    public void setTimestamp(long timestamp) {
         Preconditions.checkNotNull(timestamp);
         this.timestamp = timestamp;
     }

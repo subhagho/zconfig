@@ -1006,7 +1006,7 @@ public class JSONConfigParser extends AbstractConfigParser {
                     "Invalid Configuration : Update Timestamp is NULL/Empty.");
         }
 
-        DateTime dt = DateTimeUtils.parse(timestamp);
+        long dt = Long.parseLong(timestamp);
         ModifiedBy modifiedBy = new ModifiedBy();
         modifiedBy.setModifiedBy(owner);
         modifiedBy.setTimestamp(dt);

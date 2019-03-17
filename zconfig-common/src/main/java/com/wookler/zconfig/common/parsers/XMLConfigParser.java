@@ -691,50 +691,48 @@ public class XMLConfigParser extends AbstractConfigParser {
         }
         try {
             Element header = (Element) hnode.item(0);
+            if (header.hasAttribute(XMLConfigConstants.CONFIG_HEADER_ID)) {
+                String id = header.getAttribute(XMLConfigConstants.CONFIG_HEADER_ID);
+                Preconditions.checkState(!Strings.isNullOrEmpty(id));
+                configuration.setId(id);
+            }
+            if (header.hasAttribute(
+                            XMLConfigConstants.CONFIG_HEADER_NAME)) {
+                String name = header.getAttribute(XMLConfigConstants.CONFIG_HEADER_NAME);
+                Preconditions.checkState(!Strings.isNullOrEmpty(name));
+                configuration.setName(name);
+            }
+            if (header.hasAttribute(
+                            XMLConfigConstants.CONFIG_HEADER_GROUP) ) {
+                String name = header.getAttribute(
+                        XMLConfigConstants.CONFIG_HEADER_GROUP);
+                Preconditions.checkState(!Strings.isNullOrEmpty(name));
+                configuration.setApplicationGroup(name);
+            }
+            if (header.hasAttribute(XMLConfigConstants.CONFIG_HEADER_APP) ) {
+                String name = header.getAttribute(XMLConfigConstants.CONFIG_HEADER_APP) ;
+                Preconditions.checkState(!Strings.isNullOrEmpty(name));
+                configuration.setApplication(name);
+            }
+            if (header.hasAttribute(
+                            XMLConfigConstants.CONFIG_HEADER_VERSION) ) {
+                String vstring = header.getAttribute(
+                        XMLConfigConstants.CONFIG_HEADER_VERSION) ;
+                Preconditions.checkState(!Strings.isNullOrEmpty(vstring));
+                Version cversion = Version.parse(vstring);
+                // Check version compatibility
+                if (!version.isCompatible(cversion)) {
+                    throw new ConfigurationException(String.format(
+                            "Incompatible Configuration Version. [expected=%s][actual=%s]",
+                            version.toString(), cversion.toString()));
+                }
+                configuration.setVersion(cversion);
+            }
             NodeList children = header.getChildNodes();
             if (children != null && children.getLength() > 0) {
                 for (int ii = 0; ii < children.getLength(); ii++) {
                     Node nn = children.item(ii);
                     if (nn.getNodeName()
-                          .compareTo(XMLConfigConstants.CONFIG_HEADER_ID) == 0) {
-                        String id = nn.getTextContent();
-                        Preconditions.checkState(!Strings.isNullOrEmpty(id));
-                        configuration.setId(id);
-                    } else if (nn.getNodeName()
-                                 .compareTo(
-                                         XMLConfigConstants.CONFIG_HEADER_NAME) ==
-                            0) {
-                        String name = nn.getTextContent();
-                        Preconditions.checkState(!Strings.isNullOrEmpty(name));
-                        configuration.setName(name);
-                    } else if (nn.getNodeName()
-                                 .compareTo(
-                                         XMLConfigConstants.CONFIG_HEADER_GROUP) ==
-                            0) {
-                        String name = nn.getTextContent();
-                        Preconditions.checkState(!Strings.isNullOrEmpty(name));
-                        configuration.setApplicationGroup(name);
-                    } else if (nn.getNodeName()
-                                 .compareTo(XMLConfigConstants.CONFIG_HEADER_APP) ==
-                            0) {
-                        String name = nn.getTextContent();
-                        Preconditions.checkState(!Strings.isNullOrEmpty(name));
-                        configuration.setApplication(name);
-                    } else if (nn.getNodeName()
-                                 .compareTo(
-                                         XMLConfigConstants.CONFIG_HEADER_VERSION) ==
-                            0) {
-                        String vstring = nn.getTextContent();
-                        Preconditions.checkState(!Strings.isNullOrEmpty(vstring));
-                        Version cversion = Version.parse(vstring);
-                        // Check version compatibility
-                        if (!version.isCompatible(cversion)) {
-                            throw new ConfigurationException(String.format(
-                                    "Incompatible Configuration Version. [expected=%s][actual=%s]",
-                                    version.toString(), cversion.toString()));
-                        }
-                        configuration.setVersion(cversion);
-                    } else if (nn.getNodeName()
                                  .compareTo(XMLConfigConstants.CONFIG_CREATED_BY) ==
                             0) {
                         ModifiedBy modifiedBy = parseUpdateInfo((Element) nn);
@@ -781,22 +779,16 @@ public class XMLConfigParser extends AbstractConfigParser {
         NodeList children = node.getChildNodes();
         if (children != null && children.getLength() > 0) {
             ModifiedBy mb = new ModifiedBy();
-            for (int ii = 0; ii < children.getLength(); ii++) {
-                Node nn = children.item(ii);
-                if (nn.getNodeName()
-                      .compareTo(XMLConfigConstants.CONFIG_CREATED_BY) == 0) {
-                    String user = nn.getTextContent();
-                    Preconditions.checkState(!Strings.isNullOrEmpty(user));
-                    mb.setModifiedBy(user);
-                } else if (nn.getNodeName()
-                             .compareTo(
-                                     XMLConfigConstants.CONFIG_UPDATE_TIMESTAMP) ==
-                        0) {
-                    String ts = nn.getTextContent();
-                    Preconditions.checkState(!Strings.isNullOrEmpty(ts));
-                    DateTime dt = DateTimeUtils.parse(ts);
-                    mb.setTimestamp(dt);
-                }
+            if (node.hasAttribute(XMLConfigConstants.CONFIG_CREATED_BY)) {
+                String user = node.getAttribute(XMLConfigConstants.CONFIG_CREATED_BY);
+                Preconditions.checkState(!Strings.isNullOrEmpty(user));
+                mb.setModifiedBy(user);
+            }
+            if (node.hasAttribute(XMLConfigConstants.CONFIG_UPDATE_TIMESTAMP)) {
+                String ts = node.getAttribute(XMLConfigConstants.CONFIG_UPDATE_TIMESTAMP);
+                Preconditions.checkState(!Strings.isNullOrEmpty(ts));
+                long dt = Long.parseLong(ts);
+                mb.setTimestamp(dt);
             }
             return mb;
         }

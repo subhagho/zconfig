@@ -348,10 +348,7 @@ public class JSONFileConfigWriter extends AbstractConfigWriter {
         }
         node.put(JSONConfigConstants.CONFIG_UPDATE_OWNER,
                  updateInfo.getModifiedBy());
-        if (updateInfo.getTimestamp() == null) {
-            throw ConfigurationException.propertyNotFoundException(
-                    JSONConfigConstants.CONFIG_UPDATE_TIMESTAMP);
-        }
+
         node.put(JSONConfigConstants.CONFIG_UPDATE_TIMESTAMP,
                  DateTimeUtils.toString(updateInfo.getTimestamp()));
     }

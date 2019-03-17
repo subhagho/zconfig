@@ -90,4 +90,15 @@ public class DateTimeUtils {
         Preconditions.checkArgument(dateTime != null);
         return dateTime.toString(GlobalConstants.DEFAULT_JODA_DATETIME_FORMAT);
     }
+
+    /**
+     * Get the Date/Time string for the specified DateTime. Uses the default Date/Time Format.
+     *
+     * @param timestamp - Timestamp to stringify.
+     * @return - String Date/Time.
+     */
+    public static String toString(long timestamp) {
+        DateTime dateTime = new DateTime(timestamp);
+        return dateTime.toString(GlobalConstants.DEFAULT_JODA_DATETIME_FORMAT);
+    }
 }
