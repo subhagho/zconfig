@@ -27,6 +27,7 @@ package com.wookler.zconfig.common.model.nodes;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.wookler.zconfig.common.ConfigurationException;
+import com.wookler.zconfig.common.GlobalConstants;
 import com.wookler.zconfig.common.model.Configuration;
 import com.wookler.zconfig.common.model.ENodeState;
 import com.wookler.zconfig.common.model.Version;
@@ -235,12 +236,13 @@ public class ConfigIncludeNode extends ConfigElementNode {
             String pp = path;
             if (readerType == EReaderType.File) {
                 File file = new File(pp);
-                pp = "/" + file.getAbsolutePath();
+                return file.toURI();
+            } else {
+                String uriString = String.format("%s://%s",
+                        EReaderType.getURIScheme(readerType),
+                        pp);
+                return URI.create(uriString);
             }
-            String uriString = String.format("%s://%s",
-                                             EReaderType.getURIScheme(readerType),
-                                             pp);
-            return URI.create(uriString);
         }
         return null;
     }

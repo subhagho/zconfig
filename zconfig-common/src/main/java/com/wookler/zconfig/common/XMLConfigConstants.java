@@ -29,7 +29,7 @@ package com.wookler.zconfig.common;
  */
 public class XMLConfigConstants {
     public static final String CONFIG_HEADER_NODE = "header";
-    public static final String CONFIG_HEADER_ID = "id";
+    public static final String CONFIG_HEADER_ID = "ID";
     public static final String CONFIG_HEADER_GROUP = "group";
     public static final String CONFIG_HEADER_APP = "application";
     public static final String CONFIG_HEADER_NAME = "name";

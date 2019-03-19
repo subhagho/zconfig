@@ -776,8 +776,7 @@ public class XMLConfigParser extends AbstractConfigParser {
      */
     private ModifiedBy parseUpdateInfo(Element node)
     throws ConfigurationException {
-        NodeList children = node.getChildNodes();
-        if (children != null && children.getLength() > 0) {
+        if (node.hasAttributes()) {
             ModifiedBy mb = new ModifiedBy();
             if (node.hasAttribute(XMLConfigConstants.CONFIG_CREATED_BY)) {
                 String user = node.getAttribute(XMLConfigConstants.CONFIG_CREATED_BY);
