@@ -114,10 +114,8 @@ public class XMLConfigParser extends AbstractConfigParser {
                     parseBody((Element) nn);
                     break;
                 }
-                configuration.validate();
-                doPostLoad();
 
-                configuration.getRootConfigNode().updateState(ENodeState.Synced);
+                doPostLoad();
             }
         } catch (SAXException e) {
             if (configuration != null)

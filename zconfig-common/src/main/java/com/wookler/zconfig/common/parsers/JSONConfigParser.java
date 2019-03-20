@@ -152,7 +152,6 @@ public class JSONConfigParser extends AbstractConfigParser {
                 // Call the load finish handler.
                 doPostLoad();
             }
-            configuration.validate();
         } catch (JsonProcessingException e) {
             if (configuration != null)
                 configuration.getState().setError(e);

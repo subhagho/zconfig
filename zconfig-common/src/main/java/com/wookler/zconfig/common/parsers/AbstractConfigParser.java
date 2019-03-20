@@ -72,6 +72,8 @@ public abstract class AbstractConfigParser implements Closeable {
             Map<String, ConfigValueNode> properties = new HashMap<>();
             nodePostLoad(node, properties);
         }
+        // Validate the configuration
+        configuration.getRootConfigNode().validate();
         // Mark the configuration has been loaded.
         configuration.loaded();
     }
