@@ -343,16 +343,9 @@ public class XMLConfigParser extends AbstractConfigParser {
             }
             resource.setResourceHandle(file);
         } else {
-            String localFilePath = IOUtils.urlToLocalFilePath(uri);
-            if (Strings.isNullOrEmpty(localFilePath)) {
-                throw new ConfigurationException(String.format(
-                        "Error converting URI to local path. [uri=%s]",
-                        uri.toString()));
-            }
-            String tdir = configuration.getInstancePath(localFilePath);
-            String filename =
-                    String.format("%s/%s", tdir, resource.getResourceName());
+            String filename = String.format("%s/%s", settings.getTempDirectory(), resource.getResourceName());
             File file = new File(filename);
+            IOUtils.CheckDirectory(file.getAbsolutePath());
             resource.setResourceHandle(file);
             if (!file.exists()) {
                 if (configuration.getSettings().getDownloadRemoteFiles() ==
@@ -361,7 +354,7 @@ public class XMLConfigParser extends AbstractConfigParser {
                             EReaderType.parseFromUri(resource.getLocation());
                     Preconditions.checkNotNull(type);
 
-                    if (type == EReaderType.HTTP) {
+                    if (type == EReaderType.HTTP || type == EReaderType.HTTPS) {
                         try {
                             long bread = RemoteFileHelper
                                     .downloadRemoteDirectory(resource.getLocation(),
@@ -403,16 +396,9 @@ public class XMLConfigParser extends AbstractConfigParser {
             }
             resource.setResourceHandle(file);
         } else {
-            String localFilePath = IOUtils.urlToLocalFilePath(uri);
-            if (Strings.isNullOrEmpty(localFilePath)) {
-                throw new ConfigurationException(String.format(
-                        "Error converting URI to local path. [uri=%s]",
-                        uri.toString()));
-            }
-            String tdir = configuration.getInstancePath(localFilePath);
-            String filename =
-                    String.format("%s/%s", tdir, resource.getResourceName());
+            String filename = String.format("%s/%s", settings.getTempDirectory(), resource.getResourceName());
             File file = new File(filename);
+            IOUtils.CheckParentDirectory(file.getAbsolutePath());
             resource.setResourceHandle(file);
             if (!file.exists()) {
                 if (configuration.getSettings().getDownloadRemoteFiles() ==
@@ -421,7 +407,7 @@ public class XMLConfigParser extends AbstractConfigParser {
                             EReaderType.parseFromUri(resource.getLocation());
                     Preconditions.checkNotNull(type);
 
-                    if (type == EReaderType.HTTP) {
+                    if (type == EReaderType.HTTP || type == EReaderType.HTTPS) {
                         try {
                             long bread = RemoteFileHelper
                                     .downloadRemoteFile(resource.getLocation(),

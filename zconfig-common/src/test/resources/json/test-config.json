@@ -188,7 +188,7 @@
                     "remoteResource": {
                         "type": "FILE",
                         "url": "https://raw.githubusercontent.com/subhagho/zconfig/master/LICENSE",
-                        "resourceName": "LICENSE.txt"
+                        "resourceName": "data/LICENSE.txt"
                     }
                 }
             }

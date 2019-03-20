@@ -124,7 +124,7 @@ public class JSONConfigParser extends AbstractConfigParser {
     public void parse(String name, AbstractConfigReader reader,
                       ConfigurationSettings settings,
                       Version version)
-    throws ConfigurationException {
+            throws ConfigurationException {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(name));
         Preconditions.checkArgument(reader != null);
         Preconditions.checkArgument(version != null);
@@ -193,7 +193,7 @@ public class JSONConfigParser extends AbstractConfigParser {
      */
     private synchronized void parse(String name,
                                     Version version, JsonNode node)
-    throws ConfigurationException {
+            throws ConfigurationException {
         configuration = new Configuration(settings);
         configuration.getState().setState(ENodeState.Loading);
         configuration.setName(name);
@@ -236,7 +236,7 @@ public class JSONConfigParser extends AbstractConfigParser {
      * @throws ConfigurationException
      */
     private void parseConfiguration(String name, JsonNode node)
-    throws ConfigurationException {
+            throws ConfigurationException {
         if (node.getNodeType() != JsonNodeType.OBJECT) {
             throw new ConfigurationException(String.format(
                     "Invalid Configuration Node : [expected=%s][actual=%s]",
@@ -262,7 +262,7 @@ public class JSONConfigParser extends AbstractConfigParser {
      * @throws ConfigurationException
      */
     private void parseNode(String name, JsonNode node, AbstractConfigNode parent)
-    throws ConfigurationException {
+            throws ConfigurationException {
         if (node.getNodeType() == JsonNodeType.OBJECT) {
             AbstractConfigNode nn = readObjectNode(name, node, parent);
             if (nn != null) {
@@ -356,7 +356,7 @@ public class JSONConfigParser extends AbstractConfigParser {
                                                                 ConfigListNode<T> listNode,
                                                                 AbstractConfigNode parent,
                                                                 ArrayNode arrayNode)
-    throws ConfigurationException {
+            throws ConfigurationException {
         setupNode(name, listNode, parent);
         if (arrayNode.size() > 0) {
             for (int ii = 0; ii < arrayNode.size(); ii++) {
@@ -378,7 +378,7 @@ public class JSONConfigParser extends AbstractConfigParser {
      */
     private void setupNode(String name, AbstractConfigNode configNode,
                            AbstractConfigNode parent)
-    throws ConfigurationException {
+            throws ConfigurationException {
         configNode.setName(name);
         configNode.setParent(parent);
         configNode.setConfiguration(configuration);
@@ -397,7 +397,7 @@ public class JSONConfigParser extends AbstractConfigParser {
      */
     private void setupNodeWithChildren(String name, AbstractConfigNode parent,
                                        AbstractConfigNode configNode, JsonNode node)
-    throws ConfigurationException {
+            throws ConfigurationException {
         setupNode(name, configNode, parent);
         parseChildNodes(configNode, node);
     }
@@ -410,7 +410,7 @@ public class JSONConfigParser extends AbstractConfigParser {
      * @throws ConfigurationException
      */
     private void parseChildNodes(AbstractConfigNode parent, JsonNode node)
-    throws ConfigurationException {
+            throws ConfigurationException {
         Iterator<Map.Entry<String, JsonNode>> nnodes = node.fields();
         if (nnodes != null) {
             while (nnodes.hasNext()) {
@@ -431,7 +431,7 @@ public class JSONConfigParser extends AbstractConfigParser {
      * @throws ConfigurationException
      */
     private void addToParentNode(AbstractConfigNode parent, AbstractConfigNode node)
-    throws ConfigurationException {
+            throws ConfigurationException {
         if (parent instanceof ConfigPathNode) {
             ((ConfigPathNode) parent).addChildNode(node);
         } else if (parent instanceof ConfigListElementNode) {
@@ -456,7 +456,7 @@ public class JSONConfigParser extends AbstractConfigParser {
      */
     private AbstractConfigNode readObjectNode(String name, JsonNode node,
                                               AbstractConfigNode parent)
-    throws ConfigurationException {
+            throws ConfigurationException {
         AbstractConfigNode nn = null;
         if (name.compareTo(
                 configuration.getSettings().getPropertiesNodeName()) == 0) {
@@ -495,7 +495,7 @@ public class JSONConfigParser extends AbstractConfigParser {
                 parseFileResourceNode(name, pn, parent, node);
             } else if (type == EResourceType.DIRECTORY) {
                 pn = new ConfigResourceDirectory(configuration, parent);
-                parseFileResourceNode(name, pn, parent, node);
+                parseFolderResourceNode(name, (ConfigResourceDirectory) pn, parent, node);
             }
             nn = pn;
         } else {
@@ -517,7 +517,7 @@ public class JSONConfigParser extends AbstractConfigParser {
      */
     private void parseFileResourceNode(String name, ConfigResourceFile node,
                                        AbstractConfigNode parent, JsonNode jsonNode)
-    throws ConfigurationException {
+            throws ConfigurationException {
         parseResourceNode(name, node, parent, jsonNode);
         URI uri = node.getLocation();
         if (uri == null) {
@@ -532,15 +532,9 @@ public class JSONConfigParser extends AbstractConfigParser {
             }
             node.setResourceHandle(file);
         } else {
-            String localFilePath = IOUtils.urlToLocalFilePath(uri);
-            if (Strings.isNullOrEmpty(localFilePath)) {
-                throw new ConfigurationException(String.format(
-                        "Error converting URI to local path. [uri=%s]",
-                        uri.toString()));
-            }
-            String tdir = configuration.getInstancePath(localFilePath);
-            String filename = String.format("%s/%s", tdir, node.getResourceName());
+            String filename = String.format("%s/%s", settings.getTempDirectory(), node.getResourceName());
             File file = new File(filename);
+            IOUtils.CheckParentDirectory(file.getAbsolutePath());
             node.setResourceHandle(file);
             if (!file.exists()) {
                 if (configuration.getSettings().getDownloadRemoteFiles() ==
@@ -548,11 +542,11 @@ public class JSONConfigParser extends AbstractConfigParser {
                     EReaderType type = EReaderType.parseFromUri(node.getLocation());
                     Preconditions.checkNotNull(type);
 
-                    if (type == EReaderType.HTTP) {
+                    if (type == EReaderType.HTTP || type == EReaderType.HTTPS) {
                         try {
                             long bread = RemoteFileHelper
                                     .downloadRemoteFile(node.getLocation(),
-                                                        node.getResourceHandle());
+                                            node.getResourceHandle());
                             if (bread <= 0) {
                                 throw new ConfigurationException(String.format(
                                         "No bytes read for remote file. [url=%s]",
@@ -582,7 +576,7 @@ public class JSONConfigParser extends AbstractConfigParser {
     private void parseFolderResourceNode(String name, ConfigResourceDirectory node,
                                          AbstractConfigNode parent,
                                          JsonNode jsonNode)
-    throws ConfigurationException {
+            throws ConfigurationException {
         parseResourceNode(name, node, parent, jsonNode);
         URI uri = node.getLocation();
         if (uri == null) {
@@ -597,15 +591,9 @@ public class JSONConfigParser extends AbstractConfigParser {
             }
             node.setResourceHandle(file);
         } else {
-            String localFilePath = IOUtils.urlToLocalFilePath(uri);
-            if (Strings.isNullOrEmpty(localFilePath)) {
-                throw new ConfigurationException(String.format(
-                        "Error converting URI to local path. [uri=%s]",
-                        uri.toString()));
-            }
-            String tdir = configuration.getInstancePath(localFilePath);
-            String filename = String.format("%s/%s", tdir, node.getResourceName());
+            String filename = String.format("%s/%s", settings.getTempDirectory(), node.getResourceName());
             File file = new File(filename);
+            IOUtils.CheckDirectory(file.getAbsolutePath());
             node.setResourceHandle(file);
             if (!file.exists()) {
                 if (configuration.getSettings().getDownloadRemoteFiles() ==
@@ -613,11 +601,11 @@ public class JSONConfigParser extends AbstractConfigParser {
                     EReaderType type = EReaderType.parseFromUri(node.getLocation());
                     Preconditions.checkNotNull(type);
 
-                    if (type == EReaderType.HTTP) {
+                    if (type == EReaderType.HTTP || type == EReaderType.HTTPS) {
                         try {
                             long bread = RemoteFileHelper
                                     .downloadRemoteDirectory(node.getLocation(),
-                                                             node.getResourceHandle());
+                                            node.getResourceHandle());
                             if (bread <= 0) {
                                 throw new ConfigurationException(String.format(
                                         "No bytes read for remote file. [url=%s]",
@@ -640,7 +628,7 @@ public class JSONConfigParser extends AbstractConfigParser {
      * @throws ConfigurationException
      */
     private EResourceType parseResourceType(JsonNode node)
-    throws ConfigurationException {
+            throws ConfigurationException {
         JsonNode nn = node.get(ConfigResourceNode.NODE_RESOURCE_TYPE);
         if (nn == null) {
             throw ConfigurationException.propertyNotFoundException(
@@ -667,7 +655,7 @@ public class JSONConfigParser extends AbstractConfigParser {
                                    ConfigResourceNode node,
                                    AbstractConfigNode parent,
                                    JsonNode jsonNode)
-    throws ConfigurationException {
+            throws ConfigurationException {
         setupNode(name, node, parent);
         Iterator<Map.Entry<String, JsonNode>> nnodes = jsonNode.fields();
         if (nnodes != null) {
@@ -822,11 +810,11 @@ public class JSONConfigParser extends AbstractConfigParser {
             if (reader == null) {
                 throw new ConfigurationException(
                         String.format("Error getting reader instance : [URI=%s]",
-                                      uri.toString()));
+                                uri.toString()));
             }
             JSONConfigParser nparser = new JSONConfigParser();
             nparser.parse(node.getConfigName(), reader, settings,
-                          node.getVersion());
+                    node.getVersion());
             if (nparser.configuration != null) {
                 ConfigPathNode configPathNode =
                         nparser.configuration.getRootConfigNode();
@@ -865,7 +853,7 @@ public class JSONConfigParser extends AbstractConfigParser {
      * @throws ConfigurationException
      */
     private void parseHeader(JsonNode node, Version version)
-    throws ConfigurationException {
+            throws ConfigurationException {
         try {
             JsonNode header = node.get(JSONConfigConstants.CONFIG_HEADER_NODE);
             if (header == null) {
@@ -978,7 +966,7 @@ public class JSONConfigParser extends AbstractConfigParser {
      * @throws ConfigurationException
      */
     private ModifiedBy parseUpdateInfo(JsonNode node)
-    throws ConfigurationException {
+            throws ConfigurationException {
         if (isProcessed(node)) {
             return null;
         }

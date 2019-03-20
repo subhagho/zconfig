@@ -24,6 +24,7 @@
 
 package com.wookler.zconfig.common.utils;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.wookler.zconfig.common.readers.EReaderType;
 
@@ -54,6 +55,42 @@ public class IOUtils {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Check if the directory exists, if not create.
+     *
+     * @param path - Directory path.
+     * @return - Created or Exists?
+     */
+    public static boolean CheckDirectory(String path) {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(path));
+        File file = new File(path);
+        if (file.exists()) {
+            if (file.isDirectory()) {
+                return true;
+            }
+            return false;
+        }
+        return file.mkdirs();
+    }
+
+    /**
+     * Check if the parent directory exists, if not create.
+     *
+     * @param path - File Path
+     * @return - Created or Exists?
+     */
+    public static boolean CheckParentDirectory(String path) {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(path));
+        File file = new File(path);
+        if (file.exists()) {
+            if (file.isFile()) {
+                return true;
+            }
+            return false;
+        }
+        return CheckDirectory(file.getParent());
     }
 
     /**
@@ -106,13 +143,46 @@ public class IOUtils {
     }
 
     /**
+     * Get a temporary folder path with the appended sub-path.
+     * Directory path will be created if it doesn't exist.
+     *
+     * @param subpath - Sub-path to append.
+     * @return - Absolute path.
+     */
+    public static String getTempDirectory(String subpath) {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(subpath));
+        String path = String.format("%s/zconfig/%s", System.getProperty("java.io.tmpdir"),
+                subpath);
+        File file = new File(path);
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+        return file.getAbsolutePath();
+    }
+
+    /**
+     * Get a temporary folder path.
+     * Directory path will be created if it doesn't exist.
+     *
+     * @return - Absolute path.
+     */
+    public static String getTempDirectory() {
+        String path = String.format("%s/zconfig", System.getProperty("java.io.tmpdir"));
+        File file = new File(path);
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+        return file.getAbsolutePath();
+    }
+
+    /**
      * Get a new temporary file path.
      *
      * @return - Temp file path.
      */
     public static String getTempFile() {
         return String.format("%s/zconfig/%s", System.getProperty("java.io.tempdir"),
-                             UUID.randomUUID().toString());
+                UUID.randomUUID().toString());
     }
 
     /**

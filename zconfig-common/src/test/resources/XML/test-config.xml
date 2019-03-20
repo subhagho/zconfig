@@ -187,7 +187,7 @@
                             <TEST_LONG_LIST>-134981490134</TEST_LONG_LIST>
                         </LONG_VALUE_LIST>
                     </node_4>
-                    <remoteResource type="FILE" resourceName="LICENSE.txt">
+                    <remoteResource type="FILE" resourceName="data/LICENSE.txt">
                         <url>https://raw.githubusercontent.com/subhagho/zconfig/master/LICENSE</url>
                     </remoteResource>
                 </node_3>

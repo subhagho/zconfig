@@ -60,9 +60,9 @@ public class RemoteFileHelper {
         EReaderType type = EReaderType.parseFromUri(remoteUri);
         Preconditions.checkNotNull(type);
 
-        if (type != EReaderType.HTTP) {
+        if (type != EReaderType.HTTP && type != EReaderType.HTTPS) {
             throw new IOException(String.format(
-                    "Method should be only called for HTTP channel. [passed channel=%s]",
+                    "Method should be only called for HTTP(S) channel. [passed channel=%s]",
                     type.name()));
         }
         if (location.exists()) {

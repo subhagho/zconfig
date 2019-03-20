@@ -27,6 +27,7 @@ package com.wookler.zconfig.common.model;
 import com.google.common.base.Strings;
 import com.wookler.zconfig.common.model.annotations.ConfigPath;
 import com.wookler.zconfig.common.model.annotations.ConfigValue;
+import com.wookler.zconfig.common.utils.IOUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -80,7 +81,7 @@ public class ConfigurationSettings {
     @ConfigValue(name = "attributesTag")
     private String attributesNodeName = DEFAULT_ATTR_NAME;
     @ConfigValue(name = "tempDir")
-    private String tempDirectory = System.getProperty("java.io.tmpdir");
+    private String tempDirectory = IOUtils.getTempDirectory();
     @ConfigValue(name = "downloadOption")
     private EStartupOptions downloadRemoteFiles = EStartupOptions.OnStartUp;
     @ConfigValue(name = "shutdownOption")

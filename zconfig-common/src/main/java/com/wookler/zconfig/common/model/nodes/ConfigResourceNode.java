@@ -41,12 +41,12 @@ import java.util.List;
  * via the configuration handle.
  * <p>
  * XML:
- * <resource name="name" URI="uri" type="type" />
+ * <resource name="resourceName" URI="uri" type="type" />
  * <p>
  * <pre>
  * JSON:
  *      resource : {
- *          name : "name",
+ *          resourceName : "name",
  *          URI : "uri",
  *          type : "type",
  *          ...

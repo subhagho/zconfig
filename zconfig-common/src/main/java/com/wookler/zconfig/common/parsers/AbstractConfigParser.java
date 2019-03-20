@@ -167,6 +167,15 @@ public abstract class AbstractConfigParser implements Closeable {
                                 String rv = String.format("\\$\\{%s\\}", var);
                                 value = value.replaceAll(rv, vv);
                             }
+                        } else {
+                            String vv = System.getProperty(var);
+                            if (Strings.isNullOrEmpty(vv)) {
+                                vv = System.getenv(var);
+                            }
+                            if (!Strings.isNullOrEmpty(vv)) {
+                                String rv = String.format("\\$\\{%s\\}", var);
+                                value = value.replaceAll(rv, vv);
+                            }
                         }
                     }
                 }
