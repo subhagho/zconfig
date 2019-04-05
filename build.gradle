@@ -1,6 +1,6 @@
 
 allprojects {
-    group 'com.wookler'
+    group 'com.codekutter'
     version '1.0-SNAPSHOT'
 }
 
