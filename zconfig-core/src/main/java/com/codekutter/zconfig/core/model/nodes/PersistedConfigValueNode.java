@@ -22,10 +22,10 @@
  *
  */
 
-package com.wookler.zconfig.core.model.nodes;
+package com.codekutter.zconfig.core.model.nodes;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.wookler.zconfig.core.model.PersistedConfigPathNode;
+import com.codekutter.zconfig.core.model.PersistedConfigPathNode;
 
 /**
  * ZooKeeper node that stores a configuration value.

@@ -22,7 +22,7 @@
  *
  */
 
-package com.wookler.zconfig.core.model;
+package com.codekutter.zconfig.core.model;
 
 /**
  * Exception instance used to raise error for entity operations.

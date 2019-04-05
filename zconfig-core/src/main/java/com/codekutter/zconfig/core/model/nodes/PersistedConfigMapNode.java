@@ -22,14 +22,14 @@
  *
  */
 
-package com.wookler.zconfig.core.model.nodes;
+package com.codekutter.zconfig.core.model.nodes;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.codekutter.zconfig.common.model.nodes.ConfigValueNode;
-import com.wookler.zconfig.core.model.PersistedConfigPathNode;
+import com.codekutter.zconfig.core.model.PersistedConfigPathNode;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;

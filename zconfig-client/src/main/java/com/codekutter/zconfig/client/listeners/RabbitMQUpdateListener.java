@@ -22,18 +22,18 @@
  *
  */
 
-package com.wookler.zconfig.client.listeners;
+package com.codekutter.zconfig.client.listeners;
 
+import com.codekutter.zconfig.client.ZConfigClientEnv;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.*;
-import com.wookler.zconfig.client.ZConfigClientEnv;
-import com.wookler.zconfig.common.ConfigurationException;
-import com.wookler.zconfig.common.LogUtils;
-import com.wookler.zconfig.common.events.ConfigUpdateBatch;
-import com.wookler.zconfig.common.events.RegisterMessage;
-import com.wookler.zconfig.common.model.nodes.ConfigPathNode;
-import com.wookler.zconfig.common.rmq.RMQChannelConstants;
-import com.wookler.zconfig.common.rmq.RMQConnectionFactory;
+import com.codekutter.zconfig.common.ConfigurationException;
+import com.codekutter.zconfig.common.LogUtils;
+import com.codekutter.zconfig.common.events.ConfigUpdateBatch;
+import com.codekutter.zconfig.common.events.RegisterMessage;
+import com.codekutter.zconfig.common.model.nodes.ConfigPathNode;
+import com.codekutter.zconfig.common.rmq.RMQChannelConstants;
+import com.codekutter.zconfig.common.rmq.RMQConnectionFactory;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;

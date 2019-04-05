@@ -22,19 +22,19 @@
  *
  */
 
-package com.wookler.zconfig.client.factory;
+package com.codekutter.zconfig.client.factory;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.wookler.zconfig.common.ConfigProviderFactory;
-import com.wookler.zconfig.common.ConfigurationException;
-import com.wookler.zconfig.common.LogUtils;
-import com.wookler.zconfig.common.model.Configuration;
-import com.wookler.zconfig.common.model.ConfigurationSettings;
-import com.wookler.zconfig.common.model.Version;
-import com.wookler.zconfig.common.parsers.AbstractConfigParser;
-import com.wookler.zconfig.common.readers.AbstractConfigReader;
-import com.wookler.zconfig.common.readers.ConfigFileReader;
+import com.codekutter.zconfig.common.ConfigProviderFactory;
+import com.codekutter.zconfig.common.ConfigurationException;
+import com.codekutter.zconfig.common.LogUtils;
+import com.codekutter.zconfig.common.model.Configuration;
+import com.codekutter.zconfig.common.model.ConfigurationSettings;
+import com.codekutter.zconfig.common.model.Version;
+import com.codekutter.zconfig.common.parsers.AbstractConfigParser;
+import com.codekutter.zconfig.common.readers.AbstractConfigReader;
+import com.codekutter.zconfig.common.readers.ConfigFileReader;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;

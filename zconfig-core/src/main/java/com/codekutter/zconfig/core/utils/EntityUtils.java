@@ -22,13 +22,13 @@
  *
  */
 
-package com.wookler.zconfig.core.utils;
+package com.codekutter.zconfig.core.utils;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.codekutter.zconfig.common.utils.ReflectionUtils;
-import com.wookler.zconfig.core.model.EntityException;
-import com.wookler.zconfig.core.model.ICopiable;
+import com.codekutter.zconfig.core.model.EntityException;
+import com.codekutter.zconfig.core.model.ICopiable;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;

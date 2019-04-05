@@ -22,7 +22,7 @@
  *
  */
 
-package com.wookler.zconfig.core.model;
+package com.codekutter.zconfig.core.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;

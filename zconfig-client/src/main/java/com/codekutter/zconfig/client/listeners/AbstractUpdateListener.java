@@ -22,14 +22,14 @@
  *
  */
 
-package com.wookler.zconfig.client.listeners;
+package com.codekutter.zconfig.client.listeners;
 
-import com.wookler.zconfig.client.ZConfigClientEnv;
-import com.wookler.zconfig.client.factory.ConfigurationManager;
-import com.wookler.zconfig.common.*;
-import com.wookler.zconfig.common.events.ConfigUpdateBatch;
-import com.wookler.zconfig.common.model.Configuration;
-import com.wookler.zconfig.common.model.ESyncMode;
+import com.codekutter.zconfig.client.ZConfigClientEnv;
+import com.codekutter.zconfig.client.factory.ConfigurationManager;
+import com.codekutter.zconfig.common.*;
+import com.codekutter.zconfig.common.events.ConfigUpdateBatch;
+import com.codekutter.zconfig.common.model.Configuration;
+import com.codekutter.zconfig.common.model.ESyncMode;
 
 import javax.annotation.Nonnull;
 

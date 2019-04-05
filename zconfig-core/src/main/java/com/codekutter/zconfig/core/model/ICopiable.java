@@ -22,7 +22,7 @@
  *
  */
 
-package com.wookler.zconfig.core.model;
+package com.codekutter.zconfig.core.model;
 
 /**
  * Interface to be implemented for entities that expose a copy/clone method.

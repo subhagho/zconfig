@@ -22,7 +22,7 @@
  *
  */
 
-package com.wookler.zconfig.core.model;
+package com.codekutter.zconfig.core.model;
 
 /**
  * Enum represents the state of a defined ZooKeeper node instance.

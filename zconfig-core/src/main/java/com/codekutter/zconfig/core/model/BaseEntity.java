@@ -22,11 +22,10 @@
  *
  */
 
-package com.wookler.zconfig.core.model;
+package com.codekutter.zconfig.core.model;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.google.common.base.Preconditions;
-import com.wookler.zconfig.core.utils.EntityUtils;
 import org.springframework.lang.NonNull;
 
 import javax.annotation.Nonnull;

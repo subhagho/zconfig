@@ -22,7 +22,7 @@
  *
  */
 
-package com.wookler.zconfig.core.model;
+package com.codekutter.zconfig.core.model;
 
 import org.joda.time.DateTime;
 
