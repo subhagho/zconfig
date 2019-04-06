@@ -29,7 +29,7 @@
     <parent>
         <groupId>com.codekutter.zconfig</groupId>
         <artifactId>parent</artifactId>
-        <version>1.0-M1</version>
+        <version>${zconfig.version}</version>
     </parent>
     <artifactId>zconfig-common</artifactId>
     <packaging>jar</packaging>

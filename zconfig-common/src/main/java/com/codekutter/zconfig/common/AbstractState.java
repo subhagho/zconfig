@@ -37,7 +37,7 @@ public abstract class AbstractState<T extends IStateEnum<T>> {
     /**
      * Error handle in case of error state.
      */
-    private Throwable error;
+    protected Throwable error;
 
     /**
      * Get the current state.

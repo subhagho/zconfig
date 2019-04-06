@@ -27,23 +27,21 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <chronicle-map.version>2.1.4</chronicle-map.version>
+        <zconfig.version>1.0.1</zconfig.version>
+        <github.global.server>github</github.global.server>
+        <zconfig.common.target>${project.build.directory}/zconfig</zconfig.common.target>
+    </properties>
+
     <groupId>com.codekutter.zconfig</groupId>
     <artifactId>parent</artifactId>
-    <version>1.0-M1</version>
+    <version>${zconfig.version}</version>
     <packaging>pom</packaging>
 
     <name>zconfig</name>
     <url>https://github.com/subhagho/zconfig</url>
-
-    <!-- TODO: add scm tags -->
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <chronicle-map.version>2.1.4</chronicle-map.version>
-        <zconfig.common.version>1.0-M1</zconfig.common.version>
-        <github.global.server>github</github.global.server>
-        <zconfig.common.target>${project.build.directory}/zconfig</zconfig.common.target>
-    </properties>
 
     <distributionManagement>
         <repository>
@@ -57,6 +55,7 @@
         <module>zconfig-common</module>
         <module>zconfig-client</module>
         <module>zconfig-core</module>
+        <module>pipelines</module>
     </modules>
     <build>
         <pluginManagement>
