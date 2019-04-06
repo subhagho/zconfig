@@ -37,7 +37,7 @@ import java.lang.annotation.Target;
  * Created by subho on 16/11/15.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD})
+@Target({ElementType.FIELD, ElementType.PARAMETER})
 public @interface ConfigParam {
     /**
      * Get the configuration parameter name. By default it maps to defined

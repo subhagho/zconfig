@@ -126,7 +126,9 @@
                     "PARAM_1": "This is a replacement test. ${PROP_1}${PROP_2}",
                     "PARAM_2": "TEST_PARAM_2",
                     "PARAM_3": "TEST_PARAM_3",
-                    "PARAM_4": "TEST_PARAM_4"
+                    "PARAM_4": "TEST_PARAM_4",
+                    "PARAM_5": "18473498",
+                    "PARAM_6": "EValue3"
                 },
                 "remoteResource": {
                     "type": "BLOB",

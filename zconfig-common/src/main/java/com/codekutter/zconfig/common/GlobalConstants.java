@@ -49,6 +49,11 @@ public class GlobalConstants {
             String.format("%s HH:mm:ss", DEFAULT_DATE_FORMAT);
 
     /**
+     * ConfigParam name for passing a configuration node.
+     */
+    public static final String DEFAULT_CONFIG_PARAM_NAME = "config";
+
+    /**
      * URI Scheme constant for file.
      */
     public static final String URI_SCHEME_FILE = "file";

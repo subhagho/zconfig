@@ -27,6 +27,7 @@ package com.codekutter.zconfig.common.utils;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Date;
@@ -57,8 +58,8 @@ public class ReflectionUtils {
      * @param name - Field name.
      * @return - Found Field or NULL
      */
-    public static final Field findField(@Nonnull Class<?> type,
-                                        @Nonnull String name) {
+    public static Field findField(@Nonnull Class<?> type,
+                                  @Nonnull String name) {
         Preconditions.checkArgument(type != null);
         Preconditions.checkArgument(!Strings.isNullOrEmpty(name));
 
@@ -78,12 +79,52 @@ public class ReflectionUtils {
     }
 
     /**
+     * Recursively get all the public methods declared for a type.
+     *
+     * @param type - Type to fetch fields for.
+     * @return - Array of all defined methods.
+     */
+    public static Method[] getAllMethods(@Nonnull Class<?> type) {
+        Preconditions.checkArgument(type != null);
+        List<Method> methods = new ArrayList<>();
+        getMethods(type, methods);
+        if (!methods.isEmpty()) {
+            Method[] ma = new Method[methods.size()];
+            for (int ii = 0; ii < methods.size(); ii++) {
+                ma[ii] = methods.get(ii);
+            }
+            return ma;
+        }
+        return null;
+    }
+
+    /**
+     * Get all public methods declared for this type and add them to the list passed.
+     *
+     * @param type    - Type to get methods for.
+     * @param methods - List of methods.
+     */
+    private static void getMethods(Class<?> type, List<Method> methods) {
+        Method[] ms = type.getDeclaredMethods();
+        if (ms != null && ms.length > 0) {
+            for (Method m : ms) {
+                if (m != null && Modifier.isPublic(m.getModifiers()))
+                    methods.add(m);
+            }
+        }
+        Class<?> st = type.getSuperclass();
+        if (st != null && !st.equals(Object.class)) {
+            getMethods(st, methods);
+        }
+    }
+
+    /**
      * Recursively get all the declared fields for a type.
      *
      * @param type - Type to fetch fields for.
      * @return - Array of all defined fields.
      */
-    public static final Field[] getAllFields(@Nonnull Class<?> type) {
+    public static Field[] getAllFields(@Nonnull Class<?> type) {
         Preconditions.checkArgument(type != null);
         List<Field> fields = new ArrayList<>();
         getFields(type, fields);
@@ -476,7 +517,7 @@ public class ReflectionUtils {
      * @param field - Field to check primitive for.
      * @return - Is primitive?
      */
-    public static final boolean isPrimitiveTypeOrClass(@Nonnull Field field) {
+    public static boolean isPrimitiveTypeOrClass(@Nonnull Field field) {
         Class<?> type = field.getType();
         return isPrimitiveTypeOrClass(type);
     }
@@ -487,13 +528,16 @@ public class ReflectionUtils {
      * @param type - Field to check primitive for.
      * @return - Is primitive?
      */
-    public static final boolean isPrimitiveTypeOrClass(@Nonnull Class<?> type) {
+    public static boolean isPrimitiveTypeOrClass(@Nonnull Class<?> type) {
         if (type.isPrimitive())
             return true;
-        else if (type.equals(Boolean.class) || type.equals(Short.class)
-                || type.equals(Integer.class) || type.equals(Long.class)
-                || type.equals(Float.class) || type.equals(Double.class)
-                || type.equals(Character.class)) {
+        else if (type.equals(Boolean.class) || type.equals(boolean.class) ||
+                type.equals(Short.class) || type.equals(short.class)
+                || type.equals(Integer.class) || type.equals(int.class) ||
+                type.equals(Long.class) || type.equals(long.class)
+                || type.equals(Float.class) || type.equals(float.class) ||
+                type.equals(Double.class) || type.equals(double.class)
+                || type.equals(Character.class) || type.equals(char.class)) {
             return true;
         }
         return false;
@@ -505,7 +549,7 @@ public class ReflectionUtils {
      * @param field - Field to check primitive/String for.
      * @return - Is primitive or String?
      */
-    public static final boolean isPrimitiveTypeOrString(@Nonnull Field field) {
+    public static boolean isPrimitiveTypeOrString(@Nonnull Field field) {
         Class<?> type = field.getType();
         return isPrimitiveTypeOrString(type);
     }
@@ -516,7 +560,7 @@ public class ReflectionUtils {
      * @param type - Field to check primitive/String for.
      * @return - Is primitive or String?
      */
-    public static final boolean isPrimitiveTypeOrString(@Nonnull Class<?> type) {
+    public static boolean isPrimitiveTypeOrString(@Nonnull Class<?> type) {
         if (isPrimitiveTypeOrClass(type)) {
             return true;
         }
@@ -533,8 +577,8 @@ public class ReflectionUtils {
      * @param type   - Inherited type
      * @return - Is Ancestor type?
      */
-    public static final boolean isSuperType(@Nonnull Class<?> parent,
-                                            @Nonnull Class<?> type) {
+    public static boolean isSuperType(@Nonnull Class<?> parent,
+                                      @Nonnull Class<?> type) {
         Preconditions.checkArgument(parent != null);
         Preconditions.checkArgument(type != null);
         if (parent.equals(type)) {
@@ -557,8 +601,8 @@ public class ReflectionUtils {
      * @param type - Type implementing expected interface.
      * @return - Implements Interface?
      */
-    public static final boolean implementsInterface(@Nonnull Class<?> intf,
-                                                    @Nonnull Class<?> type) {
+    public static boolean implementsInterface(@Nonnull Class<?> intf,
+                                              @Nonnull Class<?> type) {
         Preconditions.checkArgument(intf != null);
         Preconditions.checkArgument(type != null);
 
@@ -587,7 +631,7 @@ public class ReflectionUtils {
      * @return - Parameterized type.
      * @throws Exception
      */
-    public static final Class<?> getGenericListType(@Nonnull Field field)
+    public static Class<?> getGenericListType(@Nonnull Field field)
     throws Exception {
         Preconditions.checkArgument(field != null);
         Preconditions
@@ -604,7 +648,7 @@ public class ReflectionUtils {
      * @return - Parameterized type.
      * @throws Exception
      */
-    public static final Class<?> getGenericSetType(@Nonnull Field field)
+    public static Class<?> getGenericSetType(@Nonnull Field field)
     throws Exception {
         Preconditions.checkArgument(field != null);
         Preconditions
@@ -612,5 +656,56 @@ public class ReflectionUtils {
 
         ParameterizedType ptype = (ParameterizedType) field.getGenericType();
         return (Class<?>) ptype.getActualTypeArguments()[0];
+    }
+
+    /**
+     * Get the parsed value of the type specified from the
+     * string value passed.
+     *
+     * @param type - Required value type
+     * @param value - Input String value
+     * @return - Parsed Value.
+     */
+    @SuppressWarnings("unchecked")
+    public static Object parseStringValue(Class<?> type, String value) {
+        if (!Strings.isNullOrEmpty(value)) {
+            if (isPrimitiveTypeOrString(type)) {
+                return parsePrimitiveValue(type, value);
+            } else if (type.isEnum()) {
+                Class<Enum> et = (Class<Enum>) type;
+                return Enum.valueOf(et, value);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get the value of the primitive type parsed from the string value.
+     *
+     * @param type - Primitive Type
+     * @param value - String value
+     * @return - Parsed Value
+     */
+    private static Object parsePrimitiveValue(Class<?> type, String value) {
+        if (type.equals(Boolean.class) || type.equals(boolean.class)) {
+            return Boolean.parseBoolean(value);
+        } else if (type.equals(Short.class) || type.equals(short.class)) {
+            return Short.parseShort(value);
+        } else if (type.equals(Integer.class) || type.equals(int.class)) {
+            return Integer.parseInt(value);
+        } else if (type.equals(Long.class) || type.equals(long.class)) {
+            return Long.parseLong(value);
+        } else if (type.equals(Float.class) || type.equals(float.class)) {
+            return Float.parseFloat(value);
+        } else if (type.equals(Double.class) || type.equals(double.class)) {
+            return Double.parseDouble(value);
+        } else if (type.equals(Character.class) || type.equals(char.class)) {
+            return value.charAt(0);
+        } else if (type.equals(Byte.class) || type.equals(byte.class)) {
+            return Byte.parseByte(value);
+        } else if (type.equals(String.class)) {
+            return value;
+        }
+        return null;
     }
 }

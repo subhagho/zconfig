@@ -24,6 +24,7 @@
 
 package com.codekutter.zconfig.common;
 
+import com.codekutter.zconfig.common.model.annotations.MethodInvoke;
 import com.google.common.base.Strings;
 import com.codekutter.zconfig.common.model.Configuration;
 import com.codekutter.zconfig.common.model.Version;
@@ -33,6 +34,8 @@ import com.codekutter.zconfig.common.model.annotations.ConfigValue;
 import com.codekutter.zconfig.common.model.annotations.transformers.JodaTimeTransformer;
 import com.codekutter.zconfig.common.parsers.JSONConfigParser;
 import com.codekutter.zconfig.common.readers.ConfigFileReader;
+import lombok.Data;
+import lombok.ToString;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -48,43 +51,25 @@ class Test_ConfigurationAnnotationProcessor {
             "src/test/resources/json/test-config.properties";
     private static Configuration configuration = null;
 
+    public enum ETestValue {
+        EValue1, EValue2, EValue3
+    }
+
+    @ToString
+    @Data
     @ConfigPath(path = ".")
     public static class ModifiedBy {
         @ConfigValue(name = "user")
         private String name;
         @ConfigValue(name = "timestamp", transformer = JodaTimeTransformer.class)
         private DateTime timestamp;
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public DateTime getTimestamp() {
-            return timestamp;
-        }
-
-        public void setTimestamp(DateTime timestamp) {
-            this.timestamp = timestamp;
-        }
-
-        @Override
-        public String toString() {
-            return "ModifiedBy{" +
-                    "name='" + name + '\'' +
-                    ", timestamp='" + timestamp + '\'' +
-                    '}';
-        }
     }
 
+    @ToString
     @ConfigPath(path = "configuration.node_1.node_2")
     public static class ConfigAnnotationsTest {
         @ConfigValue(required = true)
         private String nodeName;
-        @ConfigParam(name = "PARAM_1", required = true)
         private String paramValue;
         @ConfigValue(name = "values.longValue", required = true)
         private long longValue;
@@ -96,6 +81,23 @@ class Test_ConfigurationAnnotationProcessor {
         private ModifiedBy updatedBy;
         @ConfigValue(name = "createdBy")
         private ModifiedBy createdBy;
+        private long paramLong = -1;
+        private ETestValue paramEnum = ETestValue.EValue1;
+
+        @MethodInvoke
+        public ConfigAnnotationsTest(
+                @ConfigParam(name = "PARAM_1", required = true) String paramValue) {
+            this.paramValue = paramValue;
+        }
+
+        @MethodInvoke
+        public void updateValues(
+                @ConfigParam(name = "PARAM_5", required = true) long paramLong,
+                @ConfigParam(name = "PARAM_6", required = true)
+                        ETestValue paramEnum) {
+            this.paramLong = paramLong;
+            this.paramEnum = paramEnum;
+        }
 
         public String getNodeName() {
             return nodeName;
@@ -155,17 +157,21 @@ class Test_ConfigurationAnnotationProcessor {
             this.createdBy = createdBy;
         }
 
-        @Override
-        public String toString() {
-            return "ConfigAnnotationsTest{" +
-                    "nodeName='" + nodeName + '\'' +
-                    ", paramValue='" + paramValue + '\'' +
-                    ", longValue=" + longValue +
-                    ", doubleValue=" + doubleValue +
-                    ", longListSet=" + longListSet +
-                    ", updatedBy=" + updatedBy +
-                    ", createdBy=" + createdBy +
-                    '}';
+        public long getParamLong() {
+            return paramLong;
+        }
+
+        public void setParamLong(long paramLong) {
+            this.paramLong = paramLong;
+        }
+
+        public ETestValue getParamEnum() {
+            return paramEnum;
+        }
+
+        public void setParamEnum(
+                ETestValue paramEnum) {
+            this.paramEnum = paramEnum;
         }
     }
 
@@ -198,10 +204,14 @@ class Test_ConfigurationAnnotationProcessor {
     void readConfigAnnotations() {
         try {
             assertNotNull(configuration);
-            ConfigAnnotationsTest value = new ConfigAnnotationsTest();
-            value = ConfigurationAnnotationProcessor
+            ConfigAnnotationsTest value = ConfigurationAnnotationProcessor
                     .readConfigAnnotations(ConfigAnnotationsTest.class,
-                                           configuration, value);
+                                           configuration);
+            assertNotNull(value);
+            assertFalse(Strings.isNullOrEmpty(value.paramValue));
+            assertTrue(value.paramLong > 0);
+            assertEquals(ETestValue.EValue3, value.paramEnum);
+
             LogUtils.debug(getClass(), value);
         } catch (Throwable t) {
             LogUtils.error(getClass(), t);

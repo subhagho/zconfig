@@ -32,10 +32,11 @@ import com.codekutter.zconfig.common.utils.CollectionUtils;
 import com.codekutter.zconfig.common.utils.ReflectionUtils;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import org.apache.commons.lang3.reflect.MethodUtils;
 
 import javax.annotation.Nonnull;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
+import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -80,31 +81,7 @@ public class ConfigurationAnnotationProcessor {
                                               @Nonnull Configuration config,
                                               @Nonnull T target)
     throws ConfigurationException {
-        Preconditions.checkArgument(config != null);
-        Preconditions.checkArgument(target != null);
-        Preconditions.checkArgument(type != null);
-
-        ConfigPath cPath = type.getAnnotation(ConfigPath.class);
-        if (cPath != null) {
-            String path = cPath.path();
-            if (Strings.isNullOrEmpty(path)) {
-                throw new ConfigurationException(
-                        "Invalid Config Path : Path is NULL/Empty");
-            }
-            AbstractConfigNode node = config.find(path);
-            if (node == null) {
-                throw new ConfigurationException(
-                        String.format("Invalid Path : Path not found. [path=%s]",
-                                      path));
-            }
-            Field[] fields = ReflectionUtils.getAllFields(type);
-            if (fields != null && fields.length > 0) {
-                for (Field field : fields) {
-                    processField(type, node, target, field);
-                }
-            }
-        }
-        return target;
+        return readConfigAnnotations(type, config, target, null);
     }
 
     /**
@@ -121,7 +98,7 @@ public class ConfigurationAnnotationProcessor {
     public static <T> T readConfigAnnotations(@Nonnull Class<? extends T> type,
                                               @Nonnull Configuration config,
                                               @Nonnull T target,
-                                              @Nonnull String path)
+                                              String path)
     throws ConfigurationException {
         Preconditions.checkArgument(config != null);
         Preconditions.checkArgument(target != null);
@@ -129,7 +106,11 @@ public class ConfigurationAnnotationProcessor {
 
         ConfigPath cPath = type.getAnnotation(ConfigPath.class);
         if (cPath != null) {
-            path = String.format("%s.%s", path, cPath.path());
+            if (!Strings.isNullOrEmpty(path)) {
+                path = String.format("%s.%s", path, cPath.path());
+            } else {
+                path = cPath.path();
+            }
             if (Strings.isNullOrEmpty(path)) {
                 throw new ConfigurationException(
                         "Invalid Config Path : Path is NULL/Empty");
@@ -140,12 +121,7 @@ public class ConfigurationAnnotationProcessor {
                         String.format("Invalid Path : Path not found. [path=%s]",
                                       path));
             }
-            Field[] fields = ReflectionUtils.getAllFields(type);
-            if (fields != null && fields.length > 0) {
-                for (Field field : fields) {
-                    processField(type, node, target, field);
-                }
-            }
+            processType(type, node, target);
         }
         return target;
     }
@@ -177,19 +153,311 @@ public class ConfigurationAnnotationProcessor {
                         "Invalid Config Path : Path is NULL/Empty");
             }
             AbstractConfigNode node = config.find(path);
+            processType(type, node, target);
+        }
+        return target;
+    }
+
+    /**
+     * Create a new instance of the type, will invoke an annotated constructor, if present, else
+     * will try to invoke the default (empty) constructor.
+     *
+     * Read and apply the values from the passed configuration based on the type annotations.
+     *
+     * @param type   - Type of the target object.
+     * @param config - Configuration source.
+     * @param path   - Node path to search under.
+     * @param <T>    - Annotated object type.
+     * @return - Updated target instance.
+     * @throws ConfigurationException
+     */
+    public static <T> T readConfigAnnotations(@Nonnull Class<? extends T> type,
+                                              @Nonnull Configuration config,
+                                              String path)
+    throws ConfigurationException {
+        Preconditions.checkArgument(config != null);
+        Preconditions.checkArgument(type != null);
+
+
+        ConfigPath cPath = type.getAnnotation(ConfigPath.class);
+        if (cPath != null) {
+            if (!Strings.isNullOrEmpty(path)) {
+                path = String.format("%s.%s", path, cPath.path());
+            } else {
+                path = cPath.path();
+            }
+            if (Strings.isNullOrEmpty(path)) {
+                throw new ConfigurationException(
+                        "Invalid Config Path : Path is NULL/Empty");
+            }
+            AbstractConfigNode node = config.find(path);
             if (node == null) {
                 throw new ConfigurationException(
                         String.format("Invalid Path : Path not found. [path=%s]",
                                       path));
             }
-            Field[] fields = ReflectionUtils.getAllFields(type);
-            if (fields != null && fields.length > 0) {
-                for (Field field : fields) {
-                    processField(type, node, target, field);
+            T target = createInstance(type, node);
+            return readConfigAnnotations(type, config, target, path);
+        }
+        throw new ConfigurationException(
+                String.format("Path Annotation not found. [type=%s]",
+                              type.getCanonicalName()));
+    }
+
+    /**
+     * Create a new instance of the type, will invoke an annotated constructor, if present, else
+     * will try to invoke the default (empty) constructor.
+     * Read and apply the values from the passed configuration based on the type annotations.
+     *
+     * @param type   - Type of the target object.
+     * @param config - Configuration source.
+     * @param <T>    - Annotated object type.
+     * @return - Updated target instance.
+     * @throws ConfigurationException
+     */
+    public static <T> T readConfigAnnotations(@Nonnull Class<? extends T> type,
+                                              @Nonnull Configuration config)
+    throws ConfigurationException {
+        Preconditions.checkArgument(config != null);
+        Preconditions.checkArgument(type != null);
+
+
+        ConfigPath cPath = type.getAnnotation(ConfigPath.class);
+        if (cPath != null) {
+            String path = cPath.path();
+            if (Strings.isNullOrEmpty(path)) {
+                throw new ConfigurationException(
+                        "Invalid Config Path : Path is NULL/Empty");
+            }
+            AbstractConfigNode node = config.find(path);
+            if (node == null) {
+                throw new ConfigurationException(
+                        String.format("Invalid Path : Path not found. [path=%s]",
+                                      path));
+            }
+            T target = createInstance(type, node);
+            return readConfigAnnotations(type, config, target);
+        }
+        throw new ConfigurationException(
+                String.format("Path Annotation not found. [type=%s]",
+                              type.getCanonicalName()));
+    }
+
+    /**
+     * Create a new instance of the type, will invoke an annotated constructor, if present, else
+     * will try to invoke the default (empty) constructor.
+     *
+     * Read and apply the values from the passed configuration based on the type annotations.
+     *
+     * @param type   - Type of the target object.
+     * @param config - Configuration node source.
+     * @param <T>    - Annotated object type.
+     * @return - Updated target instance.
+     * @throws ConfigurationException
+     */
+    public static <T> T readConfigAnnotations(@Nonnull Class<? extends T> type,
+                                              @Nonnull ConfigPathNode config)
+    throws ConfigurationException {
+        Preconditions.checkArgument(config != null);
+        Preconditions.checkArgument(type != null);
+
+        T target = createInstance(type, config);
+        return readConfigAnnotations(type, config, target);
+    }
+
+    /**
+     * Create a new instance of the specified type.
+     * Will look for an annotated constructor, if not found will
+     * try to invoke the default (empty) constructor.
+     *
+     * @param type - Type of the target object.
+     * @param node - Configuration node source.
+     * @param <T>  - Annotated object type.
+     * @return - New Object instance
+     * @throws ConfigurationException
+     */
+    @SuppressWarnings("unchecked")
+    private static <T> T createInstance(Class<? extends T> type,
+                                        AbstractConfigNode node)
+    throws ConfigurationException {
+        try {
+            Constructor<?>[] constructors = type.getConstructors();
+            Constructor<?> defaultConst = null;
+            T target = null;
+            for (Constructor<?> constr : constructors) {
+                if (Modifier.isPublic(constr.getModifiers())) {
+                    Parameter[] params = constr.getParameters();
+                    if (params == null || params.length == 0) {
+                        defaultConst = constr;
+                    } else {
+                        if (constr.isAnnotationPresent(MethodInvoke.class)) {
+                            MethodInvoke mi =
+                                    constr.getAnnotation(MethodInvoke.class);
+                            if (!Strings.isNullOrEmpty(mi.path())) {
+                                node = node.find(mi.path());
+                            }
+                            if (node == null) {
+                                throw new ConfigurationException(String.format(
+                                        "Configuration Node not found. [path=%s]",
+                                        mi.path()));
+                            }
+                            Object[] input = null;
+                            List<Object> values = new ArrayList<>();
+                            for (Parameter param : params) {
+                                Object value = getParamValue(type, node, param);
+                                values.add(value);
+                            }
+                            input = values.toArray();
+                            target = (T) constr.newInstance(input);
+
+                            break;
+                        }
+                    }
                 }
             }
+            if (target == null && defaultConst != null) {
+                target = type.newInstance();
+            } else if (target == null){
+                throw new ConfigurationException(
+                        String.format("No valid constructor found. [type=%s]",
+                                      type.getCanonicalName()));
+            }
+            return target;
+        } catch (IllegalAccessException | InstantiationException | InvocationTargetException e) {
+            throw new ConfigurationException(e);
         }
-        return target;
+    }
+
+    /**
+     * Check and apply any annotations for all fields and methods.
+     *
+     * @param type   - Type of the target object.
+     * @param node   - Extracted configuration node.
+     * @param target - Target to apply the values to.
+     * @param <T>    - Annotated object type.
+     * @throws ConfigurationException
+     */
+    private static <T> void processType(Class<? extends T> type,
+                                        AbstractConfigNode node, T target)
+    throws ConfigurationException {
+        Field[] fields = ReflectionUtils.getAllFields(type);
+        if (fields != null && fields.length > 0) {
+            for (Field field : fields) {
+                processField(type, node, target, field);
+            }
+        }
+        Method[] methods = ReflectionUtils.getAllMethods(type);
+        if (methods != null && methods.length > 0) {
+            for (Method method : methods) {
+                processMethod(type, node, target, method);
+            }
+        }
+    }
+
+    /**
+     * Check if method(s) have been marked for auto-invoke and invoke them
+     * with the configuration parameters.
+     *
+     * @param type   - Instance Type
+     * @param node   - Configuration Node.
+     * @param target - Target instance.
+     * @param method - Method to check.
+     * @param <T>    - Annotated object type.
+     * @throws ConfigurationException
+     */
+    private static <T> void processMethod(Class<? extends T> type,
+                                          AbstractConfigNode node, T target,
+                                          Method method)
+    throws ConfigurationException {
+        if (method.isAnnotationPresent(MethodInvoke.class)) {
+            MethodInvoke mi = method.getAnnotation(MethodInvoke.class);
+            if (!Strings.isNullOrEmpty(mi.path())) {
+                node = node.find(mi.path());
+            }
+            if (node == null) {
+                throw new ConfigurationException(
+                        String.format("Configuration Node Not Found : [path=%s]",
+                                      mi.path()));
+            }
+
+            try {
+                Object[] input = null;
+                Parameter[] params = method.getParameters();
+                if (params != null && params.length > 0) {
+                    List<Object> values = new ArrayList<>();
+                    for (Parameter param : params) {
+                        Object value = getParamValue(type, node, param);
+                        values.add(value);
+                    }
+                    input = values.toArray();
+                }
+                MethodUtils.invokeMethod(target, method.getName(), input);
+            } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
+                throw new ConfigurationException(e);
+            }
+        }
+    }
+
+    /**
+     * Get the value of the annotated parameter from the configuration node.
+     *
+     * @param type  - Instance Type
+     * @param node  - Configuration Node.
+     * @param param - Method/Constructor parameter.
+     * @param <T>   - Annotated object type.
+     * @return - Value extracted from configuration.
+     * @throws ConfigurationException
+     */
+    private static <T> Object getParamValue(Class<? extends T> type,
+                                            AbstractConfigNode node,
+                                            Parameter param)
+    throws ConfigurationException {
+        if (param.isAnnotationPresent(ConfigParam.class)) {
+            ConfigParam p = param.getAnnotation(ConfigParam.class);
+            String pname = p.name();
+            if (Strings.isNullOrEmpty(pname)) {
+                pname = param.getName();
+            }
+            if (pname.compareTo(GlobalConstants.DEFAULT_CONFIG_PARAM_NAME) == 0) {
+                if (param.getType().equals(AbstractConfigNode.class)) {
+                    return node;
+                }
+            }
+            if (!(node instanceof ConfigPathNode)) {
+                throw new ConfigurationException(String.format(
+                        "Invalid Configuration Node type. [path=%s][type=%s]",
+                        node.getSearchPath(), node.getClass().getCanonicalName()));
+            }
+
+            ConfigPathNode pnode = (ConfigPathNode) node;
+            ConfigParametersNode paramnode = pnode.parmeters();
+            String value = null;
+            if (paramnode != null) {
+                ConfigValueNode cv = paramnode.getValue(pname);
+                if (cv != null) {
+                    value = cv.getValue();
+                }
+            }
+            if (Strings.isNullOrEmpty(value) && p.required()) {
+                throw new ConfigurationException(String.format(
+                        "Required Parameter Value not defined. [param=%s][type=%s]",
+                        param.getName(), type.getCanonicalName()));
+            }
+            Object v = null;
+            if (!Strings.isNullOrEmpty(value)) {
+                v = ReflectionUtils.parseStringValue(param.getType(), value);
+                if (v == null) {
+                    throw new ConfigurationException(String.format(
+                            "Error parsing parameter value. [type=%s][value=%s]",
+                            param.getType().getCanonicalName(), value));
+                }
+            }
+            return v;
+        } else {
+            throw new ConfigurationException(String.format(
+                    "Parameter Annotation not defined. [param=%s][type=%s]",
+                    param.getName(), type.getCanonicalName()));
+        }
     }
 
     /**
