@@ -120,7 +120,7 @@ public abstract class CollectionProcessor<T> extends Processor<List<T>> {
      * @param response - Processor Response.
      * @return - Processor Response.
      */
-    protected abstract ProcessorResponse<List<T>> execute(List<T> data,
+    protected abstract ProcessorResponse<List<T>> execute(@Nonnull List<T> data,
                                                           Context context,
-                                                          ProcessorResponse<List<T>> response);
+                                                          @Nonnull ProcessorResponse<List<T>> response);
 }

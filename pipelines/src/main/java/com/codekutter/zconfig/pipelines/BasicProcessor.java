@@ -4,6 +4,7 @@ import com.codekutter.zconfig.common.LogUtils;
 import com.google.common.base.Strings;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * Basic Abstract processor class to operate on entities.
@@ -73,6 +74,8 @@ public abstract class BasicProcessor<T> extends Processor<T> {
      * @param response - Processor Response.
      * @return - Processor Response.
      */
-    protected abstract ProcessorResponse<T> execute(T data, Context context,
-                                                    ProcessorResponse<T> response);
+    protected abstract ProcessorResponse<T> execute(@Nonnull T data,
+                                                    Context context,
+                                                    @Nonnull
+                                                            ProcessorResponse<T> response);
 }

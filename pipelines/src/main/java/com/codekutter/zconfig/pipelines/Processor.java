@@ -16,6 +16,38 @@ public abstract class Processor<T> {
     protected ProcessState state = new ProcessState();
 
     /**
+     * Name of this processor.
+     */
+    protected String name;
+
+    /**
+     * Get the name of this processor.
+     *
+     * @return - Processor Name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Set the name of this processor.
+     *
+     * @param name - Processor Name
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    /**
+     * Get the state of this processor.
+     *
+     * @return - Processor State.
+     */
+    public EProcessState getState() {
+        return state.getState();
+    }
+
+    /**
      * Check if the state of this processor matches the passed state.
      *
      * @param state - Expected State
@@ -40,6 +72,15 @@ public abstract class Processor<T> {
             throw new ProcessorException(
                     String.format("Processor is not available. [actual=%s]",
                                   this.state.getState().name()));
+        }
+    }
+
+    /**
+     * Dispose this process instance.
+     */
+    public void dispose() {
+        if (!state.hasError()) {
+            state.setState(EProcessState.Disposed);
         }
     }
 
