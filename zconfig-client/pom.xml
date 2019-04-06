@@ -29,9 +29,10 @@
     <parent>
         <groupId>com.codekutter.zconfig</groupId>
         <artifactId>parent</artifactId>
-        <version>${zconfig.version}</version>
+        <version>1.0.0</version>
     </parent>
     <artifactId>zconfig-client</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>zconfig-client</name>
@@ -40,7 +41,7 @@
         <dependency>
             <groupId>com.codekutter.zconfig</groupId>
             <artifactId>zconfig-common</artifactId>
-            <version>${zconfig.version}</version>
+            <version>1.0.2-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

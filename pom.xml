@@ -30,14 +30,13 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <chronicle-map.version>2.1.4</chronicle-map.version>
-        <zconfig.version>1.0.1</zconfig.version>
         <github.global.server>github</github.global.server>
         <zconfig.common.target>${project.build.directory}/zconfig</zconfig.common.target>
     </properties>
 
     <groupId>com.codekutter.zconfig</groupId>
     <artifactId>parent</artifactId>
-    <version>${zconfig.version}</version>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
 
     <name>zconfig</name>
