@@ -27,8 +27,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.codekutter</groupId>
-    <artifactId>zconfig</artifactId>
+    <groupId>com.codekutter.zconfig</groupId>
+    <artifactId>parent</artifactId>
     <version>1.0-M1</version>
     <packaging>pom</packaging>
 
@@ -74,7 +74,7 @@
                     <artifactId>maven-release-plugin</artifactId>
                     <version>2.5.1</version>
                     <configuration>
-                        <tagNameFormat>zconfig-common-@{project.version}</tagNameFormat>
+                        <tagNameFormat>zconfig-@{project.version}</tagNameFormat>
                     </configuration>
                 </plugin>
                 <!-- This plugin will help us publish the source code -->

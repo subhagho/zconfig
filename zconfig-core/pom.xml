@@ -27,8 +27,8 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.codekutter</groupId>
-        <artifactId>zconfig</artifactId>
+        <groupId>com.codekutter.zconfig</groupId>
+        <artifactId>parent</artifactId>
         <version>1.0-M1</version>
     </parent>
     <artifactId>zconfig-core</artifactId>
@@ -38,7 +38,7 @@
     <url>https://github.com/subhagho/zconfig/tree/master/zconfig-core</url>
     <dependencies>
         <dependency>
-            <groupId>com.codekutter</groupId>
+            <groupId>com.codekutter.zconfig</groupId>
             <artifactId>zconfig-common</artifactId>
             <version>1.0-M1</version>
             <scope>compile</scope>
