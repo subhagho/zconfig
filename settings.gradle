@@ -1,6 +1,0 @@
-rootProject.name = 'zconfig'
-
-include 'zconfig-common'
-include 'zconfig-core'
-include 'zconfig-client'
-
