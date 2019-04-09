@@ -29,7 +29,7 @@
     <parent>
         <groupId>com.codekutter.zconfig</groupId>
         <artifactId>parent</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1-SNAPSHOT</version>
     </parent>
     <artifactId>zconfig-core</artifactId>
     <version>1.0.0-SNAPSHOT</version>
@@ -83,7 +83,7 @@
         <dependency>
             <groupId>com.codekutter.zconfig</groupId>
             <artifactId>zconfig-common</artifactId>
-            <version>1.0.2-SNAPSHOT</version>
+            <version>1.0.4-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
