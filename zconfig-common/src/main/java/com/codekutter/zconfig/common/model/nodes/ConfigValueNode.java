@@ -24,6 +24,8 @@
 
 package com.codekutter.zconfig.common.model.nodes;
 
+import com.codekutter.zconfig.common.ZConfigEnv;
+import com.codekutter.zconfig.common.utils.CypherUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -59,6 +61,10 @@ public class ConfigValueNode extends AbstractConfigNode
      * Configuration value element.
      */
     private String value;
+    /**
+     * Is the data in this node encrypted?
+     */
+    private boolean encrypted = false;
 
     /**
      * Default constructor - Initialize the state object.
@@ -84,7 +90,26 @@ public class ConfigValueNode extends AbstractConfigNode
      */
     @Override
     public String getValue() {
+        if (encrypted && !Strings.isNullOrEmpty(getValue())) {
+
+        }
         return value;
+    }
+
+    public String getValue(String key) throws ConfigurationException {
+        if (encrypted && !Strings.isNullOrEmpty(getValue())) {
+            try {
+                byte[] data = CypherUtils.decrypt(getValue(), key);
+                if (data != null && data.length > 0) {
+                    return new String(data);
+                }
+                throw new ConfigurationException(
+                        "Decryption failed: Null buffer returned.");
+            } catch (Exception ex) {
+                throw new ConfigurationException(ex);
+            }
+        }
+        return getValue();
     }
 
     /**
@@ -95,6 +120,24 @@ public class ConfigValueNode extends AbstractConfigNode
     public void setValue(String value) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(value));
         this.value = value;
+    }
+
+    /**
+     * Is the node value encrypted?
+     *
+     * @return - Is encrypted?
+     */
+    public boolean isEncrypted() {
+        return encrypted;
+    }
+
+    /**
+     * Set the node value encryption.
+     *
+     * @param encrypted - Encrypted?
+     */
+    public void setEncrypted(boolean encrypted) {
+        this.encrypted = encrypted;
     }
 
     /**
@@ -200,7 +243,8 @@ public class ConfigValueNode extends AbstractConfigNode
     public DateTime getDateValue() {
         if (!Strings.isNullOrEmpty(value)) {
             DateTimeFormatter formatter =
-                    DateTimeFormat.forPattern(GlobalConstants.DEFAULT_JODA_DATE_FORMAT);
+                    DateTimeFormat
+                            .forPattern(GlobalConstants.DEFAULT_JODA_DATE_FORMAT);
             return DateTime.parse(value, formatter);
         }
         return null;
@@ -240,7 +284,8 @@ public class ConfigValueNode extends AbstractConfigNode
         if (!Strings.isNullOrEmpty(value)) {
             DateTimeFormatter formatter =
                     DateTimeFormat
-                            .forPattern(GlobalConstants.DEFAULT_JODA_DATETIME_FORMAT);
+                            .forPattern(
+                                    GlobalConstants.DEFAULT_JODA_DATETIME_FORMAT);
             return DateTime.parse(value, formatter);
         }
         return null;

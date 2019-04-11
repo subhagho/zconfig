@@ -25,12 +25,15 @@
 package com.codekutter.zconfig.common.model;
 
 import com.codekutter.zconfig.common.ConfigurationException;
+import com.codekutter.zconfig.common.LogUtils;
 import com.codekutter.zconfig.common.model.nodes.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 
+import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -92,7 +95,10 @@ public class Configuration {
     private ESyncMode syncMode;
 
     private ConfigurationSettings settings;
-
+    /**
+     * MD5 Hash of the encryption Key.
+     */
+    private String encryptionHash;
 
     /**
      * Default Empty constructor.
@@ -281,6 +287,24 @@ public class Configuration {
     }
 
     /**
+     * Get the encryption Hash.
+     *
+     * @return - Encryption Hash
+     */
+    public String getEncryptionHash() {
+        return encryptionHash;
+    }
+
+    /**
+     * Set the encryption Hash.
+     *
+     * @param encryptionHash - Encryption Hash
+     */
+    public void setEncryptionHash(String encryptionHash) {
+        this.encryptionHash = encryptionHash;
+    }
+
+    /**
      * Get the root configuration node.
      *
      * @return - Root configuration node.
@@ -334,6 +358,32 @@ public class Configuration {
      */
     public void setSettings(ConfigurationSettings settings) {
         this.settings = settings;
+    }
+
+    /**
+     * Match the passed password Key with the MD5 hash value set for
+     * this configuration.
+     *
+     * @param key - Password Key.
+     * @return - Matches?
+     * @throws ConfigurationException
+     */
+    public boolean checkEncryptionKey(String key) throws ConfigurationException{
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(key));
+        try {
+            if (!Strings.isNullOrEmpty(encryptionHash)) {
+                MessageDigest md = MessageDigest.getInstance("MD5");
+                md.update(key.getBytes());
+                byte[] digest = md.digest();
+                String hash = DatatypeConverter
+                        .printHexBinary(digest).toUpperCase();
+                return (encryptionHash.compareTo(hash) == 0);
+            }
+        } catch (Exception ex) {
+            LogUtils.debug(getClass(), ex);
+            throw new ConfigurationException(ex);
+        }
+        return false;
     }
 
     /**

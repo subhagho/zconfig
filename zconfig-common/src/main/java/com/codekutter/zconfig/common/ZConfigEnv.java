@@ -25,6 +25,7 @@
 package com.codekutter.zconfig.common;
 
 import com.codekutter.zconfig.common.model.Version;
+import com.codekutter.zconfig.common.utils.CypherUtils;
 import com.codekutter.zconfig.common.utils.NetUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -53,6 +54,11 @@ public abstract class ZConfigEnv {
      * Parsed configuration handle.
      */
     private Configuration configuration;
+    /**
+     * Configuration passcode store.
+     */
+    private CypherUtils.ConfigVault vault = new CypherUtils.ConfigVault();
+
     /**
      * Client instance state.
      */
@@ -207,6 +213,15 @@ public abstract class ZConfigEnv {
      */
     public Configuration getConfiguration() {
         return configuration;
+    }
+
+    /**
+     * Get a handle to the configuration vault.
+     *
+     * @return - Config Passcode Vault
+     */
+    public CypherUtils.ConfigVault getVault() {
+        return vault;
     }
 
     /**
