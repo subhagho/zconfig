@@ -25,6 +25,7 @@
 package com.codekutter.zconfig.client;
 
 import com.codekutter.zconfig.client.factory.ConfigurationManager;
+import com.codekutter.zconfig.common.ZConfigClientEnv;
 import com.codekutter.zconfig.common.model.nodes.*;
 import com.google.common.base.Preconditions;
 import com.codekutter.zconfig.common.ConfigurationException;
@@ -70,7 +71,7 @@ public class ConfigurationUpdateHandler {
                 processEvent(event);
                 updatePaths.add(event.getPath());
             }
-            ZConfigClientEnv.get().getConfigurationManager()
+            ZConfigClientEnv.clientEnv().getConfigurationManager()
                             .applyConfigurationUpdates(configName, updatePaths);
         } catch (Exception e) {
             LogUtils.error(getClass(), String.format(
@@ -92,7 +93,7 @@ public class ConfigurationUpdateHandler {
         Preconditions.checkArgument(event != null);
         try {
             ConfigurationManager manager =
-                    ZConfigClientEnv.get().getConfigurationManager();
+                    ZConfigClientEnv.clientEnv().getConfigurationManager();
             Configuration config = manager.getWithLock(event.getConfigName());
             if (config == null) {
                 LogUtils.debug(getClass(),

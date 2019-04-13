@@ -30,8 +30,8 @@ import com.codekutter.zconfig.common.LogUtils;
 import com.codekutter.zconfig.common.model.Configuration;
 import com.codekutter.zconfig.common.model.Version;
 import com.codekutter.zconfig.core.PersistenceException;
-import com.codekutter.zconfig.core.ZConfigCoreEnv;
-import com.codekutter.zconfig.core.ZConfigCoreInstance;
+import com.codekutter.zconfig.common.ZConfigCoreEnv;
+import com.codekutter.zconfig.common.ZConfigCoreInstance;
 import com.codekutter.zconfig.core.model.Application;
 import com.codekutter.zconfig.core.model.ApplicationGroup;
 import com.codekutter.zconfig.core.model.IZkNode;
@@ -75,7 +75,7 @@ public class ZkUtils {
     public static final CuratorFramework getZkClient() throws PersistenceException {
         try {
             ZkConnectionConfig config =
-                    ZConfigCoreEnv.get().getZkConnectionConfig();
+                    ZConfigCoreEnv.coreEnv().getZkConnectionConfig();
             if (config == null) {
                 throw new PersistenceException(
                         "ZooKeeper Connection configuration not set.");
@@ -117,7 +117,7 @@ public class ZkUtils {
     public static final String getServerRootPath() throws PersistenceException {
         try {
             ZkConnectionConfig config =
-                    ZConfigCoreEnv.get().getZkConnectionConfig();
+                    ZConfigCoreEnv.coreEnv().getZkConnectionConfig();
             if (config == null) {
                 throw new PersistenceException(
                         "ZooKeeper Connection configuration not set.");
@@ -127,12 +127,12 @@ public class ZkUtils {
                 if (!rp.startsWith("/")) {
                     rp = String.format("/%s", rp);
                 }
-                ZConfigCoreInstance instance = ZConfigCoreEnv.get().getInstance();
+                ZConfigCoreInstance instance = ZConfigCoreEnv.coreEnv().getInstance();
                 return String
                         .format("%s%s/%s", SERVER_ROOT_PATH, rp,
                                 instance.getApplicationName());
             } else {
-                ZConfigCoreInstance instance = ZConfigCoreEnv.get().getInstance();
+                ZConfigCoreInstance instance = ZConfigCoreEnv.coreEnv().getInstance();
                 return String
                         .format("%s/%s", SERVER_ROOT_PATH, instance.getApplicationName());
             }
@@ -230,7 +230,7 @@ public class ZkUtils {
     /**
      * Get the ZooKeeper path for the specified node.
      *
-     * @param node - Node to get path for.
+     * @param node - Node to coreEnv path for.
      * @return - ZooKeeper path.
      * @throws PersistenceException
      */

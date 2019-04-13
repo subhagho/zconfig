@@ -25,7 +25,7 @@
 package com.codekutter.zconfig.core.zookeeper;
 
 import com.codekutter.zconfig.common.LogUtils;
-import com.codekutter.zconfig.core.ZConfigCoreEnv;
+import com.codekutter.zconfig.common.ZConfigCoreEnv;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.locks.InterProcessMutex;
 import org.apache.curator.utils.ZKPaths;

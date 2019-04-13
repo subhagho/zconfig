@@ -22,8 +22,10 @@
  *
  */
 
-package com.codekutter.zconfig.client;
+package com.codekutter.zconfig.common;
 
+import com.codekutter.zconfig.client.ConfigurationUpdateHandler;
+import com.codekutter.zconfig.client.ZConfigClientInstance;
 import com.codekutter.zconfig.common.*;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -343,11 +345,6 @@ public class ZConfigClientEnv extends ZConfigEnv {
     }
 
     /**
-     * Client environment singleton.
-     */
-    private static final ZConfigClientEnv __ENV__ = new ZConfigClientEnv();
-
-    /**
      * Setup the client environment using the passed configuration file.
      *
      * @param configfile - Configuration file (path) to read from.
@@ -359,14 +356,18 @@ public class ZConfigClientEnv extends ZConfigEnv {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(configfile));
         Preconditions.checkArgument(!Strings.isNullOrEmpty(version));
 
-        synchronized (__ENV__) {
+        try {
+            ZConfigEnv.getEnvLock();
             try {
-                if (__ENV__.getState() != EEnvState.Initialized) {
-                    __ENV__.init(configfile, Version.parse(version));
+                ZConfigEnv env = ZConfigEnv.initialize(ZConfigClientEnv.class);
+                if (env.getState() != EEnvState.Initialized) {
+                    env.init(configfile, Version.parse(version));
                 }
-            } catch (ValueParseException e) {
-                throw new ConfigurationException(e);
+            } finally {
+                ZConfigEnv.releaseEnvLock();
             }
+        } catch (Exception e) {
+            throw new ConfigurationException(e);
         }
     }
 
@@ -388,38 +389,35 @@ public class ZConfigClientEnv extends ZConfigEnv {
         Preconditions.checkArgument(type != null);
         Preconditions.checkArgument(!Strings.isNullOrEmpty(version));
 
-        synchronized (__ENV__) {
-            try {
-                if (__ENV__.getState() != EEnvState.Initialized) {
-                    __ENV__.init(configfile, type, Version.parse(version));
-                }
-            } catch (ValueParseException e) {
-                throw new ConfigurationException(e);
-            }
-        }
-    }
 
-    /**
-     * Shutdown this client environment.
-     */
-    public static void shutdown() {
-        synchronized (__ENV__) {
-            __ENV__.dispose();
-        }
-    }
-
-    /**
-     * Get a handle to the client environment singleton.
-     *
-     * @return - Client Environment handle.
-     * @throws ZConfigClientException
-     */
-    public static ZConfigClientEnv get() throws ZConfigClientException {
         try {
-            __ENV__.checkState(EEnvState.Initialized);
-            return __ENV__;
-        } catch (StateException e) {
-            throw new ZConfigClientException(e);
+            ZConfigEnv.getEnvLock();
+            try {
+                ZConfigEnv env = ZConfigEnv.initialize(ZConfigClientEnv.class);
+                if (env.getState() != EEnvState.Initialized) {
+                    env.init(configfile, type, Version.parse(version));
+                }
+            } finally {
+                ZConfigEnv.releaseEnvLock();
+            }
+        } catch (Exception e) {
+            throw new ConfigurationException(e);
         }
+    }
+
+    /**
+     * Get the instance of the client environment handle.
+     *
+     * @return - Client environment handle.
+     * @throws EnvException
+     */
+    public static ZConfigClientEnv clientEnv() throws EnvException {
+        ZConfigEnv env = ZConfigEnv.env();
+        if (env instanceof ZConfigClientEnv) {
+            return (ZConfigClientEnv) env;
+        }
+        throw new EnvException(
+                String.format("Env handle is not of client type. [type=%s]",
+                              env.getClass().getCanonicalName()));
     }
 }

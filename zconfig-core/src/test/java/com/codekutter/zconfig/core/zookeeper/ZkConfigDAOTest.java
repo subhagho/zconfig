@@ -33,7 +33,7 @@ import com.codekutter.zconfig.common.parsers.AbstractConfigParser;
 import com.codekutter.zconfig.common.utils.ResourceReaderUtils;
 import com.codekutter.zconfig.core.IConfigDAO;
 import com.codekutter.zconfig.core.PersistenceException;
-import com.codekutter.zconfig.core.ZConfigCoreEnv;
+import com.codekutter.zconfig.common.ZConfigCoreEnv;
 import com.codekutter.zconfig.core.model.Application;
 import com.codekutter.zconfig.core.model.ApplicationGroup;
 import com.codekutter.zconfig.core.model.EPersistedNodeState;
@@ -165,7 +165,7 @@ class ZkConfigDAOTest {
                 ConfigProviderFactory.parser(TEST_CONFIG_FILE);
         if (parser == null) {
             throw new ConfigurationException(String.format(
-                    "Cannot get configuration parser instance. [file=%s]",
+                    "Cannot coreEnv configuration parser instance. [file=%s]",
                     TEST_CONFIG_FILE));
         }
         LogUtils.info(ZkConfigDAOTest.class, String.format(

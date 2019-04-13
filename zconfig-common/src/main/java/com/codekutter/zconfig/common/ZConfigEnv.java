@@ -41,6 +41,7 @@ import java.net.InetAddress;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Abstract base class for defining the operating environment.
@@ -242,4 +243,72 @@ public abstract class ZConfigEnv {
      * @throws ConfigurationException
      */
     public abstract void postInit() throws ConfigurationException;
+
+    /**
+     * Client environment singleton.
+     */
+    private static ZConfigEnv __ENV__ = null;
+
+    /**
+     * Environment Instance Lock.
+     */
+    private static ReentrantLock __ENV_LOCK__ = new ReentrantLock();
+
+
+    /**
+     * Shutdown this client environment.
+     */
+    public static void shutdown() {
+        synchronized (__ENV__) {
+            __ENV__.dispose();
+        }
+    }
+
+
+    /**
+     * Get a handle to the client environment singleton.
+     *
+     * @return - Environment handle.
+     * @throws EnvException
+     */
+    public static ZConfigEnv env() throws EnvException {
+        try {
+            __ENV__.checkState(EEnvState.Initialized);
+            return __ENV__;
+        } catch (StateException e) {
+            throw new EnvException(e);
+        }
+    }
+
+    protected static ZConfigEnv initialize(Class<? extends ZConfigEnv> type)
+    throws EnvException {
+        if (!__ENV_LOCK__.isLocked() || !__ENV_LOCK__.isHeldByCurrentThread()) {
+            throw new EnvException("Environment not locked for initialisation.");
+        }
+        try {
+            __ENV__ = type.newInstance();
+            LogUtils.info(ZConfigEnv.class,
+                          String.format("Created ENV instance with type [%s]...",
+                                        type.getCanonicalName()));
+            return __ENV__;
+        } catch (Exception ex) {
+            throw new EnvException(ex);
+        }
+    }
+
+    protected static void getEnvLock() throws EnvException {
+        if (__ENV__.state.getState() == EEnvState.Disposed) {
+            throw new EnvException("Environment has already been disposed.");
+        }
+        __ENV_LOCK__.lock();
+    }
+
+    protected static void releaseEnvLock() throws EnvException {
+        if (__ENV__.state.getState() == EEnvState.Disposed) {
+            throw new EnvException("Environment has already been disposed.");
+        }
+        if (__ENV_LOCK__.isLocked()) {
+            __ENV_LOCK__.unlock();
+        }
+    }
 }

@@ -24,7 +24,7 @@
 
 package com.codekutter.zconfig.client.listeners;
 
-import com.codekutter.zconfig.client.ZConfigClientEnv;
+import com.codekutter.zconfig.common.ZConfigClientEnv;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.*;
 import com.codekutter.zconfig.common.ConfigurationException;
@@ -77,12 +77,12 @@ public class RabbitMQUpdateListener extends AbstractUpdateListener {
                                 RMQChannelConstants.RMQ_UPDATE_CHANNEL);
                 String queueName = updateChannel.queueDeclarePassive(
                         RMQChannelConstants.getGroupUpdateQueue(
-                                ZConfigClientEnv.get().getInstance()
+                                ZConfigClientEnv.clientEnv().getInstance()
                                                 .getApplicationGroup()))
                                                 .getQueue();
                 updateChannel.queueBind(queueName,
                                         RMQChannelConstants.RMQ_UPDATE_CHANNEL,
-                                        ZConfigClientEnv.get().getInstance()
+                                        ZConfigClientEnv.clientEnv().getInstance()
                                                         .getApplicationName());
                 DeliverCallback deliverCallback = (consumerTag, delivery) -> {
                     try {
@@ -99,7 +99,7 @@ public class RabbitMQUpdateListener extends AbstractUpdateListener {
                                         .getRoutingKey() +
                                 "':'" + message + "'");
                         ObjectMapper mapper =
-                                ZConfigClientEnv.get().getJsonMapper();
+                                ZConfigClientEnv.clientEnv().getJsonMapper();
                         ConfigUpdateBatch batch = mapper.readValue(message,
                                                                    ConfigUpdateBatch.class);
                         executeUpdateBatch(batch);
@@ -143,9 +143,9 @@ public class RabbitMQUpdateListener extends AbstractUpdateListener {
             String queueName = registerChannel
                     .queueDeclarePassive(RMQChannelConstants.RMQ_REGISTER_QUEUE)
                     .getQueue();
-            ObjectMapper mapper = ZConfigClientEnv.get().getJsonMapper();
+            ObjectMapper mapper = ZConfigClientEnv.clientEnv().getJsonMapper();
             RegisterMessage message = new RegisterMessage();
-            message.setInstance(ZConfigClientEnv.get().getInstance());
+            message.setInstance(ZConfigClientEnv.clientEnv().getInstance());
             String json = mapper.writeValueAsString(message);
 
             registerChannel.basicPublish(RMQChannelConstants.RMQ_ADMIN_CHANNEL,

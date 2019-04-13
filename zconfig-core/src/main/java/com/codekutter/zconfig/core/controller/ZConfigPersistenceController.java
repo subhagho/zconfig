@@ -34,7 +34,7 @@ import com.codekutter.zconfig.common.utils.IUniqueIDGenerator;
 import com.codekutter.zconfig.core.IConfigDAO;
 import com.codekutter.zconfig.core.PersistenceException;
 import com.codekutter.zconfig.core.ServiceEnvException;
-import com.codekutter.zconfig.core.ZConfigCoreEnv;
+import com.codekutter.zconfig.common.ZConfigCoreEnv;
 import com.codekutter.zconfig.core.model.*;
 import com.codekutter.zconfig.core.model.nodes.PersistedConfigListValueNode;
 import com.codekutter.zconfig.core.model.nodes.PersistedConfigValueNode;
@@ -71,7 +71,7 @@ public class ZConfigPersistenceController {
                             zkPath));
                 }
                 zkPath = client.create().creatingParentsIfNeeded().forPath(zkPath);
-                String json = ZConfigCoreEnv.get().getJsonMapper()
+                String json = ZConfigCoreEnv.coreEnv().getJsonMapper()
                                             .writeValueAsString(group);
                 client.setData().forPath(zkPath, json.getBytes());
             } catch (Exception e) {
@@ -91,7 +91,7 @@ public class ZConfigPersistenceController {
                             "Cannot update Application Group : Path doesn't exists. [path=%s]",
                             zkPath));
                 }
-                String json = ZConfigCoreEnv.get().getJsonMapper()
+                String json = ZConfigCoreEnv.coreEnv().getJsonMapper()
                                             .writeValueAsString(group);
                 client.setData().forPath(zkPath, json.getBytes());
             } catch (Exception e) {
@@ -112,7 +112,7 @@ public class ZConfigPersistenceController {
                             zkPath));
                 }
                 zkPath = client.create().creatingParentsIfNeeded().forPath(zkPath);
-                String json = ZConfigCoreEnv.get().getJsonMapper()
+                String json = ZConfigCoreEnv.coreEnv().getJsonMapper()
                                             .writeValueAsString(group);
                 client.setData().forPath(zkPath, json.getBytes());
             } catch (Exception e) {
@@ -132,7 +132,7 @@ public class ZConfigPersistenceController {
                             "Cannot update Application : Path doesn't exists. [path=%s]",
                             zkPath));
                 }
-                String json = ZConfigCoreEnv.get().getJsonMapper()
+                String json = ZConfigCoreEnv.coreEnv().getJsonMapper()
                                             .writeValueAsString(group);
                 client.setData().forPath(zkPath, json.getBytes());
             } catch (Exception e) {
@@ -305,7 +305,7 @@ public class ZConfigPersistenceController {
                                            .getCanonicalName()));
             }
             if (node != null) {
-                String json = ZConfigCoreEnv.get().getJsonMapper()
+                String json = ZConfigCoreEnv.coreEnv().getJsonMapper()
                                             .writeValueAsString(node);
                 client.setData().forPath(zkPath, json.getBytes());
                 return true;
@@ -320,7 +320,7 @@ public class ZConfigPersistenceController {
                                PersistedConfigNode configNode,
                                ConfigServerUpdateEvent event, Principal user,
                                Version updateVersion) throws ServiceEnvException {
-        IUniqueIDGenerator idGenerator = ZConfigCoreEnv.get().getIdGenerator();
+        IUniqueIDGenerator idGenerator = ZConfigCoreEnv.coreEnv().getIdGenerator();
         ModifiedBy<String> owner = new ModifiedBy<>(user.getName());
         node.setName(event.getName());
         node.setDescription(event.getDescription());
@@ -368,7 +368,7 @@ public class ZConfigPersistenceController {
                                            .getCanonicalName()));
             }
             if (node != null) {
-                String json = ZConfigCoreEnv.get().getJsonMapper()
+                String json = ZConfigCoreEnv.coreEnv().getJsonMapper()
                                             .writeValueAsString(node);
                 client.setData().forPath(node.getAbsolutePath(), json.getBytes());
                 return true;

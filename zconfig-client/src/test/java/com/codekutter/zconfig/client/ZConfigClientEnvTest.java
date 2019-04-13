@@ -26,6 +26,7 @@ package com.codekutter.zconfig.client;
 
 import com.codekutter.zconfig.common.ConfigProviderFactory;
 import com.codekutter.zconfig.common.LogUtils;
+import com.codekutter.zconfig.common.ZConfigClientEnv;
 import com.codekutter.zconfig.common.model.Configuration;
 import com.codekutter.zconfig.common.model.Version;
 import com.codekutter.zconfig.common.utils.IOUtils;
@@ -61,7 +62,7 @@ class ZConfigClientEnvTest {
                 dir.mkdirs();
             }
             File source = new File(CONFIG_FILE);
-            String path = ZConfigClientEnv.get()
+            String path = ZConfigClientEnv.clientEnv()
                                           .getRelativeConfigurationPath(CONFIG_NAME,
                                                                         Version.parse(
                                                                                 CONFIG_VERSION),
@@ -72,7 +73,7 @@ class ZConfigClientEnvTest {
                 destDir.mkdirs();
             }
             IOUtils.copyFile(source, destDir);
-            Configuration configuration = ZConfigClientEnv.get().getConfiguration(
+            Configuration configuration = ZConfigClientEnv.clientEnv().getConfiguration(
                     CONFIG_NAME, Version.parse(
                             CONFIG_VERSION),
                     ConfigProviderFactory.EConfigType.JSON);

@@ -24,7 +24,7 @@
 
 package com.codekutter.zconfig.client.listeners;
 
-import com.codekutter.zconfig.client.ZConfigClientEnv;
+import com.codekutter.zconfig.common.ZConfigClientEnv;
 import com.codekutter.zconfig.client.factory.ConfigurationManager;
 import com.codekutter.zconfig.common.*;
 import com.codekutter.zconfig.common.events.ConfigUpdateBatch;
@@ -49,10 +49,11 @@ public abstract class AbstractUpdateListener implements Runnable, IConfigurable 
                                                                         ConfigurationException {
         try {
             ConfigurationManager manager =
-                    ZConfigClientEnv.get().getConfigurationManager();
+                    ZConfigClientEnv.clientEnv().getConfigurationManager();
             Configuration config = manager.get(batch.getHeader().getConfigName());
             if (config != null && config.getSyncMode() == ESyncMode.EVENTS) {
-                ZConfigClientEnv.get().getUpdateHandler().processEvents(batch);
+                ZConfigClientEnv.clientEnv().getUpdateHandler()
+                                .processEvents(batch);
             }
         } catch (Exception e) {
             LogUtils.error(getClass(), e);
