@@ -30,6 +30,7 @@ import com.codekutter.zconfig.common.model.nodes.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import lombok.Data;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
@@ -43,62 +44,74 @@ import java.util.UUID;
  * Configuration class that defines a configuration set.
  */
 public class Configuration {
-    /**
-     * Unique configuration ID for this configuration/version.
-     */
-    private String id;
-    /**
-     * Application Group this configuration belongs to.
-     */
-    private String applicationGroup;
-    /**
-     * Application this configuration belong to.
-     */
-    private String application;
+    @Data
+    public static class Header {
+        /**
+         * Unique configuration ID for this configuration/version.
+         */
+        private String id;
+        /**
+         * Application Group this configuration belongs to.
+         */
+        private String applicationGroup;
+        /**
+         * Application this configuration belong to.
+         */
+        private String application;
+        /**
+         * Name of this configuration set. Must be globally unique within a configuration server instance.
+         */
+        private String name;
+        /**
+         * Description of this configuration.
+         */
+        private String description;
+        /**
+         * Version of this configuration instance.
+         */
+        private Version version;
+        /**
+         * Created By information about this configuration.
+         */
+        private ModifiedBy createdBy;
+        /**
+         * Last Modified By information about this configuration.
+         */
+        private ModifiedBy updatedBy;
+        /**
+         * Specifies the sync mode for this configuration.
+         */
+        private ESyncMode syncMode;
+
+        /**
+         * MD5 Hash of the encryption Key.
+         */
+        private String encryptionHash;
+    }
+
     /**
      * Local instance ID of this configuration handle.
      */
     @JsonIgnore
     private String instanceId;
-    /**
-     * Name of this configuration set. Must be globally unique within a configuration server instance.
-     */
-    private String name;
-    /**
-     * Description of this configuration.
-     */
-    private String description;
-    /**
-     * Version of this configuration instance.
-     */
-    private Version version;
-    /**
-     * Created By information about this configuration.
-     */
-    private ModifiedBy createdBy;
-    /**
-     * Last Modified By information about this configuration.
-     */
-    private ModifiedBy updatedBy;
+
     /**
      * Local State of this configuration instance.
      */
     @JsonIgnore
     private NodeState state;
+
+    /**
+     * Configuration Header.
+     */
+    private Header header = new Header();
+
     /**
      * Root configuration node for this configuration.
      */
     private ConfigPathNode rootConfigNode;
-    /**
-     * Specifies the sync mode for this configuration.
-     */
-    private ESyncMode syncMode;
 
     private ConfigurationSettings settings;
-    /**
-     * MD5 Hash of the encryption Key.
-     */
-    private String encryptionHash;
 
     /**
      * Default Empty constructor.
@@ -127,7 +140,7 @@ public class Configuration {
      * @return - Unique Configuration ID.
      */
     public String getId() {
-        return id;
+        return header.id;
     }
 
     /**
@@ -136,7 +149,7 @@ public class Configuration {
      * @param id - Unique Configuration ID.
      */
     public void setId(String id) {
-        this.id = id;
+        this.header.id = id;
     }
 
     /**
@@ -145,7 +158,7 @@ public class Configuration {
      * @return - Application Group name.
      */
     public String getApplicationGroup() {
-        return applicationGroup;
+        return header.applicationGroup;
     }
 
     /**
@@ -154,7 +167,7 @@ public class Configuration {
      * @param applicationGroup - Application Group name.
      */
     public void setApplicationGroup(String applicationGroup) {
-        this.applicationGroup = applicationGroup;
+        this.header.applicationGroup = applicationGroup;
     }
 
     /**
@@ -163,7 +176,7 @@ public class Configuration {
      * @return - Application name.
      */
     public String getApplication() {
-        return application;
+        return header.application;
     }
 
     /**
@@ -172,7 +185,7 @@ public class Configuration {
      * @param application - Application name.
      */
     public void setApplication(String application) {
-        this.application = application;
+        this.header.application = application;
     }
 
     /**
@@ -190,7 +203,7 @@ public class Configuration {
      * @return - Configuration name.
      */
     public String getName() {
-        return name;
+        return header.name;
     }
 
     /**
@@ -200,7 +213,7 @@ public class Configuration {
      */
     public void setName(String name) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(name));
-        this.name = name;
+        this.header.name = name;
     }
 
     /**
@@ -209,7 +222,7 @@ public class Configuration {
      * @return - Configuration description.
      */
     public String getDescription() {
-        return description;
+        return header.description;
     }
 
     /**
@@ -218,7 +231,7 @@ public class Configuration {
      * @param description - Configuration description.
      */
     public void setDescription(String description) {
-        this.description = description;
+        this.header.description = description;
     }
 
     /**
@@ -227,7 +240,7 @@ public class Configuration {
      * @return - Configuration Version.
      */
     public Version getVersion() {
-        return version;
+        return header.version;
     }
 
     /**
@@ -237,7 +250,7 @@ public class Configuration {
      */
     public void setVersion(Version version) {
         Preconditions.checkArgument(version != null);
-        this.version = version;
+        this.header.version = version;
     }
 
     /**
@@ -246,7 +259,7 @@ public class Configuration {
      * @return - Created By information.
      */
     public ModifiedBy getCreatedBy() {
-        return createdBy;
+        return header.createdBy;
     }
 
     /**
@@ -256,7 +269,7 @@ public class Configuration {
      */
     public void setCreatedBy(ModifiedBy createdBy) {
         Preconditions.checkArgument(createdBy != null);
-        this.createdBy = createdBy;
+        this.header.createdBy = createdBy;
     }
 
     /**
@@ -265,7 +278,7 @@ public class Configuration {
      * @return - Last Updated By information.
      */
     public ModifiedBy getUpdatedBy() {
-        return updatedBy;
+        return header.updatedBy;
     }
 
     /**
@@ -274,7 +287,7 @@ public class Configuration {
      * @param updatedBy - Last Updated By information.
      */
     public void setUpdatedBy(ModifiedBy updatedBy) {
-        this.updatedBy = updatedBy;
+        this.header.updatedBy = updatedBy;
     }
 
     /**
@@ -292,7 +305,7 @@ public class Configuration {
      * @return - Encryption Hash
      */
     public String getEncryptionHash() {
-        return encryptionHash;
+        return header.encryptionHash;
     }
 
     /**
@@ -301,7 +314,7 @@ public class Configuration {
      * @param encryptionHash - Encryption Hash
      */
     public void setEncryptionHash(String encryptionHash) {
-        this.encryptionHash = encryptionHash;
+        this.header.encryptionHash = encryptionHash;
     }
 
     /**
@@ -330,7 +343,7 @@ public class Configuration {
      * @return - Update Sync mode.
      */
     public ESyncMode getSyncMode() {
-        return syncMode;
+        return header.syncMode;
     }
 
     /**
@@ -339,7 +352,7 @@ public class Configuration {
      * @param syncMode - Update Sync mode.
      */
     public void setSyncMode(ESyncMode syncMode) {
-        this.syncMode = syncMode;
+        this.header.syncMode = syncMode;
     }
 
     /**
@@ -368,16 +381,16 @@ public class Configuration {
      * @return - Matches?
      * @throws ConfigurationException
      */
-    public boolean checkEncryptionKey(String key) throws ConfigurationException{
+    public boolean checkEncryptionKey(String key) throws ConfigurationException {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(key));
         try {
-            if (!Strings.isNullOrEmpty(encryptionHash)) {
+            if (!Strings.isNullOrEmpty(header.encryptionHash)) {
                 MessageDigest md = MessageDigest.getInstance("MD5");
                 md.update(key.getBytes());
                 byte[] digest = md.digest();
                 String hash = DatatypeConverter
                         .printHexBinary(digest).toUpperCase();
-                return (encryptionHash.compareTo(hash) == 0);
+                return (header.encryptionHash.compareTo(hash) == 0);
             }
         } catch (Exception ex) {
             LogUtils.debug(getClass(), ex);
@@ -587,42 +600,42 @@ public class Configuration {
      * @throws ConfigurationException
      */
     public void validate() throws ConfigurationException {
-        if (Strings.isNullOrEmpty(id)) {
+        if (Strings.isNullOrEmpty(header.id)) {
             throw ConfigurationException
                     .propertyNotFoundException(
                             "id");
         }
-        if (Strings.isNullOrEmpty(name)) {
+        if (Strings.isNullOrEmpty(header.name)) {
             throw ConfigurationException
                     .propertyNotFoundException(
                             "name");
         }
-        if (Strings.isNullOrEmpty(applicationGroup)) {
+        if (Strings.isNullOrEmpty(header.applicationGroup)) {
             throw ConfigurationException
                     .propertyNotFoundException(
                             "applicationGroup");
         }
-        if (Strings.isNullOrEmpty(application)) {
+        if (Strings.isNullOrEmpty(header.application)) {
             throw ConfigurationException
                     .propertyNotFoundException(
                             "application");
         }
-        if (Strings.isNullOrEmpty(description)) {
+        if (Strings.isNullOrEmpty(header.description)) {
             throw ConfigurationException
                     .propertyNotFoundException(
                             "description");
         }
-        if (version == null) {
+        if (header.version == null) {
             throw ConfigurationException
                     .propertyNotFoundException(
                             "version");
         }
-        if (createdBy == null) {
+        if (header.createdBy == null) {
             throw ConfigurationException
                     .propertyNotFoundException(
                             "createdBy");
         }
-        if (updatedBy == null) {
+        if (header.updatedBy == null) {
             throw ConfigurationException
                     .propertyNotFoundException(
                             "updatedBy");
@@ -646,8 +659,9 @@ public class Configuration {
     public synchronized String getInstancePath(String subdir)
     throws ConfigurationException {
         String dir =
-                String.format("%s/%s/%s/%s", applicationGroup, application, name,
-                              version.toString());
+                String.format("%s/%s/%s/%s", header.applicationGroup,
+                              header.application, header.name,
+                              header.version.toString());
         if (!Strings.isNullOrEmpty(subdir)) {
             dir = String.format("%s/%s", dir, subdir);
         }

@@ -270,13 +270,17 @@ public class ZkConfigDAO implements IConfigDAO {
                                        Application application,
                                        ModifiedBy<String> modifiedBy)
     throws ServiceEnvException {
-        configNode.setId(ZConfigCoreEnv.coreEnv().getIdGenerator()
-                                       .generateStringId(null));
-        configNode.setApplication(application);
-        configNode.setName(configuration.getName());
-        configNode.setDescription(configuration.getDescription());
-        configNode.setSyncMode(configuration.getSyncMode());
-        configNode.setOwner(modifiedBy);
+        try {
+            configNode.setId(ZConfigCoreEnv.coreEnv().getIdGenerator()
+                                           .generateStringId(null));
+            configNode.setApplication(application);
+            configNode.setName(configuration.getName());
+            configNode.setDescription(configuration.getDescription());
+            configNode.setSyncMode(configuration.getSyncMode());
+            configNode.setOwner(modifiedBy);
+        } catch (Exception ex) {
+            throw new ServiceEnvException(ex);
+        }
     }
 
     /**
@@ -384,7 +388,8 @@ public class ZkConfigDAO implements IConfigDAO {
             }
             String path = zkNode.getAbsolutePath();
             String json =
-                    ZConfigCoreEnv.coreEnv().getJsonMapper().writeValueAsString(zkNode);
+                    ZConfigCoreEnv.coreEnv().getJsonMapper()
+                                  .writeValueAsString(zkNode);
             client.setData().forPath(path, json.getBytes());
 
             return zkNode;
@@ -409,17 +414,22 @@ public class ZkConfigDAO implements IConfigDAO {
                                   PersistedConfigNode configNode, Version version)
     throws
     ServiceEnvException {
-        zkNode = new PersistedConfigValueNode();
-        IUniqueIDGenerator idGenerator = ZConfigCoreEnv.coreEnv().getIdGenerator();
-        zkNode.setId(idGenerator.generateStringId(null));
-        zkNode.setName(node.getName());
-        String desc = ConfigUtils.getDescription(node);
-        if (!Strings.isNullOrEmpty(desc))
-            zkNode.setDescription(desc);
-        zkNode.setParent(configNode);
-        zkNode.setOwner(owner);
-        zkNode.setUpdated(owner);
-        zkNode.setNodeVersion(version);
+        try {
+            zkNode = new PersistedConfigValueNode();
+            IUniqueIDGenerator idGenerator =
+                    ZConfigCoreEnv.coreEnv().getIdGenerator();
+            zkNode.setId(idGenerator.generateStringId(null));
+            zkNode.setName(node.getName());
+            String desc = ConfigUtils.getDescription(node);
+            if (!Strings.isNullOrEmpty(desc))
+                zkNode.setDescription(desc);
+            zkNode.setParent(configNode);
+            zkNode.setOwner(owner);
+            zkNode.setUpdated(owner);
+            zkNode.setNodeVersion(version);
+        } catch (Exception ex) {
+            throw new ServiceEnvException(ex);
+        }
     }
 
     /**
@@ -487,7 +497,8 @@ public class ZkConfigDAO implements IConfigDAO {
             }
             String path = zkNode.getAbsolutePath();
             String json =
-                    ZConfigCoreEnv.coreEnv().getJsonMapper().writeValueAsString(zkNode);
+                    ZConfigCoreEnv.coreEnv().getJsonMapper()
+                                  .writeValueAsString(zkNode);
             client.setData().forPath(path, json.getBytes());
 
             return zkNode;
@@ -554,7 +565,8 @@ public class ZkConfigDAO implements IConfigDAO {
             }
             String path = zkNode.getAbsolutePath();
             String json =
-                    ZConfigCoreEnv.coreEnv().getJsonMapper().writeValueAsString(zkNode);
+                    ZConfigCoreEnv.coreEnv().getJsonMapper()
+                                  .writeValueAsString(zkNode);
             client.setData().forPath(path, json.getBytes());
 
             return zkNode;

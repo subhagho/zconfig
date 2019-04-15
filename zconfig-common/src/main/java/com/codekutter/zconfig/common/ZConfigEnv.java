@@ -154,6 +154,13 @@ public abstract class ZConfigEnv {
         }
     }
 
+    /**
+     * Setup the instance header data.
+     *
+     * @param type - Instance Tpe.
+     * @param instance - Instance handle.
+     * @throws ConfigurationException
+     */
     protected void setupInstance(@Nonnull Class<? extends ZConfigInstance> type,
                                  @Nonnull ZConfigInstance instance)
     throws ConfigurationException {
@@ -280,6 +287,13 @@ public abstract class ZConfigEnv {
         }
     }
 
+    /**
+     * Initialize the ENV handle.
+     *
+     * @param type - Type of the env instance.
+     * @return - Created Env handle.
+     * @throws EnvException - Exception raised if initialization lock not acquired by current thread.
+     */
     protected static ZConfigEnv initialize(Class<? extends ZConfigEnv> type)
     throws EnvException {
         if (!__ENV_LOCK__.isLocked() || !__ENV_LOCK__.isHeldByCurrentThread()) {
@@ -296,6 +310,11 @@ public abstract class ZConfigEnv {
         }
     }
 
+    /**
+     * Get the env initialization lock.
+     *
+     * @throws EnvException - Exception raised if Env has already been disposed.
+     */
     protected static void getEnvLock() throws EnvException {
         if (__ENV__.state.getState() == EEnvState.Disposed) {
             throw new EnvException("Environment has already been disposed.");
@@ -303,12 +322,21 @@ public abstract class ZConfigEnv {
         __ENV_LOCK__.lock();
     }
 
+    /**
+     * Release the env initialization lock.
+     *
+     * @throws EnvException - Exception raised if current thread doesn't hold the lock.
+     */
     protected static void releaseEnvLock() throws EnvException {
         if (__ENV__.state.getState() == EEnvState.Disposed) {
             throw new EnvException("Environment has already been disposed.");
         }
-        if (__ENV_LOCK__.isLocked()) {
+        if (__ENV_LOCK__.isLocked() && __ENV_LOCK__.isHeldByCurrentThread()) {
             __ENV_LOCK__.unlock();
+        } else {
+            throw new EnvException(String.format(
+                    "Lock not acquired or held by another thread. [thread id=%d]",
+                    Thread.currentThread().getId()));
         }
     }
 }

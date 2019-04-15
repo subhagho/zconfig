@@ -320,15 +320,20 @@ public class ZConfigPersistenceController {
                                PersistedConfigNode configNode,
                                ConfigServerUpdateEvent event, Principal user,
                                Version updateVersion) throws ServiceEnvException {
-        IUniqueIDGenerator idGenerator = ZConfigCoreEnv.coreEnv().getIdGenerator();
-        ModifiedBy<String> owner = new ModifiedBy<>(user.getName());
-        node.setName(event.getName());
-        node.setDescription(event.getDescription());
-        node.setParent(configNode);
-        node.setNodeVersion(updateVersion);
-        node.setId(idGenerator.generateStringId(null));
-        node.setOwner(owner);
-        node.setUpdated(owner);
+        try {
+            IUniqueIDGenerator idGenerator =
+                    ZConfigCoreEnv.coreEnv().getIdGenerator();
+            ModifiedBy<String> owner = new ModifiedBy<>(user.getName());
+            node.setName(event.getName());
+            node.setDescription(event.getDescription());
+            node.setParent(configNode);
+            node.setNodeVersion(updateVersion);
+            node.setId(idGenerator.generateStringId(null));
+            node.setOwner(owner);
+            node.setUpdated(owner);
+        } catch (Exception ex) {
+            throw new ServiceEnvException(ex);
+        }
     }
 
     private boolean updateConfigNode(@Nonnull CuratorFramework client,
