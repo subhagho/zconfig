@@ -59,7 +59,7 @@ public class ConfigurationLoader {
     public Configuration load(@Nonnull String configName, @Nonnull String configUri,
                               @Nonnull ConfigProviderFactory.EConfigType configType,
                               @Nonnull Version version,
-                              ConfigurationSettings settings)
+                              ConfigurationSettings settings, String password)
     throws ConfigurationException {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(configName));
         Preconditions.checkArgument(!Strings.isNullOrEmpty(configUri));
@@ -88,7 +88,7 @@ public class ConfigurationLoader {
                                         "Error getting parser for type: [type=%s]",
                                         configType.name()));
                     }
-                    parser.parse(configName, reader, settings, version);
+                    parser.parse(configName, reader, settings, version, password);
                     return parser.getConfiguration();
                 }
             }
@@ -111,9 +111,9 @@ public class ConfigurationLoader {
      */
     public Configuration load(@Nonnull String configName, @Nonnull String configUri,
                               @Nonnull ConfigProviderFactory.EConfigType configType,
-                              @Nonnull Version version)
+                              @Nonnull Version version, String password)
     throws ConfigurationException {
-        return load(configName, configUri, configType, version, null);
+        return load(configName, configUri, configType, version, null, password);
     }
 
     /**
@@ -128,7 +128,7 @@ public class ConfigurationLoader {
      */
     public Configuration load(@Nonnull String configName, @Nonnull String filename,
                               @Nonnull Version version,
-                              ConfigurationSettings settings)
+                              ConfigurationSettings settings, String password)
     throws ConfigurationException {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(configName));
         Preconditions.checkArgument(!Strings.isNullOrEmpty(filename));
@@ -150,7 +150,7 @@ public class ConfigurationLoader {
                                         "Error getting parser for file: [filename=%s]",
                                         filename));
                     }
-                    parser.parse(configName, reader, settings, version);
+                    parser.parse(configName, reader, settings, version, password);
                     return parser.getConfiguration();
                 }
             }
@@ -169,8 +169,8 @@ public class ConfigurationLoader {
      * @throws ConfigurationException
      */
     public Configuration load(@Nonnull String configName, @Nonnull String filename,
-                              @Nonnull Version version)
+                              @Nonnull Version version, String password)
     throws ConfigurationException {
-        return load(configName, filename, version, null);
+        return load(configName, filename, version, null, password);
     }
 }

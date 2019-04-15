@@ -68,7 +68,8 @@ class Test_JSONFileConfigWriter {
         Properties properties = new Properties();
         properties.load(new FileInputStream(JSON_FILE));
 
-        String filename = properties.getProperty(ConfigTestConstants.PROP_CONFIG_FILE);
+        String filename =
+                properties.getProperty(ConfigTestConstants.PROP_CONFIG_FILE);
         assertFalse(Strings.isNullOrEmpty(filename));
         String vs = properties.getProperty(ConfigTestConstants.PROP_CONFIG_VERSION);
         assertFalse(Strings.isNullOrEmpty(vs));
@@ -77,7 +78,7 @@ class Test_JSONFileConfigWriter {
 
         try (ConfigFileReader reader = new ConfigFileReader(filename)) {
 
-            parser.parse("test-config", reader, null, version);
+            parser.parse("test-config", reader, null, version, null);
             configuration = parser.getConfiguration();
             assertNotNull(configuration);
         }

@@ -77,7 +77,7 @@ public abstract class ZConfigEnv {
      * @param version    - Configuration version (expected)
      * @throws ConfigurationException
      */
-    protected final void init(String configfile, Version version)
+    protected final void init(String configfile, Version version, String password)
     throws ConfigurationException {
         try {
             AbstractConfigParser parser = ConfigProviderFactory.parser(configfile);
@@ -86,7 +86,7 @@ public abstract class ZConfigEnv {
                         "Cannot get configuration parser instance. [file=%s]",
                         configfile));
             }
-            init(parser, configfile, version);
+            init(parser, configfile, version, password);
         } catch (Exception e) {
             state.setError(e);
             throw new ConfigurationException(e);
@@ -103,7 +103,7 @@ public abstract class ZConfigEnv {
      */
     protected final void init(String configfile,
                               ConfigProviderFactory.EConfigType type,
-                              Version version)
+                              Version version, String password)
     throws ConfigurationException {
         try {
             AbstractConfigParser parser = ConfigProviderFactory.parser(type);
@@ -112,7 +112,7 @@ public abstract class ZConfigEnv {
                         "Cannot get configuration parser instance. [file=%s]",
                         configfile));
             }
-            init(parser, configfile, version);
+            init(parser, configfile, version, password);
         } catch (Exception e) {
             state.setError(e);
             throw new ConfigurationException(e);
@@ -129,7 +129,7 @@ public abstract class ZConfigEnv {
      * @throws ConfigurationException
      */
     protected final void init(AbstractConfigParser parser, String configfile,
-                              Version version)
+                              Version version, String password)
     throws ConfigurationException {
         try {
             LogUtils.info(getClass(), String.format(
@@ -138,7 +138,7 @@ public abstract class ZConfigEnv {
             Path path = Paths.get(configfile);
             parser.parse(configName, ConfigProviderFactory.reader(path.toUri()),
                          null,
-                         version);
+                         version, password);
             configuration = parser.getConfiguration();
             if (configuration == null) {
                 throw new ConfigurationException(String.format(
@@ -157,7 +157,7 @@ public abstract class ZConfigEnv {
     /**
      * Setup the instance header data.
      *
-     * @param type - Instance Tpe.
+     * @param type     - Instance Tpe.
      * @param instance - Instance handle.
      * @throws ConfigurationException
      */

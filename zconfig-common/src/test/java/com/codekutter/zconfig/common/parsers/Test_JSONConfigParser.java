@@ -67,7 +67,7 @@ class Test_JSONConfigParser {
 
             try (ConfigFileReader reader = new ConfigFileReader(filename)) {
 
-                parser.parse("test-config", reader, null, version);
+                parser.parse("test-config", reader, null, version, null);
                 Configuration configuration = parser.getConfiguration();
                 assertNotNull(configuration);
 
@@ -101,7 +101,7 @@ class Test_JSONConfigParser {
 
             try (ConfigURLReader reader = new ConfigURLReader(url)) {
 
-                parser.parse("test-config", reader, null, version);
+                parser.parse("test-config", reader, null, version, null);
                 Configuration configuration = parser.getConfiguration();
                 assertNotNull(configuration);
 
@@ -135,7 +135,7 @@ class Test_JSONConfigParser {
 
             try (ConfigFileReader reader = new ConfigFileReader(filename)) {
 
-                parser.parse("test-config-include", reader, null, version);
+                parser.parse("test-config-include", reader, null, version, null);
                 Configuration configuration = parser.getConfiguration();
                 assertNotNull(configuration);
 

@@ -43,7 +43,7 @@ class ZkUtilsTest {
 
     @BeforeAll
     static void setup() throws Exception {
-        ZConfigCoreEnv.setup(CONFIG_FILE, "0.*");
+        ZConfigCoreEnv.setup(CONFIG_FILE, "0.*", null);
     }
 
     @AfterAll

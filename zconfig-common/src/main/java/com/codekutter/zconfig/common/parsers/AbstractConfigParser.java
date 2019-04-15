@@ -195,11 +195,12 @@ public abstract class AbstractConfigParser implements Closeable {
      * @param reader   - Configuration reader handle to read input from.
      * @param settings - Configuration Settings to use for parsing.
      * @param version  - Configuration version to load.
+     * @param password - Password in case the Configuration has encrypted elements.
      * @throws ConfigurationException
      */
     public abstract void parse(String name, AbstractConfigReader reader,
                                ConfigurationSettings settings,
-                               Version version)
+                               Version version, String password)
     throws ConfigurationException;
 
 }

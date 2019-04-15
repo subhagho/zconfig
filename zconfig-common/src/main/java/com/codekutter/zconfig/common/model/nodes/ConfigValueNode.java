@@ -91,7 +91,17 @@ public class ConfigValueNode extends AbstractConfigNode
     @Override
     public String getValue() {
         if (encrypted && !Strings.isNullOrEmpty(getValue())) {
-
+            try {
+                String value = ZConfigEnv.env().getVault()
+                                         .decrypt(getValue(), getConfiguration());
+                if (Strings.isNullOrEmpty(value)) {
+                    throw new Exception(
+                            "Error Decrypting Value. NULL value returned.");
+                }
+                return value;
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
         }
         return value;
     }

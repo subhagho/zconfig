@@ -9,13 +9,12 @@ import org.apache.commons.codec.binary.Base64;
 import javax.annotation.Nonnull;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.HashMap;
 import java.util.Map;
 
 public class CypherUtils {
-    private static final String CYPHER_TYPE = "AES";
-
     /**
      * Encrypt the passed data buffer using the passcode.
      *
@@ -112,7 +111,21 @@ public class CypherUtils {
                 String value = vault.get(config.getInstanceId());
                 String key = getEncodingKey(config);
 
-                return new String(decrypt(value, key));
+                return new String(CypherUtils.decrypt(value, key));
+            }
+            return null;
+        }
+
+        public String decrypt(String data, Configuration config) throws Exception {
+            Preconditions.checkArgument(!Strings.isNullOrEmpty(data));
+            String passcode = getPasscode(config);
+            if (Strings.isNullOrEmpty(passcode)) {
+                throw new Exception(
+                        "Invalid Passcode: NULL/Empty passcode returned.");
+            }
+            byte[] buff = CypherUtils.decrypt(data, passcode);
+            if (buff != null && buff.length > 0) {
+                return new String(buff, StandardCharsets.UTF_8);
             }
             return null;
         }

@@ -61,7 +61,7 @@ class ZkConfigDAOTest {
 
     @BeforeAll
     static void setup() throws Exception {
-        ZConfigCoreEnv.setup(CONFIG_FILE, "0.*");
+        ZConfigCoreEnv.setup(CONFIG_FILE, "0.*", null);
     }
 
     @AfterAll
@@ -174,7 +174,7 @@ class ZkConfigDAOTest {
         Path path = Paths.get(TEST_CONFIG_FILE);
         parser.parse(TEST_CONFIG_NAME, ConfigProviderFactory.reader(path.toUri()),
                      null,
-                     new Version(0, 0));
+                     new Version(0, 0), null);
         Configuration configuration = parser.getConfiguration();
         if (configuration == null) {
             throw new ConfigurationException(String.format(

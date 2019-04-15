@@ -100,7 +100,7 @@ public class ConfigurationManager {
                                       ConfigProviderFactory.EConfigType configType,
                               @Nonnull
                                       Version version,
-                              ConfigurationSettings settings)
+                              ConfigurationSettings settings, String password)
     throws ConfigurationException {
         Configuration configuration = loadedConfigs.get(configName);
         if (configuration == null) {
@@ -110,7 +110,7 @@ public class ConfigurationManager {
                 if (configuration == null) {
                     configuration = loader
                             .load(configName, configUri, configType, version,
-                                  settings);
+                                  settings, password);
                     if (configuration != null) {
                         postConfigurationLoad(configuration);
                     } else {
@@ -141,9 +141,9 @@ public class ConfigurationManager {
                               @Nonnull
                                       ConfigProviderFactory.EConfigType configType,
                               @Nonnull
-                                      Version version)
+                                      Version version, String password)
     throws ConfigurationException {
-        return load(configName, configUri, configType, version, null);
+        return load(configName, configUri, configType, version, null, password);
     }
 
     /**
@@ -160,7 +160,7 @@ public class ConfigurationManager {
                               @Nonnull String filename,
                               @Nonnull
                                       Version version,
-                              ConfigurationSettings settings)
+                              ConfigurationSettings settings, String password)
     throws ConfigurationException {
         Configuration configuration = loadedConfigs.get(configName);
         if (configuration == null) {
@@ -169,7 +169,8 @@ public class ConfigurationManager {
                 configuration = loadedConfigs.get(configName);
                 if (configuration == null) {
                     configuration = loader
-                            .load(configName, filename, version, settings);
+                            .load(configName, filename, version, settings,
+                                  password);
                     if (configuration != null) {
                         postConfigurationLoad(configuration);
                     } else {
@@ -211,9 +212,9 @@ public class ConfigurationManager {
     public Configuration load(@Nonnull String configName,
                               @Nonnull String filename,
                               @Nonnull
-                                      Version version)
+                                      Version version, String password)
     throws ConfigurationException {
-        return load(configName, filename, version, null);
+        return load(configName, filename, version, null, password);
     }
 
     /**

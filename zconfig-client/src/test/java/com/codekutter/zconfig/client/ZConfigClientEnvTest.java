@@ -46,7 +46,7 @@ class ZConfigClientEnvTest {
     @Test
     void postInit() {
         try {
-            ZConfigClientEnv.setup(CONFIG_FILE, CONFIG_VERSION);
+            ZConfigClientEnv.setup(CONFIG_FILE, CONFIG_VERSION, null);
         } catch (Throwable t) {
             LogUtils.error(getClass(), t);
             fail(t.getLocalizedMessage());
@@ -56,7 +56,7 @@ class ZConfigClientEnvTest {
     @Test
     void getConfiguration() {
         try {
-            ZConfigClientEnv.setup(CONFIG_FILE, CONFIG_VERSION);
+            ZConfigClientEnv.setup(CONFIG_FILE, CONFIG_VERSION, null);
             File dir = new File(CONFIG_BASE_PATH);
             if (!dir.exists()) {
                 dir.mkdirs();
@@ -73,10 +73,11 @@ class ZConfigClientEnvTest {
                 destDir.mkdirs();
             }
             IOUtils.copyFile(source, destDir);
-            Configuration configuration = ZConfigClientEnv.clientEnv().getConfiguration(
-                    CONFIG_NAME, Version.parse(
-                            CONFIG_VERSION),
-                    ConfigProviderFactory.EConfigType.JSON);
+            Configuration configuration =
+                    ZConfigClientEnv.clientEnv().getConfiguration(
+                            CONFIG_NAME, Version.parse(
+                                    CONFIG_VERSION),
+                            ConfigProviderFactory.EConfigType.JSON, null);
             assertNotNull(configuration);
             LogUtils.debug(getClass(), configuration);
         } catch (Throwable t) {

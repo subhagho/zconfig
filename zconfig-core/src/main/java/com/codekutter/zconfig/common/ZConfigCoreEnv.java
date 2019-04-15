@@ -106,7 +106,8 @@ public class ZConfigCoreEnv extends ZConfigEnv {
      * @param version    - Configuration version (expected)
      * @throws ConfigurationException
      */
-    public static void setup(@Nonnull String configfile, @Nonnull String version)
+    public static void setup(@Nonnull String configfile, @Nonnull String version,
+                             String password)
     throws ConfigurationException {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(configfile));
         Preconditions.checkArgument(!Strings.isNullOrEmpty(version));
@@ -116,7 +117,7 @@ public class ZConfigCoreEnv extends ZConfigEnv {
             try {
                 ZConfigEnv env = ZConfigEnv.initialize(ZConfigCoreEnv.class);
                 if (env.getState() != EEnvState.Initialized) {
-                    env.init(configfile, Version.parse(version));
+                    env.init(configfile, Version.parse(version), password);
                 }
             } finally {
                 ZConfigEnv.releaseEnvLock();
@@ -138,7 +139,7 @@ public class ZConfigCoreEnv extends ZConfigEnv {
      */
     public static void setup(@Nonnull String configfile,
                              @Nonnull ConfigProviderFactory.EConfigType type,
-                             @Nonnull String version)
+                             @Nonnull String version, String password)
     throws ConfigurationException {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(configfile));
         Preconditions.checkArgument(type != null);
@@ -149,7 +150,7 @@ public class ZConfigCoreEnv extends ZConfigEnv {
             try {
                 ZConfigEnv env = ZConfigEnv.initialize(ZConfigCoreEnv.class);
                 if (env.getState() != EEnvState.Initialized) {
-                    env.init(configfile, type, Version.parse(version));
+                    env.init(configfile, type, Version.parse(version), password);
                 }
             } finally {
                 ZConfigEnv.releaseEnvLock();

@@ -69,7 +69,7 @@ class Test_JSONIncludedConfiguration {
             ConfigurationSettings settings = new ConfigurationSettings();
             settings.setDownloadRemoteFiles(
                     ConfigurationSettings.EStartupOptions.OnStartUp);
-            parser.parse("test-config-include", reader, settings, version);
+            parser.parse("test-config-include", reader, settings, version, null);
             configuration = parser.getConfiguration();
             assertNotNull(configuration);
         }

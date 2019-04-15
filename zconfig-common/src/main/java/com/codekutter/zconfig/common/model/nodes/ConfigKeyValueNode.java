@@ -158,6 +158,20 @@ public abstract class ConfigKeyValueNode extends ConfigElementNode {
     }
 
     /**
+     * Add the passed Value Node to this Map.
+     *
+     * @param node - Value Node.
+     */
+    public void addKeyValue(ConfigValueNode node) {
+        Preconditions.checkArgument(node != null);
+        if (keyValues == null) {
+            keyValues = new HashMap<>();
+        }
+        keyValues.put(node.getName(), node);
+        updated();
+    }
+
+    /**
      * Remove the key/value with the specified key.
      *
      * @param key - Parameter key.

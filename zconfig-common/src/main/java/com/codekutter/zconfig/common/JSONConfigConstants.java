@@ -39,5 +39,7 @@ public class JSONConfigConstants {
     public static final String CONFIG_UPDATE_TIMESTAMP = "timestamp";
     public static final String CONFIG_CREATED_BY = "createdBy";
     public static final String CONFIG_UPDATED_BY = "updatedBy";
-    public static final String CONFIG_NODE_VERSION = "nodeVersion";
+    public static final String CONFIG_HEADER_PASSWD_HASH = "passwordHash";
+    public static final String CONFIG_NODE_ENCRYPTED = "__encrypted";
+    public static final String CONFIG_NODE_ENCRYPTED_VALUE = "value";
 }
