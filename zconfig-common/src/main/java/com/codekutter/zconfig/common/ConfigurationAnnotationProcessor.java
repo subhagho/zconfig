@@ -554,9 +554,9 @@ public class ConfigurationAnnotationProcessor {
                     if (fnode != null) {
                         if (fnode instanceof ConfigValueNode) {
                             vn = (ConfigValueNode) fnode;
-                            if (vn.isEncrypted()) {
+                            if (!vn.isEncrypted()) {
                                 throw new ConfigurationException(String.format(
-                                        "Encrypted value cannot be used. [path=%s]",
+                                        "Non-Encrypted value cannot be used. [path=%s]",
                                         vn.getSearchPath()));
                             }
                         }

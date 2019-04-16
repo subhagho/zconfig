@@ -18,7 +18,8 @@ public class EncryptedValue extends ConfigValueNode {
 
     public EncryptedValue(@Nonnull ConfigValueNode node) {
         Preconditions.checkArgument(node != null);
-        setValue(node.getRawValue());
+        setValue(node.getValue());
         path = node.getSearchPath();
+        setEncrypted(true);
     }
 }

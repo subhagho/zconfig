@@ -228,6 +228,10 @@ public abstract class AbstractConfigNode {
         List<String> stack =
                 ConfigUtils.getResolvedPath(path, getConfiguration().getSettings());
         if (stack != null && !stack.isEmpty()) {
+            String node = stack.get(0);
+            if (node.compareTo(getName()) != 0) {
+                stack.add(0, getName());
+            }
             return find(stack, 0);
         }
         return null;

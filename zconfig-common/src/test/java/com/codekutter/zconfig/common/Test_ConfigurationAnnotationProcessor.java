@@ -24,6 +24,7 @@
 
 package com.codekutter.zconfig.common;
 
+import com.codekutter.zconfig.common.model.EncryptedValue;
 import com.codekutter.zconfig.common.model.annotations.MethodInvoke;
 import com.google.common.base.Strings;
 import com.codekutter.zconfig.common.model.Configuration;
@@ -48,8 +49,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class Test_ConfigurationAnnotationProcessor {
     private static final String BASE_PROPS_FILE =
-            "src/test/resources/json/test-config.properties";
+            "src/test/resources/json/test-config-encrypted.properties";
     private static Configuration configuration = null;
+    private static String encryptionKey = "21947a50-6755-47";
 
     public enum ETestValue {
         EValue1, EValue2, EValue3
@@ -65,6 +67,7 @@ class Test_ConfigurationAnnotationProcessor {
         private DateTime timestamp;
     }
 
+    @Data
     @ToString
     @ConfigPath(path = "configuration.node_1.node_2")
     public static class ConfigAnnotationsTest {
@@ -83,6 +86,10 @@ class Test_ConfigurationAnnotationProcessor {
         private ModifiedBy createdBy;
         private long paramLong = -1;
         private ETestValue paramEnum = ETestValue.EValue1;
+        @ConfigValue(name = "node_3.password")
+        private EncryptedValue password;
+        @ConfigParam(name = "#PARAM_3", required = true)
+        private EncryptedValue encryptedValue;
 
         @MethodInvoke
         public ConfigAnnotationsTest(
@@ -96,81 +103,6 @@ class Test_ConfigurationAnnotationProcessor {
                 @ConfigParam(name = "PARAM_6", required = true)
                         ETestValue paramEnum) {
             this.paramLong = paramLong;
-            this.paramEnum = paramEnum;
-        }
-
-        public String getNodeName() {
-            return nodeName;
-        }
-
-        public void setNodeName(String nodeName) {
-            this.nodeName = nodeName;
-        }
-
-        public String getParamValue() {
-            return paramValue;
-        }
-
-        public void setParamValue(String paramValue) {
-            this.paramValue = paramValue;
-        }
-
-        public long getLongValue() {
-            return longValue;
-        }
-
-        public void setLongValue(long longValue) {
-            this.longValue = longValue;
-        }
-
-        public double getDoubleValue() {
-            return doubleValue;
-        }
-
-        public void setDoubleValue(double doubleValue) {
-            this.doubleValue = doubleValue;
-        }
-
-        public Set<Long> getLongListSet() {
-            return longListSet;
-        }
-
-        public void setLongListSet(Set<Long> longListSet) {
-            this.longListSet = longListSet;
-        }
-
-        public ModifiedBy getUpdatedBy() {
-            return updatedBy;
-        }
-
-        public void setUpdatedBy(
-                ModifiedBy updatedBy) {
-            this.updatedBy = updatedBy;
-        }
-
-        public ModifiedBy getCreatedBy() {
-            return createdBy;
-        }
-
-        public void setCreatedBy(
-                ModifiedBy createdBy) {
-            this.createdBy = createdBy;
-        }
-
-        public long getParamLong() {
-            return paramLong;
-        }
-
-        public void setParamLong(long paramLong) {
-            this.paramLong = paramLong;
-        }
-
-        public ETestValue getParamEnum() {
-            return paramEnum;
-        }
-
-        public void setParamEnum(
-                ETestValue paramEnum) {
             this.paramEnum = paramEnum;
         }
     }
@@ -194,7 +126,7 @@ class Test_ConfigurationAnnotationProcessor {
         assertNotNull(version);
 
         try (ConfigFileReader reader = new ConfigFileReader(filename)) {
-            parser.parse("test-config", reader, null, version, null);
+            parser.parse("test-config", reader, null, version, encryptionKey);
             configuration = parser.getConfiguration();
             assertNotNull(configuration);
         }
@@ -211,6 +143,8 @@ class Test_ConfigurationAnnotationProcessor {
             assertFalse(Strings.isNullOrEmpty(value.paramValue));
             assertTrue(value.paramLong > 0);
             assertEquals(ETestValue.EValue3, value.paramEnum);
+            assertNotNull(value.password);
+            assertNotNull(value.encryptedValue);
 
             LogUtils.debug(getClass(), value);
         } catch (Throwable t) {

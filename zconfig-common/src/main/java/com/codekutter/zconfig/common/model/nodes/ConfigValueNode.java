@@ -90,6 +90,11 @@ public class ConfigValueNode extends AbstractConfigNode
      */
     @Override
     public String getValue() {
+        return value;
+    }
+
+    @JsonIgnore
+    public String getDecryptedValue() {
         if (encrypted && !Strings.isNullOrEmpty(this.value)) {
             try {
                 String value = ZConfigEnv.getVault()
@@ -106,6 +111,7 @@ public class ConfigValueNode extends AbstractConfigNode
         return value;
     }
 
+    @JsonIgnore
     public String getValue(String key) throws ConfigurationException {
         if (encrypted && !Strings.isNullOrEmpty(getValue())) {
             try {
@@ -120,10 +126,6 @@ public class ConfigValueNode extends AbstractConfigNode
             }
         }
         return getValue();
-    }
-
-    public String getRawValue() {
-        return value;
     }
 
     /**

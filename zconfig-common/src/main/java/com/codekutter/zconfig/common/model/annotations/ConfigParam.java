@@ -26,10 +26,7 @@ package com.codekutter.zconfig.common.model.annotations;
 
 import com.codekutter.zconfig.common.model.annotations.transformers.NullTransformer;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Annotation to be used to define configuration mapping for auto-wired
@@ -38,6 +35,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER})
+@Inherited
 public @interface ConfigParam {
     /**
      * Get the configuration parameter name. By default it maps to defined

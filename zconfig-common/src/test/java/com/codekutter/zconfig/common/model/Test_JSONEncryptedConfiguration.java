@@ -82,9 +82,11 @@ class Test_JSONEncryptedConfiguration {
             AbstractConfigNode node = configuration.find(path);
             assertNotNull(node);
             assertTrue(node instanceof ConfigValueNode);
-            String value = ((ConfigValueNode)node).getValue();
+            String value = ((ConfigValueNode) node).getDecryptedValue();
             assertFalse(Strings.isNullOrEmpty(value));
             assertEquals("TEST-PARAM-3", value);
+            String raw = ((ConfigValueNode) node).getValue();
+            LogUtils.debug(getClass(), String.format("Encrypted Value: [%s]", raw));
         } catch (Throwable e) {
             error(getClass(), e);
             fail(e);
@@ -98,9 +100,11 @@ class Test_JSONEncryptedConfiguration {
             AbstractConfigNode node = configuration.find(path);
             assertNotNull(node);
             assertTrue(node instanceof ConfigValueNode);
-            String value = ((ConfigValueNode)node).getValue();
+            String value = ((ConfigValueNode) node).getDecryptedValue();
             assertFalse(Strings.isNullOrEmpty(value));
             assertEquals("wh0c@res", value);
+            String raw = ((ConfigValueNode) node).getValue();
+            LogUtils.debug(getClass(), String.format("Encrypted Value: [%s]", raw));
         } catch (Throwable e) {
             error(getClass(), e);
             fail(e);
@@ -114,9 +118,11 @@ class Test_JSONEncryptedConfiguration {
             AbstractConfigNode node = configuration.find(path);
             assertNotNull(node);
             assertTrue(node instanceof ConfigValueNode);
-            String value = ((ConfigValueNode)node).getValue();
+            String value = ((ConfigValueNode) node).getDecryptedValue();
             assertFalse(Strings.isNullOrEmpty(value));
             assertEquals("TEST_ATTR_2", value);
+            String raw = ((ConfigValueNode) node).getValue();
+            LogUtils.debug(getClass(), String.format("Encrypted Value: [%s]", raw));
         } catch (Throwable e) {
             error(getClass(), e);
             fail(e);

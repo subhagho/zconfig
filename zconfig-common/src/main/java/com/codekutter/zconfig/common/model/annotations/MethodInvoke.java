@@ -1,9 +1,6 @@
 package com.codekutter.zconfig.common.model.annotations;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Annotation to be used to define auto-invoked methods based on
@@ -13,6 +10,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.CONSTRUCTOR})
+@Inherited
 public @interface MethodInvoke {
     /**
      * Get the configuration node path defined for this type.
