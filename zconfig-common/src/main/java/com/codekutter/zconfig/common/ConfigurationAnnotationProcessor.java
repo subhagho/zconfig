@@ -526,6 +526,11 @@ public class ConfigurationAnnotationProcessor {
                     if (fnode != null) {
                         if (fnode instanceof ConfigValueNode) {
                             ConfigValueNode cv = (ConfigValueNode) fnode;
+                            if (cv.isEncrypted()) {
+                                throw new ConfigurationException(String.format(
+                                        "Encrypted value cannot be used. [path=%s]",
+                                        cv.getSearchPath()));
+                            }
                             value = cv.getValue();
                         } else if (fnode instanceof ConfigListValueNode) {
                             setListValueFromNode(type,
@@ -549,6 +554,11 @@ public class ConfigurationAnnotationProcessor {
                     if (fnode != null) {
                         if (fnode instanceof ConfigValueNode) {
                             vn = (ConfigValueNode) fnode;
+                            if (vn.isEncrypted()) {
+                                throw new ConfigurationException(String.format(
+                                        "Encrypted value cannot be used. [path=%s]",
+                                        vn.getSearchPath()));
+                            }
                         }
                     }
                 }
@@ -671,8 +681,17 @@ public class ConfigurationAnnotationProcessor {
                 ConfigPathNode pathNode = (ConfigPathNode) nodeInfo.node;
                 ConfigParametersNode params = pathNode.parmeters();
                 if (params != null && !params.isEmpty()) {
-                    if (params.hasKey(nodeInfo.name))
-                        value = params.getValue(nodeInfo.name).getValue();
+                    if (params.hasKey(nodeInfo.name)) {
+                        ConfigValueNode vn = params.getValue(nodeInfo.name);
+                        if (vn != null) {
+                            if (vn.isEncrypted()) {
+                                throw new ConfigurationException(String.format(
+                                        "Encrypted value cannot be used. [path=%s]",
+                                        vn.getSearchPath()));
+                            }
+                            value = vn.getValue();
+                        }
+                    }
                 }
             }
 
@@ -680,7 +699,6 @@ public class ConfigurationAnnotationProcessor {
                 if (canProcessFieldType(field) || field.getType().isEnum()) {
                     if (!Strings.isNullOrEmpty(value)) {
                         ReflectionUtils.setValueFromString(value, target, field);
-
                     } else {
                         Class<? extends ITransformer> tt = param.transformer();
                         if (tt != NullTransformer.class) {
@@ -746,13 +764,23 @@ public class ConfigurationAnnotationProcessor {
 
                 return;
             }
+
             String value = null;
             if (node instanceof ConfigPathNode) {
                 ConfigPathNode pathNode = (ConfigPathNode) nodeInfo.node;
                 ConfigAttributesNode attrs = pathNode.attributes();
                 if (attrs != null && !attrs.isEmpty()) {
-                    if (attrs.hasKey(nodeInfo.name))
-                        value = attrs.getValue(nodeInfo.name).getValue();
+                    if (attrs.hasKey(nodeInfo.name)) {
+                        ConfigValueNode vn = attrs.getValue(nodeInfo.name);
+                        if (vn != null) {
+                            if (vn.isEncrypted()) {
+                                throw new ConfigurationException(String.format(
+                                        "Encrypted value cannot be used. [path=%s]",
+                                        vn.getSearchPath()));
+                            }
+                            value = vn.getValue();
+                        }
+                    }
                 }
             }
             if (!Strings.isNullOrEmpty(value)) {
