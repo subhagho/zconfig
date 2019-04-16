@@ -1,7 +1,6 @@
 package com.codekutter.zconfig.common.utils;
 
 import com.codekutter.zconfig.common.model.Configuration;
-import com.codekutter.zconfig.common.model.annotations.ConfigValue;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.apache.commons.codec.binary.Base64;
@@ -11,10 +10,28 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Map;
 
 public class CypherUtils {
+    private static final String HASH_ALGO = "MD5";
+
+    /**
+     * Get an MD5 hash of the specified key.
+     *
+     * @param key - Input Key.
+     * @return - String value of the Hash
+     * @throws Exception
+     */
+    public static String getKeyHash(@Nonnull String key) throws Exception {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(key));
+
+        MessageDigest digest = MessageDigest.getInstance(HASH_ALGO);
+        byte[] d = digest.digest(key.getBytes(StandardCharsets.UTF_8));
+        return new String(d, StandardCharsets.UTF_8);
+    }
+
     /**
      * Encrypt the passed data buffer using the passcode.
      *

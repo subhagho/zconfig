@@ -25,6 +25,7 @@
 package com.codekutter.zconfig.common;
 
 import com.codekutter.zconfig.common.model.Configuration;
+import com.codekutter.zconfig.common.model.EncryptedValue;
 import com.codekutter.zconfig.common.model.annotations.*;
 import com.codekutter.zconfig.common.model.annotations.transformers.NullTransformer;
 import com.codekutter.zconfig.common.model.nodes.*;
@@ -161,7 +162,7 @@ public class ConfigurationAnnotationProcessor {
     /**
      * Create a new instance of the type, will invoke an annotated constructor, if present, else
      * will try to invoke the default (empty) constructor.
-     *
+     * <p>
      * Read and apply the values from the passed configuration based on the type annotations.
      *
      * @param type   - Type of the target object.
@@ -246,7 +247,7 @@ public class ConfigurationAnnotationProcessor {
     /**
      * Create a new instance of the type, will invoke an annotated constructor, if present, else
      * will try to invoke the default (empty) constructor.
-     *
+     * <p>
      * Read and apply the values from the passed configuration based on the type annotations.
      *
      * @param type   - Type of the target object.
@@ -317,7 +318,7 @@ public class ConfigurationAnnotationProcessor {
             }
             if (target == null && defaultConst != null) {
                 target = type.newInstance();
-            } else if (target == null){
+            } else if (target == null) {
                 throw new ConfigurationException(
                         String.format("No valid constructor found. [type=%s]",
                                       type.getCanonicalName()));
@@ -435,6 +436,12 @@ public class ConfigurationAnnotationProcessor {
             if (paramnode != null) {
                 ConfigValueNode cv = paramnode.getValue(pname);
                 if (cv != null) {
+                    if (cv.isEncrypted()) {
+                        if (param.getType() == EncryptedValue.class) {
+                            EncryptedValue ev = new EncryptedValue(cv);
+                            return ev;
+                        }
+                    }
                     value = cv.getValue();
                 }
             }
@@ -535,6 +542,26 @@ public class ConfigurationAnnotationProcessor {
                             "Required configuration value not specified: [path=%s][name=%s]",
                             node.getAbsolutePath(), name));
                 }
+            } else if (field.getType() == EncryptedValue.class) {
+                ConfigValueNode vn = null;
+                if (node instanceof ConfigPathNode) {
+                    AbstractConfigNode fnode = node.find(name);
+                    if (fnode != null) {
+                        if (fnode instanceof ConfigValueNode) {
+                            vn = (ConfigValueNode) fnode;
+                        }
+                    }
+                }
+                if (vn == null) {
+                    if (configValue.required()) {
+                        throw new ConfigurationException(String.format(
+                                "Required parameter not specified: [path=%s][name=%s]",
+                                node.getAbsolutePath(), node.getName()));
+                    }
+                } else {
+                    EncryptedValue ev = new EncryptedValue(vn);
+                    ReflectionUtils.setObjectValue(target, field, ev);
+                }
             } else {
                 Class<? extends ITransformer> tt = configValue.transformer();
                 if (tt != NullTransformer.class) {
@@ -616,6 +643,29 @@ public class ConfigurationAnnotationProcessor {
             }
             StructNodeInfo nodeInfo = checkAnnotationTags(name, node,
                                                           ConfigParametersNode.NODE_ABBR_PREFIX);
+            if (field.getType() == EncryptedValue.class) {
+                ConfigValueNode vn = null;
+                if (node instanceof ConfigPathNode) {
+                    ConfigPathNode pathNode = (ConfigPathNode) nodeInfo.node;
+                    ConfigParametersNode params = pathNode.parmeters();
+                    if (params != null && !params.isEmpty()) {
+                        if (params.hasKey(nodeInfo.name))
+                            vn = params.getValue(nodeInfo.name);
+                    }
+                }
+                if (vn == null) {
+                    if (param.required()) {
+                        throw new ConfigurationException(String.format(
+                                "Required parameter not specified: [path=%s][name=%s]",
+                                node.getAbsolutePath(), nodeInfo.name));
+                    }
+                } else {
+                    EncryptedValue ev = new EncryptedValue(vn);
+                    ReflectionUtils.setObjectValue(target, field, ev);
+                }
+
+                return;
+            }
             String value = null;
             if (node instanceof ConfigPathNode) {
                 ConfigPathNode pathNode = (ConfigPathNode) nodeInfo.node;
@@ -625,6 +675,7 @@ public class ConfigurationAnnotationProcessor {
                         value = params.getValue(nodeInfo.name).getValue();
                 }
             }
+
             if (!Strings.isNullOrEmpty(value)) {
                 if (canProcessFieldType(field) || field.getType().isEnum()) {
                     if (!Strings.isNullOrEmpty(value)) {
@@ -672,6 +723,29 @@ public class ConfigurationAnnotationProcessor {
             }
             StructNodeInfo nodeInfo = checkAnnotationTags(name, node,
                                                           ConfigAttributesNode.NODE_ABBR_PREFIX);
+            if (field.getType() == EncryptedValue.class) {
+                ConfigValueNode vn = null;
+                if (node instanceof ConfigPathNode) {
+                    ConfigPathNode pathNode = (ConfigPathNode) nodeInfo.node;
+                    ConfigAttributesNode attrs = pathNode.attributes();
+                    if (attrs != null && !attrs.isEmpty()) {
+                        if (attrs.hasKey(nodeInfo.name))
+                            vn = attrs.getValue(nodeInfo.name);
+                    }
+                }
+                if (vn == null) {
+                    if (attribute.required()) {
+                        throw new ConfigurationException(String.format(
+                                "Required parameter not specified: [path=%s][name=%s]",
+                                node.getAbsolutePath(), nodeInfo.name));
+                    }
+                } else {
+                    EncryptedValue ev = new EncryptedValue(vn);
+                    ReflectionUtils.setObjectValue(target, field, ev);
+                }
+
+                return;
+            }
             String value = null;
             if (node instanceof ConfigPathNode) {
                 ConfigPathNode pathNode = (ConfigPathNode) nodeInfo.node;

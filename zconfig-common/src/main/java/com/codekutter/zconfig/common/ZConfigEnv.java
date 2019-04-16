@@ -55,10 +55,6 @@ public abstract class ZConfigEnv {
      * Parsed configuration handle.
      */
     private Configuration configuration;
-    /**
-     * Configuration passcode store.
-     */
-    private CypherUtils.ConfigVault vault = new CypherUtils.ConfigVault();
 
     /**
      * Client instance state.
@@ -224,15 +220,6 @@ public abstract class ZConfigEnv {
     }
 
     /**
-     * Get a handle to the configuration vault.
-     *
-     * @return - Config Passcode Vault
-     */
-    public CypherUtils.ConfigVault getVault() {
-        return vault;
-    }
-
-    /**
      * Get a new instance of the JSON Object mapper.
      *
      * @return - JSON Object mapper.
@@ -250,6 +237,22 @@ public abstract class ZConfigEnv {
      * @throws ConfigurationException
      */
     public abstract void postInit() throws ConfigurationException;
+
+    /**
+     * Configuration passcode store.
+     */
+    private static CypherUtils.ConfigVault vault = new CypherUtils.ConfigVault();
+
+
+    /**
+     * Get a handle to the configuration vault.
+     *
+     * @return - Config Passcode Vault
+     */
+    public static CypherUtils.ConfigVault getVault() {
+        return vault;
+    }
+
 
     /**
      * Client environment singleton.

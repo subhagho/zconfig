@@ -28,6 +28,7 @@ import com.codekutter.zconfig.common.*;
 import com.codekutter.zconfig.common.model.*;
 import com.codekutter.zconfig.common.model.nodes.*;
 import com.codekutter.zconfig.common.readers.EReaderType;
+import com.codekutter.zconfig.common.utils.CypherUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -148,6 +149,10 @@ public class JSONConfigParser extends AbstractConfigParser {
 
                 // Call the load finish handler.
                 doPostLoad();
+
+                if (!Strings.isNullOrEmpty(configuration.getEncryptionHash())) {
+                    ZConfigEnv.getVault().addPasscode(configuration, password);
+                }
             }
         } catch (JsonProcessingException e) {
             if (configuration != null)
@@ -161,6 +166,10 @@ public class JSONConfigParser extends AbstractConfigParser {
             if (configuration != null)
                 configuration.getState().setError(e);
             throw e;
+        } catch (Exception e) {
+            if (configuration != null)
+                configuration.getState().setError(e);
+            throw new ConfigurationException(e);
         }
     }
 
@@ -195,7 +204,7 @@ public class JSONConfigParser extends AbstractConfigParser {
         configuration.setName(name);
 
         // Parse the configuration header.
-        parseHeader(node, version);
+        parseHeader(node, version, password);
 
         // Parse the configuration body
         parseBody(node, password);
@@ -908,7 +917,7 @@ public class JSONConfigParser extends AbstractConfigParser {
      * @param version - Expected Compatibility Version.
      * @throws ConfigurationException
      */
-    private void parseHeader(JsonNode node, Version version)
+    private void parseHeader(JsonNode node, Version version, String password)
     throws ConfigurationException {
         try {
             JsonNode header = node.get(JSONConfigConstants.CONFIG_HEADER_NODE);
@@ -1017,10 +1026,23 @@ public class JSONConfigParser extends AbstractConfigParser {
                         throw new ConfigurationException(
                                 "Invalid Password Hash: NULL or Empty.");
                     }
+                    if (Strings.isNullOrEmpty(password)) {
+                        throw new ConfigurationException(String.format(
+                                "Configuration has encryption, but no passcode specified. [config=%s]",
+                                configuration.getName()));
+                    }
+                    String chash = CypherUtils.getKeyHash(password);
+                    if (password.compareTo(chash) != 0) {
+                        throw new ConfigurationException(String.format(
+                                "Invalid Passcode: Doesn't match with passcode set in configuration. [config=%s]",
+                                configuration.getName()));
+                    }
                     configuration.setEncryptionHash(hash);
                 }
             }
-        } catch (ValueParseException e) {
+        } catch (ConfigurationException e) {
+            throw e;
+        } catch (Exception e) {
             throw new ConfigurationException(e);
         }
     }

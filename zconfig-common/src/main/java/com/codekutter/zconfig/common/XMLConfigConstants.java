@@ -35,9 +35,9 @@ public class XMLConfigConstants {
     public static final String CONFIG_HEADER_NAME = "name";
     public static final String CONFIG_HEADER_DESC = "description";
     public static final String CONFIG_HEADER_VERSION = "version";
-    public static final String CONFIG_UPDATE_OWNER = "user";
     public static final String CONFIG_UPDATE_TIMESTAMP = "timestamp";
     public static final String CONFIG_CREATED_BY = "createdBy";
     public static final String CONFIG_UPDATED_BY = "updatedBy";
-    public static final String CONFIG_NODE_VERSION = "nodeVersion";
+    public static final String CONFIG_NODE_ENCRYPTED = "encrypted";
+    public static final String CONFIG_HEADER_PASSWD_HASH = "passwordHash";
 }

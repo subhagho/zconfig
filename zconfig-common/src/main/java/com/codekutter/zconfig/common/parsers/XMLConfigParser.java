@@ -28,6 +28,7 @@ import com.codekutter.zconfig.common.*;
 import com.codekutter.zconfig.common.model.*;
 import com.codekutter.zconfig.common.model.nodes.*;
 import com.codekutter.zconfig.common.readers.EReaderType;
+import com.codekutter.zconfig.common.utils.CypherUtils;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.codekutter.zconfig.common.readers.AbstractConfigReader;
@@ -99,7 +100,7 @@ public class XMLConfigParser extends AbstractConfigParser {
                 configuration.getState().setState(ENodeState.Loading);
                 configuration.setName(name);
 
-                parseHeader(rootNode, version);
+                parseHeader(rootNode, version, password);
 
                 NodeList children = rootNode.getChildNodes();
                 for (int ii = 0; ii < children.getLength(); ii++) {
@@ -116,16 +117,12 @@ public class XMLConfigParser extends AbstractConfigParser {
                 }
 
                 doPostLoad();
+
+                if (!Strings.isNullOrEmpty(configuration.getEncryptionHash())) {
+                    ZConfigEnv.getVault().addPasscode(configuration, password);
+                }
             }
-        } catch (SAXException e) {
-            if (configuration != null)
-                configuration.getState().setError(e);
-            throw new ConfigurationException(e);
-        } catch (IOException e) {
-            if (configuration != null)
-                configuration.getState().setError(e);
-            throw new ConfigurationException(e);
-        } catch (ParserConfigurationException e) {
+        } catch (IOException | ParserConfigurationException | SAXException e) {
             if (configuration != null)
                 configuration.getState().setError(e);
             throw new ConfigurationException(e);
@@ -133,6 +130,10 @@ public class XMLConfigParser extends AbstractConfigParser {
             if (configuration != null)
                 configuration.getState().setError(e);
             throw e;
+        } catch (Exception e) {
+            if (configuration != null)
+                configuration.getState().setError(e);
+            throw new ConfigurationException(e);
         }
     }
 
@@ -284,6 +285,13 @@ public class XMLConfigParser extends AbstractConfigParser {
             value = value.trim();
             if (!Strings.isNullOrEmpty(value)) {
                 vn.setValue(value);
+            }
+            if (node.hasAttribute(XMLConfigConstants.CONFIG_NODE_ENCRYPTED)) {
+                String en =
+                        node.getAttribute(XMLConfigConstants.CONFIG_NODE_ENCRYPTED);
+                if (en.compareToIgnoreCase("true") == 0) {
+                    vn.setEncrypted(true);
+                }
             }
             if (parent instanceof ConfigPathNode) {
                 ((ConfigPathNode) parent).addChildNode(vn);
@@ -669,7 +677,7 @@ public class XMLConfigParser extends AbstractConfigParser {
      * @param version - Expected Version.
      * @throws ConfigurationException
      */
-    private void parseHeader(Element node, Version version)
+    private void parseHeader(Element node, Version version, String password)
     throws ConfigurationException {
         NodeList hnode =
                 node.getElementsByTagName(XMLConfigConstants.CONFIG_HEADER_NODE);
@@ -720,6 +728,26 @@ public class XMLConfigParser extends AbstractConfigParser {
                 }
                 configuration.setVersion(cversion);
             }
+            if (header.hasAttribute(XMLConfigConstants.CONFIG_HEADER_PASSWD_HASH)) {
+                String hash = header.getAttribute(
+                        XMLConfigConstants.CONFIG_HEADER_PASSWD_HASH);
+                if (Strings.isNullOrEmpty(hash)) {
+                    throw new ConfigurationException(
+                            "Invalid Password Hash: NULL or Empty.");
+                }
+                if (Strings.isNullOrEmpty(password)) {
+                    throw new ConfigurationException(String.format(
+                            "Configuration has encryption, but no passcode specified. [config=%s]",
+                            configuration.getName()));
+                }
+                String chash = CypherUtils.getKeyHash(password);
+                if (password.compareTo(chash) != 0) {
+                    throw new ConfigurationException(String.format(
+                            "Invalid Passcode: Doesn't match with passcode set in configuration. [config=%s]",
+                            configuration.getName()));
+                }
+                configuration.setEncryptionHash(hash);
+            }
             NodeList children = header.getChildNodes();
             if (children != null && children.getLength() > 0) {
                 for (int ii = 0; ii < children.getLength(); ii++) {
@@ -754,7 +782,9 @@ public class XMLConfigParser extends AbstractConfigParser {
                     }
                 }
             }
-        } catch (ValueParseException e) {
+        } catch (ConfigurationException e) {
+            throw e;
+        } catch (Exception e) {
             throw new ConfigurationException(e);
         }
     }
