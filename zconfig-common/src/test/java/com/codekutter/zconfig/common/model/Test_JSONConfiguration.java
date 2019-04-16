@@ -44,8 +44,7 @@ class Test_JSONConfiguration {
     private static final String BASE_PROPS_FILE =
             "src/test/resources/json/test-config.properties";
     private static Configuration configuration = null;
-    private static String encryptionKey = "21947a50-6755-47";
-    
+
     @BeforeAll
     static void init() throws Exception {
         JSONConfigParser parser =
@@ -194,7 +193,7 @@ class Test_JSONConfiguration {
             assertEquals(path, node.getSearchPath());
             assertEquals(4, ((ConfigListElementNode) node).size());
 
-            path = "TEST_ELEMENT_LIST.2.string_2";
+            path = "TEST_ELEMENT_LIST/2.string_2";
             node = configuration.find(node, path);
             assertNotNull(node);
             assertTrue(node instanceof ConfigValueNode);

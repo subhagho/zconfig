@@ -26,6 +26,7 @@ package com.codekutter.zconfig.common.model.nodes;
 
 import com.codekutter.zconfig.common.ConfigurationException;
 import com.codekutter.zconfig.common.model.Configuration;
+import com.codekutter.zconfig.common.utils.ConfigUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -224,17 +225,9 @@ public abstract class AbstractConfigNode {
             path = String.format("%s%s", getName(), path);
         }
 
-        String[] parts = path.split("\\.");
-        if (parts.length > 0) {
-            List<String> stack = new ArrayList<>(parts.length);
-            if (parts[0].equals("*")) {
-                parts[0] = this.name;
-            } else if (!getName().equals(parts[0])) {
-                stack.add(getName());
-            }
-            for (String part : parts) {
-                stack.add(part);
-            }
+        List<String> stack =
+                ConfigUtils.getResolvedPath(path, getConfiguration().getSettings());
+        if (stack != null && !stack.isEmpty()) {
             return find(stack, 0);
         }
         return null;

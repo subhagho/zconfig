@@ -27,6 +27,7 @@ package com.codekutter.zconfig.common.model;
 import com.codekutter.zconfig.common.ConfigurationException;
 import com.codekutter.zconfig.common.LogUtils;
 import com.codekutter.zconfig.common.model.nodes.*;
+import com.codekutter.zconfig.common.utils.ConfigUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -87,6 +88,10 @@ public class Configuration {
          * MD5 Hash of the encryption Key.
          */
         private String encryptionHash;
+        /**
+         * Loaded Timestamp of this instance.
+         */
+        private long timestamp = System.currentTimeMillis();
     }
 
     /**
@@ -132,6 +137,15 @@ public class Configuration {
         this.settings = settings;
         state = new NodeState();
         state.setState(ENodeState.Loading);
+    }
+
+    /**
+     * Get the header of this configuration instance.
+     *
+     * @return - Configuration Header
+     */
+    public Header getHeader() {
+        return header;
     }
 
     /**
@@ -430,12 +444,8 @@ public class Configuration {
         Preconditions.checkArgument(node != null);
         Preconditions.checkArgument(!Strings.isNullOrEmpty(path));
 
-        String[] parts = path.split("\\.");
-        if (parts.length > 0) {
-            List<String> stack = new ArrayList<>(parts.length);
-            for (String part : parts) {
-                stack.add(part);
-            }
+        List<String> stack = ConfigUtils.getResolvedPath(path, settings);
+        if (stack != null && !stack.isEmpty()) {
             return node.find(stack, 0);
         }
         return null;

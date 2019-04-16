@@ -24,6 +24,7 @@
 
 package com.codekutter.zconfig.common.utils;
 
+import com.codekutter.zconfig.common.model.ConfigurationSettings;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.codekutter.zconfig.common.model.nodes.AbstractConfigNode;
@@ -32,12 +33,104 @@ import com.codekutter.zconfig.common.model.nodes.ConfigPathNode;
 import com.codekutter.zconfig.common.model.nodes.ConfigValueNode;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Utility functions for configuration/configuration nodes.
  */
 public class ConfigUtils {
     private static final String NODE_NAME_DESCRIPTION = "__description";
+
+    public static List<String> getResolvedPath(@Nonnull String path,
+                                               @Nonnull
+                                                       ConfigurationSettings settings) {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(path));
+        Preconditions.checkArgument(settings != null);
+
+        List<String> stack = new ArrayList<>();
+        String[] parts = path.split("\\.");
+        if (parts != null && parts.length > 0) {
+            for (String part : parts) {
+                String[] pc = checkSubPath(part, settings);
+                if (pc != null && pc.length > 0) {
+                    for (String p : pc) {
+                        stack.add(p);
+                    }
+                } else {
+                    stack.add(part);
+                }
+            }
+        } else {
+            stack.add(path);
+        }
+        return stack;
+    }
+
+    /**
+     * Check if the passed node name contains sub-tags for parameters/attributes.
+     *
+     * @param name - Path element to parse.
+     * @return - Parsed path name, if tags are present, else NULL.
+     */
+    public static String[] checkSubPath(@Nonnull String name,
+                                        @Nonnull ConfigurationSettings settings) {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(name));
+        Preconditions.checkArgument(settings != null);
+
+        int index = name.indexOf(ConfigurationSettings.PARAM_NODE_CHAR);
+        if (index > 0) {
+            String[] parts = name.split(ConfigurationSettings.PARAM_NODE_CHAR);
+            if (parts.length == 1) {
+                return new String[]{parts[0],
+                                    settings
+                                            .getParametersNodeName()};
+            } else if (parts.length == 2) {
+                return new String[]{parts[0],
+                                    settings
+                                            .getParametersNodeName(),
+                                    parts[1]};
+            }
+        }
+        index = name.indexOf(ConfigurationSettings.ATTR_NODE_CHAR);
+        if (index > 0) {
+            String[] parts = name.split(ConfigurationSettings.ATTR_NODE_CHAR);
+            if (parts.length == 1) {
+                return new String[]{parts[0],
+                                    settings
+                                            .getAttributesNodeName()};
+            } else if (parts.length == 2) {
+                return new String[]{parts[0],
+                                    settings
+                                            .getAttributesNodeName(),
+                                    parts[1]};
+            }
+        }
+        index = name.indexOf(ConfigurationSettings.PROP_NODE_CHAR);
+        if (index > 0) {
+            String[] parts = name.split(
+                    String.format("\\%s", ConfigurationSettings.PROP_NODE_CHAR));
+            if (parts.length == 1) {
+                return new String[]{parts[0],
+                                    settings
+                                            .getPropertiesNodeName()};
+            } else if (parts.length == 2) {
+                return new String[]{parts[0],
+                                    settings
+                                            .getPropertiesNodeName(),
+                                    parts[1]};
+            }
+        }
+        index = name.indexOf(ConfigurationSettings.ARRAY_INDEX_CHAR);
+        if (index > 0) {
+            String[] parts = name.split(ConfigurationSettings.ARRAY_INDEX_CHAR);
+            if (parts.length == 2) {
+                return new String[]{parts[0],
+                                    parts[1]};
+            }
+        }
+        return null;
+    }
 
     /**
      * Add a description element to the specified configuration node.

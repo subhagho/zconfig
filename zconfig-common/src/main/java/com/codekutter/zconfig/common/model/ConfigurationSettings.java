@@ -73,6 +73,10 @@ public class ConfigurationSettings {
     private static final String DEFAULT_PROPS_NAME = "properties";
     private static final String DEFAULT_ATTR_NAME = "@";
     private static final String DEFAULT_PARAMS_NAME = "parameters";
+    public static final String ARRAY_INDEX_CHAR = "/";
+    public static final String PARAM_NODE_CHAR = "#";
+    public static final String PROP_NODE_CHAR = "$";
+    public static final String ATTR_NODE_CHAR = "@";
 
     @ConfigValue(name = "propertiesTag")
     private String propertiesNodeName = DEFAULT_PROPS_NAME;

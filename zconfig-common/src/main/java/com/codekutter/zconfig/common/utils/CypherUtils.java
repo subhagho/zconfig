@@ -158,12 +158,12 @@ public class CypherUtils {
             String key = String.format("%s%s%d", config.getName(),
                                        config.getInstanceId(),
                                        config.getCreatedBy().getTimestamp());
-            int index = config.getUpdatedBy().hashCode() / key.length();
+            int index = (int) (config.getHeader().getTimestamp() % 16);
 
             if (index + 16 >= key.length()) {
-                index = index - 16;
+                index = key.length() - 17;
             }
-            return key.substring(index, 16);
+            return key.substring(index, index + 16);
         }
     }
 
