@@ -1,7 +1,6 @@
 package com.codekutter.zconfig.common.utils;
 
 import com.codekutter.zconfig.common.LogUtils;
-import org.apache.commons.codec.binary.Base64;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;

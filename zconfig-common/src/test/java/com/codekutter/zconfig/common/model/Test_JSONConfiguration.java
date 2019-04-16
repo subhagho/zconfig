@@ -44,7 +44,8 @@ class Test_JSONConfiguration {
     private static final String BASE_PROPS_FILE =
             "src/test/resources/json/test-config.properties";
     private static Configuration configuration = null;
-
+    private static String encryptionKey = "21947a50-6755-47";
+    
     @BeforeAll
     static void init() throws Exception {
         JSONConfigParser parser =
