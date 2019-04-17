@@ -79,7 +79,7 @@ class Test_JSONIncludedConfiguration {
     void find() {
         try {
             String path =
-                    "configuration.node_1.root-node.node_1.node_2.node_3.node_4$";
+                    "configuration/node_1/root-node/node_1/node_2/node_3/node_4$";
             AbstractConfigNode node = configuration.find(path);
             assertNotNull(node);
             assertTrue(node instanceof ConfigPropertiesNode);

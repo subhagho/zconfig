@@ -26,6 +26,8 @@ package com.codekutter.zconfig.common;
 
 import com.codekutter.zconfig.common.model.EncryptedValue;
 import com.codekutter.zconfig.common.model.annotations.MethodInvoke;
+import com.codekutter.zconfig.common.model.nodes.AbstractConfigNode;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.codekutter.zconfig.common.model.Configuration;
 import com.codekutter.zconfig.common.model.Version;
@@ -69,16 +71,16 @@ class Test_ConfigurationAnnotationProcessor {
 
     @Data
     @ToString
-    @ConfigPath(path = "configuration.node_1.node_2")
+    @ConfigPath(path = "configuration/node_1/node_2")
     public static class ConfigAnnotationsTest {
         @ConfigValue(required = true)
         private String nodeName;
         private String paramValue;
-        @ConfigValue(name = "values.longValue", required = true)
+        @ConfigValue(name = "values/longValue", required = true)
         private long longValue;
-        @ConfigValue(name = "values.doubleValue", required = true)
+        @ConfigValue(name = "values/doubleValue", required = true)
         private double doubleValue;
-        @ConfigValue(name = "node_3.node_4.TEST_LONG_LIST")
+        @ConfigValue(name = "node_3/node_4/TEST_LONG_LIST")
         private Set<Long> longListSet;
         @ConfigValue(name = "updatedBy")
         private ModifiedBy updatedBy;
@@ -86,7 +88,7 @@ class Test_ConfigurationAnnotationProcessor {
         private ModifiedBy createdBy;
         private long paramLong = -1;
         private ETestValue paramEnum = ETestValue.EValue1;
-        @ConfigValue(name = "node_3.password")
+        @ConfigValue(name = "node_3/password")
         private EncryptedValue password;
         @ConfigParam(name = "#PARAM_3", required = true)
         private EncryptedValue encryptedValue;
@@ -105,6 +107,22 @@ class Test_ConfigurationAnnotationProcessor {
             this.paramLong = paramLong;
             this.paramEnum = paramEnum;
         }
+
+        @MethodInvoke
+        public void printConfig(@ConfigParam AbstractConfigNode node) {
+            Preconditions.checkArgument(node != null);
+            LogUtils.debug(getClass(),
+                           String.format("[path=%s]", node.getSearchPath()));
+        }
+
+        @MethodInvoke
+        public void printConfigSearch(
+                @ConfigParam(name = "node_3") AbstractConfigNode node) {
+            Preconditions.checkArgument(node != null);
+            LogUtils.debug(getClass(),
+                           String.format("[path=%s]", node.getSearchPath()));
+        }
+
     }
 
     @BeforeAll

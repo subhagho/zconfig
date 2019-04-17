@@ -440,11 +440,12 @@ public class Configuration {
      * @param path - Path to search for.
      * @return - Configuration Node or NULL.
      */
-    public AbstractConfigNode find(AbstractConfigNode node, String path) {
+    public AbstractConfigNode find(AbstractConfigNode node, String path)
+    throws ConfigurationException {
         Preconditions.checkArgument(node != null);
         Preconditions.checkArgument(!Strings.isNullOrEmpty(path));
 
-        List<String> stack = ConfigUtils.getResolvedPath(path, settings);
+        List<String> stack = ConfigUtils.getResolvedPath(path, settings, node);
         if (stack != null && !stack.isEmpty()) {
             return node.find(stack, 0);
         }
@@ -462,7 +463,7 @@ public class Configuration {
      * @param path - Path to search for.
      * @return - Configuration Node or NULL.
      */
-    public AbstractConfigNode find(String path) {
+    public AbstractConfigNode find(String path) throws ConfigurationException {
         return find(rootConfigNode, path);
     }
 

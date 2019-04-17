@@ -26,6 +26,7 @@ package com.codekutter.zconfig.common.model.nodes;
 
 import com.codekutter.zconfig.common.ConfigurationException;
 import com.codekutter.zconfig.common.model.Configuration;
+import com.codekutter.zconfig.common.model.ConfigurationSettings;
 import com.codekutter.zconfig.common.utils.ConfigUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
@@ -194,7 +195,7 @@ public abstract class AbstractConfigNode {
         String path = null;
         if (parent != null) {
             path = parent.getSearchPath();
-            path = String.format("%s.%s", path, name);
+            path = String.format("%s/%s", path, name);
         } else {
             path = String.format("%s", name);
         }
@@ -217,8 +218,14 @@ public abstract class AbstractConfigNode {
      * @param path - Dot separated path.
      * @return - Node at path
      */
-    public AbstractConfigNode find(@Nonnull String path) {
+    public AbstractConfigNode find(@Nonnull String path)
+    throws ConfigurationException {
         path = path.trim();
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(path));
+        if (path.startsWith("/")) {
+            return configuration.find(path);
+        }
+
         if (path.equals(".")) {
             return this;
         } else if (path.startsWith(".")) {
@@ -226,7 +233,8 @@ public abstract class AbstractConfigNode {
         }
 
         List<String> stack =
-                ConfigUtils.getResolvedPath(path, getConfiguration().getSettings());
+                ConfigUtils.getResolvedPath(path, getConfiguration().getSettings(),
+                                            this);
         if (stack != null && !stack.isEmpty()) {
             String node = stack.get(0);
             if (node.compareTo(getName()) != 0) {

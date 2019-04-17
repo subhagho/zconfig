@@ -76,7 +76,7 @@ class Test_JSONConfiguration {
     @Test
     void find() {
         try {
-            String path = "configuration.node_1";
+            String path = "configuration/node_1";
             AbstractConfigNode node = configuration.find(path);
             assertNotNull(node);
             assertEquals(path, node.getSearchPath());
@@ -96,7 +96,7 @@ class Test_JSONConfiguration {
     void update() {
         try {
             String path =
-                    "configuration.node_1.node_2.node_3.node_4.TEST_VALUE_LIST";
+                    "configuration/node_1/node_2/node_3/node_4/TEST_VALUE_LIST";
             AbstractConfigNode node = configuration.find(path);
             assertNotNull(node);
             assertTrue(node instanceof ConfigListValueNode);
@@ -136,7 +136,7 @@ class Test_JSONConfiguration {
     @Test
     void findParameters() {
         try {
-            String path = "configuration.node_1#";
+            String path = "configuration/node_1#";
             AbstractConfigNode node = configuration.find(path);
             assertNotNull(node);
             assertTrue(node instanceof ConfigParametersNode);
@@ -150,7 +150,7 @@ class Test_JSONConfiguration {
             debug(getClass(),
                   String.format("[path=%s] parameter value = %s", path, param));
 
-            path = "configuration.node_1.node_2#";
+            path = "configuration/node_1/node_2#";
             node = configuration.find(path);
             assertNotNull(node);
             assertTrue(node instanceof ConfigParametersNode);
@@ -164,7 +164,7 @@ class Test_JSONConfiguration {
     @Test
     void findAttribute() {
         try {
-            String path = "configuration.node_1.node_2@";
+            String path = "configuration/node_1/node_2@";
             AbstractConfigNode node = configuration.find(path);
             assertNotNull(node);
             assertTrue(node instanceof ConfigAttributesNode);
@@ -186,14 +186,14 @@ class Test_JSONConfiguration {
     @Test
     void findForConfigNode() {
         try {
-            String path = "configuration.node_1.TEST_ELEMENT_LIST";
+            String path = "configuration/node_1/TEST_ELEMENT_LIST";
             AbstractConfigNode node = configuration.find(path);
             assertNotNull(node);
             assertTrue(node instanceof ConfigListElementNode);
             assertEquals(path, node.getSearchPath());
             assertEquals(4, ((ConfigListElementNode) node).size());
 
-            path = "TEST_ELEMENT_LIST/2.string_2";
+            path = "TEST_ELEMENT_LIST[2]/string_2";
             node = configuration.find(node, path);
             assertNotNull(node);
             assertTrue(node instanceof ConfigValueNode);
@@ -209,20 +209,46 @@ class Test_JSONConfiguration {
     @Test
     void searchWildcard() {
         try {
-            String path = "configuration.node_1.node_2.node_3.*";
+            String path = "configuration/node_1/node_2/node_3/*";
             AbstractConfigNode node = configuration.find(path);
             assertNotNull(node);
             assertTrue(node instanceof ConfigSearchListNode);
             debug(getClass(), node);
 
-            path = "*.createdBy";
+            path = "*/createdBy";
             node = configuration.find(node, path);
             assertNotNull(node);
             assertTrue(node instanceof ConfigPathNode);
             debug(getClass(), node);
 
-            path = "configuration.node_1.node_2.node_3.*.TEST_VALUE_LIST";
+            path = "configuration/node_1/node_2/node_3/*/TEST_VALUE_LIST";
             node = configuration.find(path);
+            assertNotNull(node);
+            assertTrue(node instanceof ConfigListValueNode);
+            debug(getClass(), node);
+        } catch (Throwable e) {
+            error(getClass(), e);
+            fail(e);
+        }
+    }
+
+    @Test
+    void searchRecursiveWildcard() {
+        try {
+            String path = "**/node_3/*";
+            AbstractConfigNode node = configuration.find(path);
+            assertNotNull(node);
+            assertTrue(node instanceof ConfigSearchListNode);
+            debug(getClass(), node);
+
+            path = "*/createdBy";
+            node = configuration.find(node, path);
+            assertNotNull(node);
+            assertTrue(node instanceof ConfigPathNode);
+            debug(getClass(), node);
+
+            path = "/configuration/node_1/node_2/node_3/*/TEST_VALUE_LIST";
+            node = node.find(path);
             assertNotNull(node);
             assertTrue(node instanceof ConfigListValueNode);
             debug(getClass(), node);

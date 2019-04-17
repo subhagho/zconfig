@@ -203,6 +203,13 @@ public class ConfigPathNode extends ConfigElementNode {
             } else {
                 return findChild(path, index);
             }
+        } else if (ConfigurationSettings.isRecursiveWildcard(key)) {
+            String cname = path.get(index + 1);
+            if (children.containsKey(cname)) {
+                return children.get(cname).find(path, index + 1);
+            } else {
+                return findChild(path, index);
+            }
         } else if (index == 0 && children.containsKey(key)) {
             if (path.size() == 1) {
                 return children.get(key);
@@ -222,6 +229,7 @@ public class ConfigPathNode extends ConfigElementNode {
      */
     public AbstractConfigNode findChild(List<String> path, int index) {
         String cname = path.get(index + 1);
+        String name = path.get(index);
         if (children.containsKey(cname)) {
             AbstractConfigNode node = children.get(cname);
             return node.find(path, index + 1);
@@ -230,6 +238,28 @@ public class ConfigPathNode extends ConfigElementNode {
             for (String ckey : children.keySet()) {
                 AbstractConfigNode cn = children.get(ckey);
                 AbstractConfigNode sn = cn.find(path, index + 1);
+                if (sn != null) {
+                    nodes.add(sn);
+                }
+            }
+            if (!nodes.isEmpty()) {
+                if (nodes.size() > 1) {
+                    ConfigSearchListNode nodeList =
+                            new ConfigSearchListNode(getConfiguration(),
+                                                     null);
+                    for (AbstractConfigNode nn : nodes) {
+                        nodeList.addValue(nn);
+                    }
+                    return nodeList;
+                } else {
+                    return nodes.get(0);
+                }
+            }
+        } else if (ConfigurationSettings.isRecursiveWildcard(name)) {
+            List<AbstractConfigNode> nodes = new ArrayList<>();
+            for (String ckey : children.keySet()) {
+                AbstractConfigNode cn = children.get(ckey);
+                AbstractConfigNode sn = cn.find(path, index);
                 if (sn != null) {
                     nodes.add(sn);
                 }

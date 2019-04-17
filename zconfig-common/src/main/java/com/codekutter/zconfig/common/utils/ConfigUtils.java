@@ -24,6 +24,7 @@
 
 package com.codekutter.zconfig.common.utils;
 
+import com.codekutter.zconfig.common.ConfigurationException;
 import com.codekutter.zconfig.common.model.ConfigurationSettings;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -35,6 +36,7 @@ import com.codekutter.zconfig.common.model.nodes.ConfigValueNode;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
 
 /**
  * Utility functions for configuration/configuration nodes.
@@ -44,14 +46,25 @@ public class ConfigUtils {
 
     public static List<String> getResolvedPath(@Nonnull String path,
                                                @Nonnull
-                                                       ConfigurationSettings settings) {
+                                                       ConfigurationSettings settings,
+                                               AbstractConfigNode node)
+    throws ConfigurationException {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(path));
         Preconditions.checkArgument(settings != null);
 
         List<String> stack = new ArrayList<>();
-        String[] parts = path.split("\\.");
+        String[] parts = path.split("/");
         if (parts != null && parts.length > 0) {
             for (String part : parts) {
+                if (part.compareTo(ConfigurationSettings.NODE_PARENT_TERM) == 0) {
+                    if (node == null || node.getParent() == null) {
+                        throw new ConfigurationException(
+                                "Cannot find parent: Node is NULL or parent is null.");
+                    }
+                    node = node.getParent();
+                    stack.add(node.getName());
+                    continue;
+                }
                 String[] pc = checkSubPath(part, settings);
                 if (pc != null && pc.length > 0) {
                     for (String p : pc) {
@@ -74,10 +87,23 @@ public class ConfigUtils {
      * @return - Parsed path name, if tags are present, else NULL.
      */
     public static String[] checkSubPath(@Nonnull String name,
-                                        @Nonnull ConfigurationSettings settings) {
+                                        @Nonnull ConfigurationSettings settings)
+    throws
+    ConfigurationException {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(name));
         Preconditions.checkArgument(settings != null);
 
+        Matcher matcher = ConfigurationSettings.INDEX_PATTERN.matcher(name);
+        if (matcher != null && matcher.matches()) {
+            String pname = matcher.group(1);
+            String index = matcher.group(2);
+            if (Strings.isNullOrEmpty(pname) || Strings.isNullOrEmpty(index)) {
+                throw new ConfigurationException(String.format(
+                        "Error getting name/index from array node. [term=%s]",
+                        name));
+            }
+            return new String[]{pname, index};
+        }
         int index = name.indexOf(ConfigurationSettings.PARAM_NODE_CHAR);
         if (index > 0) {
             String[] parts = name.split(ConfigurationSettings.PARAM_NODE_CHAR);
@@ -121,14 +147,6 @@ public class ConfigUtils {
                                     parts[1]};
             }
         }
-        index = name.indexOf(ConfigurationSettings.ARRAY_INDEX_CHAR);
-        if (index > 0) {
-            String[] parts = name.split(ConfigurationSettings.ARRAY_INDEX_CHAR);
-            if (parts.length == 2) {
-                return new String[]{parts[0],
-                                    parts[1]};
-            }
-        }
         return null;
     }
 
@@ -139,7 +157,8 @@ public class ConfigUtils {
      * @param description - Description.
      */
     public static final void addDescription(@Nonnull AbstractConfigNode node,
-                                            @Nonnull String description) {
+                                            @Nonnull String description)
+    throws ConfigurationException {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(description));
         if (node instanceof ConfigPathNode) {
             AbstractConfigNode cnode = node.find(
@@ -163,7 +182,8 @@ public class ConfigUtils {
      * @param node - Configuration node.
      * @return - Description.
      */
-    public static final String getDescription(@Nonnull AbstractConfigNode node) {
+    public static final String getDescription(@Nonnull AbstractConfigNode node)
+    throws ConfigurationException {
         if (node instanceof ConfigPathNode) {
             AbstractConfigNode cnode = node.find(
                     String.format("%s.%s", node.getName(), NODE_NAME_DESCRIPTION));

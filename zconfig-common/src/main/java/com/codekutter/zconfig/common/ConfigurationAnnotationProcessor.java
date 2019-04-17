@@ -416,13 +416,15 @@ public class ConfigurationAnnotationProcessor {
         if (param.isAnnotationPresent(ConfigParam.class)) {
             ConfigParam p = param.getAnnotation(ConfigParam.class);
             String pname = p.name();
-            if (Strings.isNullOrEmpty(pname)) {
+            if (Strings.isNullOrEmpty(pname) &&
+                    !param.getType().equals(AbstractConfigNode.class)) {
                 pname = param.getName();
             }
-            if (pname.compareTo(GlobalConstants.DEFAULT_CONFIG_PARAM_NAME) == 0) {
-                if (param.getType().equals(AbstractConfigNode.class)) {
-                    return node;
+            if (param.getType().equals(AbstractConfigNode.class)) {
+                if (!Strings.isNullOrEmpty(pname)) {
+                    node = node.find(pname);
                 }
+                return node;
             }
             if (!(node instanceof ConfigPathNode)) {
                 throw new ConfigurationException(String.format(

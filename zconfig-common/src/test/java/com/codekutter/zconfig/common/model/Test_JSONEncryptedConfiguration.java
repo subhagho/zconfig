@@ -78,7 +78,7 @@ class Test_JSONEncryptedConfiguration {
     @Test
     void findParameters() {
         try {
-            String path = "configuration.node_1.node_2#PARAM_3";
+            String path = "configuration/node_1/node_2#PARAM_3";
             AbstractConfigNode node = configuration.find(path);
             assertNotNull(node);
             assertTrue(node instanceof ConfigValueNode);
@@ -96,7 +96,7 @@ class Test_JSONEncryptedConfiguration {
     @Test
     void findConfigValue() {
         try {
-            String path = "configuration.node_1.node_2.node_3.password";
+            String path = "configuration/node_1/node_2/node_3/password";
             AbstractConfigNode node = configuration.find(path);
             assertNotNull(node);
             assertTrue(node instanceof ConfigValueNode);
@@ -114,7 +114,7 @@ class Test_JSONEncryptedConfiguration {
     @Test
     void findAttribute() {
         try {
-            String path = "configuration.node_1.node_2.node_3@ATTR_2";
+            String path = "configuration/node_1/node_2/node_3@ATTR_2";
             AbstractConfigNode node = configuration.find(path);
             assertNotNull(node);
             assertTrue(node instanceof ConfigValueNode);

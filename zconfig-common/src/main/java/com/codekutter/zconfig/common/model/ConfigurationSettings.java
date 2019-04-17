@@ -31,6 +31,7 @@ import com.google.common.base.Strings;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 /**
  * Settings definition for parsing/writing configurations.
@@ -69,14 +70,17 @@ public class ConfigurationSettings {
      * Wildcard for node search.
      */
     public static final String NODE_SEARCH_WILDCARD = "*";
+    public static final String NODE_SEARCH_RECURSIVE_WILDCARD = "**";
+    public static final String NODE_PARENT_TERM = "..";
 
     private static final String DEFAULT_PROPS_NAME = "properties";
     private static final String DEFAULT_ATTR_NAME = "@";
     private static final String DEFAULT_PARAMS_NAME = "parameters";
-    public static final String ARRAY_INDEX_CHAR = "/";
+    public static final String ARRAY_INDEX_REGEX = "^(\\w*)\\[(\\d*)\\]$";
     public static final String PARAM_NODE_CHAR = "#";
     public static final String PROP_NODE_CHAR = "$";
     public static final String ATTR_NODE_CHAR = "@";
+    public static final Pattern INDEX_PATTERN = Pattern.compile(ARRAY_INDEX_REGEX);
 
     @ConfigValue(name = "propertiesTag")
     private String propertiesNodeName = DEFAULT_PROPS_NAME;
@@ -233,9 +237,20 @@ public class ConfigurationSettings {
      */
     public static boolean isWildcard(String name) {
         if (!Strings.isNullOrEmpty(name)) {
-            if (NODE_SEARCH_WILDCARD.compareTo(name.trim()) == 0) {
-                return true;
-            }
+            return (NODE_SEARCH_WILDCARD.compareTo(name.trim()) == 0);
+        }
+        return false;
+    }
+
+    /**
+     * Check if this name is a wildcard.
+     *
+     * @param name - Node name.
+     * @return - Is Wildcard?
+     */
+    public static boolean isRecursiveWildcard(String name) {
+        if (!Strings.isNullOrEmpty(name)) {
+            return (NODE_SEARCH_RECURSIVE_WILDCARD.compareTo(name.trim()) == 0);
         }
         return false;
     }
