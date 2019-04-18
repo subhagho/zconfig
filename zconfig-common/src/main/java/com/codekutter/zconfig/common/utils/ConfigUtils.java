@@ -53,9 +53,12 @@ public class ConfigUtils {
         Preconditions.checkArgument(settings != null);
 
         List<String> stack = new ArrayList<>();
-        String[] parts = path.split("/");
+        String[] parts = path.split(ConfigurationSettings.NODE_SEARCH_SEPERATOR);
         if (parts != null && parts.length > 0) {
             for (String part : parts) {
+                if (Strings.isNullOrEmpty(part)) {
+                    continue;
+                }
                 if (part.compareTo(ConfigurationSettings.NODE_PARENT_TERM) == 0) {
                     if (node == null || node.getParent() == null) {
                         throw new ConfigurationException(

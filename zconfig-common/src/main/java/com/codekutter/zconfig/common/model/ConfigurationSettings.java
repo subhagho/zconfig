@@ -72,6 +72,7 @@ public class ConfigurationSettings {
     public static final String NODE_SEARCH_WILDCARD = "*";
     public static final String NODE_SEARCH_RECURSIVE_WILDCARD = "**";
     public static final String NODE_PARENT_TERM = "..";
+    public static final String NODE_SEARCH_SEPERATOR = "/";
 
     private static final String DEFAULT_PROPS_NAME = "properties";
     private static final String DEFAULT_ATTR_NAME = "@";

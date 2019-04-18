@@ -235,11 +235,18 @@ public class ConfigPathNode extends ConfigElementNode {
             return node.find(path, index + 1);
         } else if (ConfigurationSettings.isWildcard(cname)) {
             List<AbstractConfigNode> nodes = new ArrayList<>();
-            for (String ckey : children.keySet()) {
-                AbstractConfigNode cn = children.get(ckey);
-                AbstractConfigNode sn = cn.find(path, index + 1);
-                if (sn != null) {
-                    nodes.add(sn);
+            if (index + 1 == path.size() - 1) {
+                for (String ckey : children.keySet()) {
+                    AbstractConfigNode cn = children.get(ckey);
+                    nodes.add(cn);
+                }
+            } else {
+                for (String ckey : children.keySet()) {
+                    AbstractConfigNode cn = children.get(ckey);
+                    AbstractConfigNode sn = cn.find(path, index + 1);
+                    if (sn != null) {
+                        nodes.add(sn);
+                    }
                 }
             }
             if (!nodes.isEmpty()) {

@@ -26,10 +26,13 @@ package com.codekutter.zconfig.common.model.nodes;
 
 import com.codekutter.zconfig.common.ConfigurationException;
 import com.codekutter.zconfig.common.model.Configuration;
+import com.codekutter.zconfig.common.model.ConfigurationSettings;
+import com.codekutter.zconfig.common.utils.ConfigUtils;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.codekutter.zconfig.common.model.ENodeState;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,6 +55,7 @@ public class ConfigSearchListNode extends ConfigListNode<AbstractConfigNode> {
             Configuration configuration,
             AbstractConfigNode parent) {
         super(configuration, parent);
+        setName(NODE_NAME);
     }
 
     /**
@@ -62,26 +66,6 @@ public class ConfigSearchListNode extends ConfigListNode<AbstractConfigNode> {
     @Override
     public void setName(String name) {
         super.setName(NODE_NAME);
-    }
-
-    /**
-     * Find the specified path under this configuration node.
-     *
-     * @param path - Dot separated path.
-     * @return - Node at path
-     */
-    @Override
-    public AbstractConfigNode find(String path) {
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(path));
-        String[] parts = path.split("\\.");
-        if (parts != null && parts.length > 0) {
-            List<String> stack = new ArrayList<>(parts.length);
-            for (String part : parts) {
-                stack.add(part);
-            }
-            return find(stack, 0);
-        }
-        return null;
     }
 
     /**
@@ -115,6 +99,34 @@ public class ConfigSearchListNode extends ConfigListNode<AbstractConfigNode> {
                     return result.get(0);
                 }
             }
+        }
+        return null;
+    }
+
+    /**
+     * Find the specified path under this configuration node.
+     *
+     * @param path - Unix Path separated path.
+     * @return - Node at path
+     */
+    @Override
+    public AbstractConfigNode find(@Nonnull String path)
+    throws ConfigurationException {
+        ConfigSearchListNode result = new ConfigSearchListNode();
+        List<AbstractConfigNode> nodes = getValues();
+        if (nodes != null && !nodes.isEmpty()) {
+            for (AbstractConfigNode node : nodes) {
+                AbstractConfigNode r = node.find(path);
+                if (r != null) {
+                    result.addValue(r);
+                }
+            }
+        }
+        if (!result.isEmpty()) {
+            if (result.size() == 1) {
+                return result.getValue(0);
+            }
+            return result;
         }
         return null;
     }

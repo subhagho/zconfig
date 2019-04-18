@@ -247,10 +247,30 @@ class Test_JSONConfiguration {
             assertTrue(node instanceof ConfigPathNode);
             debug(getClass(), node);
 
-            path = "/configuration/node_1/node_2/node_3/*/TEST_VALUE_LIST";
+            path = "/**/node_2/node_3/*/TEST_VALUE_LIST";
             node = node.find(path);
             assertNotNull(node);
             assertTrue(node instanceof ConfigListValueNode);
+            debug(getClass(), node);
+        } catch (Throwable e) {
+            error(getClass(), e);
+            fail(e);
+        }
+    }
+
+    @Test
+    void searchParent() {
+        try {
+            String path = "**/node_3";
+            AbstractConfigNode node = configuration.find(path);
+            assertNotNull(node);
+            assertTrue(node instanceof ConfigPathNode);
+            debug(getClass(), node);
+
+            path = "../@";
+            node = node.find(path);
+            assertNotNull(node);
+            assertTrue(node instanceof ConfigAttributesNode);
             debug(getClass(), node);
         } catch (Throwable e) {
             error(getClass(), e);

@@ -222,13 +222,14 @@ public abstract class AbstractConfigNode {
     throws ConfigurationException {
         path = path.trim();
         Preconditions.checkArgument(!Strings.isNullOrEmpty(path));
-        if (path.startsWith("/")) {
+        if (path.startsWith(ConfigurationSettings.NODE_SEARCH_SEPERATOR)) {
             return configuration.find(path);
         }
 
         if (path.equals(".")) {
             return this;
-        } else if (path.startsWith(".")) {
+        } else if (path
+                .startsWith("." + ConfigurationSettings.NODE_SEARCH_SEPERATOR)) {
             path = String.format("%s%s", getName(), path);
         }
 
