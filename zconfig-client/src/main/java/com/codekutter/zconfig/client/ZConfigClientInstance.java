@@ -30,7 +30,7 @@ import com.codekutter.zconfig.common.model.annotations.ConfigPath;
 /**
  * Instance object of a client connecting to the configuration server.
  */
-@ConfigPath(path = "zconfig.instance")
+@ConfigPath(path = "zconfig/instance")
 public class ZConfigClientInstance extends ZConfigInstance {
 
 }

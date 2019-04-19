@@ -74,7 +74,7 @@ public abstract class ZConfigEnv {
      * @throws ConfigurationException
      */
     protected final void init(String configfile, Version version, String password)
-    throws ConfigurationException {
+            throws ConfigurationException {
         try {
             AbstractConfigParser parser = ConfigProviderFactory.parser(configfile);
             if (parser == null) {
@@ -100,7 +100,7 @@ public abstract class ZConfigEnv {
     protected final void init(String configfile,
                               ConfigProviderFactory.EConfigType type,
                               Version version, String password)
-    throws ConfigurationException {
+            throws ConfigurationException {
         try {
             AbstractConfigParser parser = ConfigProviderFactory.parser(type);
             if (parser == null) {
@@ -126,15 +126,15 @@ public abstract class ZConfigEnv {
      */
     protected final void init(AbstractConfigParser parser, String configfile,
                               Version version, String password)
-    throws ConfigurationException {
+            throws ConfigurationException {
         try {
             LogUtils.info(getClass(), String.format(
                     "Initializing Client Environment : With Configuration file [%s]...",
                     configfile));
             Path path = Paths.get(configfile);
             parser.parse(configName, ConfigProviderFactory.reader(path.toUri()),
-                         null,
-                         version, password);
+                    null,
+                    version, password);
             configuration = parser.getConfiguration();
             if (configuration == null) {
                 throw new ConfigurationException(String.format(
@@ -159,13 +159,13 @@ public abstract class ZConfigEnv {
      */
     protected void setupInstance(@Nonnull Class<? extends ZConfigInstance> type,
                                  @Nonnull ZConfigInstance instance)
-    throws ConfigurationException {
+            throws ConfigurationException {
         instance.setId(UUID.randomUUID().toString());
         instance.setStartTime(DateTime.now());
         ConfigurationAnnotationProcessor
                 .readConfigAnnotations(type,
-                                       getConfiguration(),
-                                       instance);
+                        getConfiguration(),
+                        instance);
         InetAddress addr = NetUtils.getIpAddress();
         if (addr != null) {
             instance.setIp(addr.getHostAddress());
@@ -298,15 +298,15 @@ public abstract class ZConfigEnv {
      * @throws EnvException - Exception raised if initialization lock not acquired by current thread.
      */
     protected static ZConfigEnv initialize(Class<? extends ZConfigEnv> type)
-    throws EnvException {
+            throws EnvException {
         if (!__ENV_LOCK__.isLocked() || !__ENV_LOCK__.isHeldByCurrentThread()) {
             throw new EnvException("Environment not locked for initialisation.");
         }
         try {
             __ENV__ = type.newInstance();
             LogUtils.info(ZConfigEnv.class,
-                          String.format("Created ENV instance with type [%s]...",
-                                        type.getCanonicalName()));
+                    String.format("Created ENV instance with type [%s]...",
+                            type.getCanonicalName()));
             return __ENV__;
         } catch (Exception ex) {
             throw new EnvException(ex);
@@ -319,7 +319,7 @@ public abstract class ZConfigEnv {
      * @throws EnvException - Exception raised if Env has already been disposed.
      */
     protected static void getEnvLock() throws EnvException {
-        if (__ENV__.state.getState() == EEnvState.Disposed) {
+        if (__ENV__ != null && __ENV__.state.getState() == EEnvState.Disposed) {
             throw new EnvException("Environment has already been disposed.");
         }
         __ENV_LOCK__.lock();
@@ -331,7 +331,7 @@ public abstract class ZConfigEnv {
      * @throws EnvException - Exception raised if current thread doesn't hold the lock.
      */
     protected static void releaseEnvLock() throws EnvException {
-        if (__ENV__.state.getState() == EEnvState.Disposed) {
+        if (__ENV__ != null && __ENV__.state.getState() == EEnvState.Disposed) {
             throw new EnvException("Environment has already been disposed.");
         }
         if (__ENV_LOCK__.isLocked() && __ENV_LOCK__.isHeldByCurrentThread()) {

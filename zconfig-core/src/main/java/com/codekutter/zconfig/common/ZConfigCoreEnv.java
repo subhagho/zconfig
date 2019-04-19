@@ -168,7 +168,7 @@ public class ZConfigCoreEnv extends ZConfigEnv {
      */
     public static ZConfigCoreEnv coreEnv() throws EnvException {
         ZConfigEnv env = ZConfigEnv.env();
-        if (env instanceof ZConfigClientEnv) {
+        if (env instanceof ZConfigCoreEnv) {
             return (ZConfigCoreEnv) env;
         }
         throw new EnvException(

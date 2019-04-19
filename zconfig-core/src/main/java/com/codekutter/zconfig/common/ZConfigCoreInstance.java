@@ -31,7 +31,7 @@ import com.codekutter.zconfig.common.model.annotations.ConfigValue;
 /**
  * Class represents a service instance of the Configuration Server.
  */
-@ConfigPath(path = "zconfig.instance")
+@ConfigPath(path = "zconfig/instance")
 public class ZConfigCoreInstance extends ZConfigInstance {
 
     /**

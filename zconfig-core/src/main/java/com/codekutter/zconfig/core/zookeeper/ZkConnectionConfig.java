@@ -31,7 +31,7 @@ import com.codekutter.zconfig.common.model.annotations.ConfigValue;
 /**
  * Connection configuration settings for the ZooKeeper clients.
  */
-@ConfigPath(path = "zconfig.server.zookeeper.settings")
+@ConfigPath(path = "zconfig/server/zookeeper/settings")
 public class ZkConnectionConfig {
     /**
      * ZooKeeper connection String.

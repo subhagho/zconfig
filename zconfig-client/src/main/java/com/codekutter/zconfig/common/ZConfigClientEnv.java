@@ -57,19 +57,19 @@ public class ZConfigClientEnv extends ZConfigEnv {
     /**
      * Type of the configuration server URI. (file/http(s))
      */
-    public static final String CONFIG_NODE_SERVER_TYPE = "server.type";
+    public static final String CONFIG_NODE_SERVER_TYPE = "server/type";
     /**
      * Host IP/name of the configuration server (required if type is HTTP(s))
      */
-    public static final String CONFIG_NODE_SERVER_HOST = "server.host";
+    public static final String CONFIG_NODE_SERVER_HOST = "server/host";
     /**
      * Host port of the configuration server (optional if type is HTTP(s))
      */
-    public static final String CONFIG_NODE_SERVER_PORT = "server.port";
+    public static final String CONFIG_NODE_SERVER_PORT = "server/port";
     /**
      * Base path of the configuration server
      */
-    public static final String CONFIG_NODE_SERVER_BASE_PATH = "server.basePath";
+    public static final String CONFIG_NODE_SERVER_BASE_PATH = "server/basePath";
 
     /**
      * Configuration name for ZConfig Client configurations.
@@ -106,7 +106,7 @@ public class ZConfigClientEnv extends ZConfigEnv {
     /**
      * Default constructor - Sets the name of the config.
      */
-    private ZConfigClientEnv() {
+    protected ZConfigClientEnv() {
         super(CONFIG_NAME);
     }
 
@@ -146,7 +146,7 @@ public class ZConfigClientEnv extends ZConfigEnv {
     private void parseServerUri() throws ConfigurationException {
         try {
             String path =
-                    String.format("%s.%s", CONFIG_NODE_ZCONFIG, CONFIG_NODE_SERVER);
+                    String.format("%s/%s", CONFIG_NODE_ZCONFIG, CONFIG_NODE_SERVER);
             AbstractConfigNode node = getConfiguration().find(path);
             if ((node instanceof ConfigPathNode)) {
                 ConfigPathNode pathNode = (ConfigPathNode) node;
