@@ -104,7 +104,7 @@ public class ConfigProviderFactory {
      * Get a new configuration parser instance of the parser for the specified configuration type.
      *
      * @param type - Configuration type.
-     * @return - Parser instance.
+         * @return - Parser instance.
      */
     public static final AbstractConfigParser parser(EConfigType type) {
         switch (type) {

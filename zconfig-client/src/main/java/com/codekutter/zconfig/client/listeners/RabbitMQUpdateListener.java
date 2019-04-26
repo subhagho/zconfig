@@ -25,6 +25,8 @@
 package com.codekutter.zconfig.client.listeners;
 
 import com.codekutter.zconfig.common.ZConfigClientEnv;
+import com.codekutter.zconfig.transport.rabbitmq.RMQChannelConstants;
+import com.codekutter.zconfig.transport.rabbitmq.RMQConnectionFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.*;
 import com.codekutter.zconfig.common.ConfigurationException;
@@ -32,8 +34,6 @@ import com.codekutter.zconfig.common.LogUtils;
 import com.codekutter.zconfig.common.events.ConfigUpdateBatch;
 import com.codekutter.zconfig.common.events.RegisterMessage;
 import com.codekutter.zconfig.common.model.nodes.ConfigPathNode;
-import com.codekutter.zconfig.common.rmq.RMQChannelConstants;
-import com.codekutter.zconfig.common.rmq.RMQConnectionFactory;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;

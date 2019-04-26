@@ -71,6 +71,7 @@
         <module>zconfig-common</module>
         <module>zconfig-client</module>
         <module>zconfig-core</module>
+        <module>transport</module>
     </modules>
 
     <build>

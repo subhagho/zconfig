@@ -71,10 +71,13 @@ public abstract class ZConfigEnv {
      *
      * @param configfile - Configuration file path.
      * @param version    - Configuration version (expected)
+     * @param password   - Password (required if configuration has encryption)
      * @throws ConfigurationException
      */
-    protected final void init(String configfile, Version version, String password)
+    protected final void init(@Nonnull String configfile, @Nonnull Version version, String password)
             throws ConfigurationException {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(configfile));
+        Preconditions.checkArgument(version != null);
         try {
             AbstractConfigParser parser = ConfigProviderFactory.parser(configfile);
             if (parser == null) {
@@ -95,18 +98,23 @@ public abstract class ZConfigEnv {
      * @param configfile - Configuration file path.
      * @param type       - Configuration file type (in-case file type cannot be deciphered).
      * @param version    - Configuration version (expected)
+     * @param password   - Password (required if configuration has encryption)
      * @throws ConfigurationException
      */
-    protected final void init(String configfile,
-                              ConfigProviderFactory.EConfigType type,
-                              Version version, String password)
+    protected final void init(@Nonnull String configfile,
+                              @Nonnull ConfigProviderFactory.EConfigType type,
+                              @Nonnull Version version, String password)
             throws ConfigurationException {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(configfile));
+        Preconditions.checkArgument(version != null);
+        Preconditions.checkArgument(type != null);
+
         try {
             AbstractConfigParser parser = ConfigProviderFactory.parser(type);
             if (parser == null) {
                 throw new ConfigurationException(String.format(
-                        "Cannot get configuration parser instance. [file=%s]",
-                        configfile));
+                        "Cannot get configuration parser instance. [type=%s]",
+                        type.name()));
             }
             init(parser, configfile, version, password);
         } catch (Exception e) {
@@ -122,11 +130,15 @@ public abstract class ZConfigEnv {
      * @param parser     - Configuration parser to use.
      * @param configfile - Configuration file path.
      * @param version    - Configuration version (expected)
+     * @param password   - Password (required if configuration has encryption)
      * @throws ConfigurationException
      */
-    protected final void init(AbstractConfigParser parser, String configfile,
-                              Version version, String password)
+    protected final void init(@Nonnull AbstractConfigParser parser, @Nonnull String configfile,
+                              @Nonnull Version version, String password)
             throws ConfigurationException {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(configfile));
+        Preconditions.checkArgument(version != null);
+        Preconditions.checkArgument(parser != null);
         try {
             LogUtils.info(getClass(), String.format(
                     "Initializing Client Environment : With Configuration file [%s]...",
@@ -160,6 +172,9 @@ public abstract class ZConfigEnv {
     protected void setupInstance(@Nonnull Class<? extends ZConfigInstance> type,
                                  @Nonnull ZConfigInstance instance)
             throws ConfigurationException {
+        Preconditions.checkArgument(type != null);
+        Preconditions.checkArgument(instance != null);
+
         instance.setId(UUID.randomUUID().toString());
         instance.setStartTime(DateTime.now());
         ConfigurationAnnotationProcessor
@@ -180,7 +195,8 @@ public abstract class ZConfigEnv {
      *
      * @param state - State to update to.
      */
-    protected void updateState(EEnvState state) {
+    protected void updateState(@Nonnull EEnvState state) {
+        Preconditions.checkArgument(state != null);
         this.state.setState(state);
     }
 
@@ -190,7 +206,8 @@ public abstract class ZConfigEnv {
      * @param state - Expected state.
      * @throws StateException - Exception will be raised if state is not as expected.
      */
-    protected void checkState(EEnvState state) throws StateException {
+    protected void checkState(@Nonnull EEnvState state) throws StateException {
+        Preconditions.checkArgument(state != null);
         this.state.checkState(state);
     }
 
@@ -198,7 +215,9 @@ public abstract class ZConfigEnv {
      * Disposed this client environment instance.
      */
     protected void dispose() {
-        state.dispose();
+        if (state.getState() == EEnvState.Initialized) {
+            state.dispose();
+        }
     }
 
     /**
@@ -257,20 +276,30 @@ public abstract class ZConfigEnv {
     /**
      * Client environment singleton.
      */
-    private static ZConfigEnv __ENV__ = null;
+    private static ZConfigEnv __env = null;
 
     /**
      * Environment Instance Lock.
      */
-    private static ReentrantLock __ENV_LOCK__ = new ReentrantLock();
+    private static ReentrantLock _envLock = new ReentrantLock();
 
 
     /**
      * Shutdown this client environment.
      */
     public static void shutdown() {
-        synchronized (__ENV__) {
-            __ENV__.dispose();
+        try {
+            if (__env != null) {
+                getEnvLock();
+                try {
+                    __env.dispose();
+                    __env = null;
+                } finally {
+                    releaseEnvLock();
+                }
+            }
+        } catch (Exception ex) {
+            LogUtils.error(ZConfigEnv.class, ex);
         }
     }
 
@@ -283,8 +312,9 @@ public abstract class ZConfigEnv {
      */
     public static ZConfigEnv env() throws EnvException {
         try {
-            __ENV__.checkState(EEnvState.Initialized);
-            return __ENV__;
+            if (__env != null)
+                __env.checkState(EEnvState.Initialized);
+            return __env;
         } catch (StateException e) {
             throw new EnvException(e);
         }
@@ -299,15 +329,17 @@ public abstract class ZConfigEnv {
      */
     protected static ZConfigEnv initialize(Class<? extends ZConfigEnv> type)
             throws EnvException {
-        if (!__ENV_LOCK__.isLocked() || !__ENV_LOCK__.isHeldByCurrentThread()) {
+        if (!_envLock.isLocked() || !_envLock.isHeldByCurrentThread()) {
             throw new EnvException("Environment not locked for initialisation.");
         }
         try {
-            __ENV__ = type.newInstance();
-            LogUtils.info(ZConfigEnv.class,
-                    String.format("Created ENV instance with type [%s]...",
-                            type.getCanonicalName()));
-            return __ENV__;
+            if (__env == null) {
+                __env = type.newInstance();
+                LogUtils.info(ZConfigEnv.class,
+                        String.format("Created ENV instance with type [%s]...",
+                                type.getCanonicalName()));
+            }
+            return __env;
         } catch (Exception ex) {
             throw new EnvException(ex);
         }
@@ -319,10 +351,10 @@ public abstract class ZConfigEnv {
      * @throws EnvException - Exception raised if Env has already been disposed.
      */
     protected static void getEnvLock() throws EnvException {
-        if (__ENV__ != null && __ENV__.state.getState() == EEnvState.Disposed) {
+        if (__env != null && __env.state.getState() == EEnvState.Disposed) {
             throw new EnvException("Environment has already been disposed.");
         }
-        __ENV_LOCK__.lock();
+        _envLock.lock();
     }
 
     /**
@@ -331,11 +363,11 @@ public abstract class ZConfigEnv {
      * @throws EnvException - Exception raised if current thread doesn't hold the lock.
      */
     protected static void releaseEnvLock() throws EnvException {
-        if (__ENV__ != null && __ENV__.state.getState() == EEnvState.Disposed) {
+        if (__env != null && __env.state.getState() == EEnvState.Disposed) {
             throw new EnvException("Environment has already been disposed.");
         }
-        if (__ENV_LOCK__.isLocked() && __ENV_LOCK__.isHeldByCurrentThread()) {
-            __ENV_LOCK__.unlock();
+        if (_envLock.isLocked() && _envLock.isHeldByCurrentThread()) {
+            _envLock.unlock();
         } else {
             throw new EnvException(String.format(
                     "Lock not acquired or held by another thread. [thread id=%d]",

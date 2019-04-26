@@ -22,7 +22,7 @@
  *
  */
 
-package com.codekutter.zconfig.common.rmq;
+package com.codekutter.zconfig.transport.rabbitmq;
 
 /**
  * Constants to be used for communicating with the configuration server using RabbitMQ.

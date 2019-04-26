@@ -22,7 +22,7 @@
  *
  */
 
-package com.codekutter.zconfig.common.rmq;
+package com.codekutter.zconfig.transport.rabbitmq;
 
 /**
  * Exception instance used to raise error with regards to RabbitMQ clients.

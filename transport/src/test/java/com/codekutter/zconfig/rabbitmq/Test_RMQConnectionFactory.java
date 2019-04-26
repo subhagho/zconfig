@@ -22,7 +22,7 @@
  *
  */
 
-package com.codekutter.zconfig.common.rmq;
+package com.codekutter.zconfig.rabbitmq;
 
 import com.codekutter.zconfig.common.ConfigProviderFactory;
 import com.codekutter.zconfig.common.ConfigurationException;
@@ -32,6 +32,7 @@ import com.codekutter.zconfig.common.model.Version;
 import com.codekutter.zconfig.common.model.nodes.AbstractConfigNode;
 import com.codekutter.zconfig.common.model.nodes.ConfigPathNode;
 import com.codekutter.zconfig.common.parsers.AbstractConfigParser;
+import com.codekutter.zconfig.transport.rabbitmq.RMQConnectionFactory;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

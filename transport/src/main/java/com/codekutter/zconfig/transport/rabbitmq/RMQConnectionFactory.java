@@ -22,7 +22,7 @@
  *
  */
 
-package com.codekutter.zconfig.common.rmq;
+package com.codekutter.zconfig.transport.rabbitmq;
 
 import com.codekutter.zconfig.common.model.annotations.ConfigParam;
 import com.codekutter.zconfig.common.model.annotations.ConfigPath;
@@ -45,7 +45,7 @@ import java.io.IOException;
 /**
  * RabbitMQ Connection Factory - Class abstracts the RabbitMQ Connection.
  */
-@ConfigPath(path = "*.rmq.settings")
+@ConfigPath(path = "*/rmq/settings")
 public class RMQConnectionFactory implements IConfigurable, Closeable {
     /**
      * Default Virtual Host value.
