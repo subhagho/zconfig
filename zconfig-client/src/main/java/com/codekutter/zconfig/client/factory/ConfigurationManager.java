@@ -24,6 +24,8 @@
 
 package com.codekutter.zconfig.client.factory;
 
+import com.codekutter.zconfig.common.model.nodes.AbstractConfigNode;
+import com.codekutter.zconfig.common.model.nodes.ConfigPathNode;
 import com.google.common.base.Strings;
 import com.google.common.collect.*;
 import com.codekutter.zconfig.common.ConfigProviderFactory;
@@ -101,7 +103,7 @@ public class ConfigurationManager {
                               @Nonnull
                                       Version version,
                               ConfigurationSettings settings, String password)
-    throws ConfigurationException {
+            throws ConfigurationException {
         Configuration configuration = loadedConfigs.get(configName);
         if (configuration == null) {
             configCacheLock.lock();
@@ -110,7 +112,7 @@ public class ConfigurationManager {
                 if (configuration == null) {
                     configuration = loader
                             .load(configName, configUri, configType, version,
-                                  settings, password);
+                                    settings, password);
                     if (configuration != null) {
                         postConfigurationLoad(configuration);
                     } else {
@@ -142,7 +144,7 @@ public class ConfigurationManager {
                                       ConfigProviderFactory.EConfigType configType,
                               @Nonnull
                                       Version version, String password)
-    throws ConfigurationException {
+            throws ConfigurationException {
         return load(configName, configUri, configType, version, null, password);
     }
 
@@ -161,7 +163,7 @@ public class ConfigurationManager {
                               @Nonnull
                                       Version version,
                               ConfigurationSettings settings, String password)
-    throws ConfigurationException {
+            throws ConfigurationException {
         Configuration configuration = loadedConfigs.get(configName);
         if (configuration == null) {
             configCacheLock.lock();
@@ -170,7 +172,7 @@ public class ConfigurationManager {
                 if (configuration == null) {
                     configuration = loader
                             .load(configName, filename, version, settings,
-                                  password);
+                                    password);
                     if (configuration != null) {
                         postConfigurationLoad(configuration);
                     } else {
@@ -196,7 +198,7 @@ public class ConfigurationManager {
             loadedConfigs.put(configuration.getName(), configuration);
             configInstanceLocks.put(configuration.getName(), new ReentrantLock());
             applicationGroups.put(configuration.getApplicationGroup(),
-                                  configuration);
+                    configuration);
         }
     }
 
@@ -213,7 +215,7 @@ public class ConfigurationManager {
                               @Nonnull String filename,
                               @Nonnull
                                       Version version, String password)
-    throws ConfigurationException {
+            throws ConfigurationException {
         return load(configName, filename, version, null, password);
     }
 
@@ -236,11 +238,13 @@ public class ConfigurationManager {
      * @param configName - Configuration name.
      * @return - Configuration handle.
      */
-    public Configuration getWithLock(@Nonnull String configName) {
+    public Configuration getWithLock(@Nonnull String configName) throws ConfigurationException {
         Configuration config = get(configName);
         if (config != null) {
             ReentrantLock lock = configInstanceLocks.get(configName);
             lock.lock();
+        } else {
+            throw new ConfigurationException(String.format("Specified configuration not loaded. [name=%s]", configName));
         }
         return config;
     }
@@ -282,7 +286,7 @@ public class ConfigurationManager {
      * @throws ConfigurationException
      */
     public void applyConfigurationUpdates(String configName, List<String> paths)
-    throws ConfigurationException {
+            throws ConfigurationException {
         Configuration config = loadedConfigs.get(configName);
         if (config != null && config.getSyncMode() == ESyncMode.EVENTS) {
             Map<String, AutowiredType> updated = getUpdatedTypes(configName, paths);
@@ -312,7 +316,7 @@ public class ConfigurationManager {
                 for (AutowiredType type : types) {
                     String key =
                             String.format("%s::%s", type.type.getCanonicalName(),
-                                          type.relativePath);
+                                    type.relativePath);
                     if (!map.containsKey(key)) {
                         map.put(key, type);
                     }
@@ -336,7 +340,7 @@ public class ConfigurationManager {
     public <T> T autowireType(@Nonnull Class<? extends T> type,
                               @Nonnull String configName,
                               String relativePath)
-    throws ConfigurationException {
+            throws ConfigurationException {
         return autowireType(type, configName, relativePath, false);
     }
 
@@ -357,7 +361,7 @@ public class ConfigurationManager {
                                @Nonnull String configName,
                                String relativePath,
                                boolean update)
-    throws ConfigurationException {
+            throws ConfigurationException {
         String key = getTypeKey(type, relativePath, configName);
         if (!Strings.isNullOrEmpty(key)) {
             if (!update && autowiredInstances.containsKey(key)) {
@@ -377,10 +381,22 @@ public class ConfigurationManager {
                             T value = null;
                             if (update) {
                                 value = (T) autowiredInstances.get(key);
-                            } else
+                            } else {
                                 value = type.newInstance();
-                            ConfigurationAnnotationProcessor
-                                    .readConfigAnnotations(type, config, value);
+                            }
+                            
+                            if (Strings.isNullOrEmpty(relativePath)) {
+                                value = ConfigurationAnnotationProcessor
+                                        .readConfigAnnotations(type, config, value);
+                            } else {
+                                AbstractConfigNode node = config.find(relativePath);
+                                if (!(node instanceof ConfigPathNode)) {
+                                    throw new ConfigurationException(
+                                            String.format("Specified configuration node not found. [config=%s][path=%s]",
+                                                    configName, relativePath));
+                                }
+                                value = ConfigurationAnnotationProcessor.readConfigAnnotations(type, (ConfigPathNode) node, value);
+                            }
                             autowiredInstances.put(key, value);
                             if (config.getSyncMode() == ESyncMode.EVENTS &&
                                     !update) {
@@ -389,7 +405,7 @@ public class ConfigurationManager {
                                 at.type = type;
                                 autowiredIndex
                                         .put(getTypeIndexKey(path, configName),
-                                             at);
+                                                at);
                             }
                             return value;
                         }
@@ -454,7 +470,7 @@ public class ConfigurationManager {
             if (Strings.isNullOrEmpty(reletivePath)) {
                 return path;
             } else {
-                return String.format("%s.%s", path, reletivePath);
+                return String.format("%s/%s", reletivePath, path);
             }
         }
         return null;
