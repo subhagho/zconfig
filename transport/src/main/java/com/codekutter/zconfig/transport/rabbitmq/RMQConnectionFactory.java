@@ -143,6 +143,7 @@ public class RMQConnectionFactory implements IConfigurable, Closeable {
             connectionFactory.setHost(hostname);
             connectionFactory.setPort(port);
             try (Connection connection = connectionFactory.newConnection()) {
+
                 LogUtils.info(getClass(),
                               "RabbitMQ Connection successfully initialized...");
             }

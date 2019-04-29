@@ -10,11 +10,15 @@ import org.kohsuke.args4j.spi.BooleanOptionHandler;
 
 import javax.annotation.Nonnull;
 import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.Console;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +26,8 @@ import java.util.Map;
 
 public class CypherUtils {
     private static final String HASH_ALGO = "MD5";
+    private static final String CIPHER_ALGO = "AES/CBC/PKCS5Padding";
+    private static final String CIPHER_TYPE = "AES";
 
     /**
      * Get an MD5 hash of the specified key.
@@ -39,24 +45,24 @@ public class CypherUtils {
         return new String(d, StandardCharsets.UTF_8);
     }
 
+
     /**
      * Encrypt the passed data buffer using the passcode.
      *
      * @param data     - Data Buffer.
      * @param password - Passcode.
+     * @param iv       - IV Key
      * @return - Encrypted Buffer.
      * @throws Exception
      */
-    public static byte[] encrypt(@Nonnull byte[] data, @Nonnull String password)
-    throws Exception {
+    public static byte[] encrypt(@Nonnull byte[] data, @Nonnull String password, @Nonnull String iv)
+            throws Exception {
         Preconditions.checkArgument(data != null && data.length > 0);
         Preconditions.checkArgument(!Strings.isNullOrEmpty(password));
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(iv));
 
-        // Create key and cipher
-        Key aesKey = new SecretKeySpec(password.getBytes(), "AES");
-        Cipher cipher = Cipher.getInstance("AES");
-        // encrypt the text
-        cipher.init(Cipher.ENCRYPT_MODE, aesKey);
+        Cipher cipher = getCipher(password, iv, Cipher.ENCRYPT_MODE);
+
         return cipher.doFinal(data);
     }
 
@@ -65,16 +71,39 @@ public class CypherUtils {
      *
      * @param data     - Data Buffer.
      * @param password - Passcode.
+     * @param iv       - IV Key
      * @return - Base64 encoded String.
      * @throws Exception
      */
     public static String encryptAsString(@Nonnull byte[] data,
-                                         @Nonnull String password)
-    throws Exception {
+                                         @Nonnull String password, @Nonnull String iv)
+            throws Exception {
         Preconditions.checkArgument(data != null && data.length > 0);
         Preconditions.checkArgument(!Strings.isNullOrEmpty(password));
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(iv));
 
-        byte[] encrypted = encrypt(data, password);
+        byte[] encrypted = encrypt(data, password, iv);
+        return new String(Base64.encodeBase64(encrypted));
+    }
+
+
+    /**
+     * Encrypt the passed data buffer using the passcode.
+     *
+     * @param data     - Data Buffer.
+     * @param password - Passcode.
+     * @param iv       - IV Key
+     * @return - Base64 encoded String.
+     * @throws Exception
+     */
+    public static String encryptAsString(@Nonnull String data,
+                                         @Nonnull String password, @Nonnull String iv)
+            throws Exception {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(data));
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(password));
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(iv));
+
+        byte[] encrypted = encrypt(data.getBytes(StandardCharsets.UTF_8), password, iv);
         return new String(Base64.encodeBase64(encrypted));
     }
 
@@ -83,20 +112,30 @@ public class CypherUtils {
      *
      * @param data     - Encrypted Data buffer.
      * @param password - Passcode
+     * @param iv       - IV Key
      * @return - Decrypted Data Buffer.
      * @throws Exception
      */
-    public static byte[] decrypt(byte[] data, String password) throws Exception {
+    public static byte[] decrypt(@Nonnull byte[] data, @Nonnull String password, @Nonnull String iv) throws Exception {
         Preconditions.checkArgument(data != null && data.length > 0);
         Preconditions.checkArgument(!Strings.isNullOrEmpty(password));
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(iv));
 
-        // Create key and cipher
-        Key aesKey = new SecretKeySpec(password.getBytes(), "AES");
-        Cipher cipher = Cipher.getInstance("AES");
-
+        Cipher cipher = getCipher(password, iv, Cipher.DECRYPT_MODE);
         // decrypt the text
-        cipher.init(Cipher.DECRYPT_MODE, aesKey);
+
         return cipher.doFinal(data);
+    }
+
+    private static Cipher getCipher(String password, String iv, int mode) throws Exception {
+        // Create key and cipher
+        Key aesKey = new SecretKeySpec(password.getBytes(StandardCharsets.UTF_8), CIPHER_TYPE);
+        IvParameterSpec ivspec = new IvParameterSpec(iv.getBytes(StandardCharsets.UTF_8));
+
+        Cipher cipher = Cipher.getInstance(CIPHER_ALGO);
+        cipher.init(mode, aesKey, ivspec);
+
+        return cipher;
     }
 
     /**
@@ -104,26 +143,30 @@ public class CypherUtils {
      *
      * @param data     - Encrypted String data.
      * @param password - Passcode
+     * @param iv       - IV Key
      * @return - Decrypted Data Buffer.
      * @throws Exception
      */
-    public static byte[] decrypt(String data, String password) throws Exception {
+    public static byte[] decrypt(@Nonnull String data, @Nonnull String password, @Nonnull String iv) throws Exception {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(data));
         Preconditions.checkArgument(!Strings.isNullOrEmpty(password));
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(iv));
 
-        byte[] array = Base64.decodeBase64(data.getBytes());
-        return decrypt(array, password);
+        byte[] array = Base64.decodeBase64(data.getBytes(StandardCharsets.UTF_8));
+        return decrypt(array, password, iv);
     }
 
     public static class ConfigVault {
         private Map<String, String> vault = new HashMap<>();
 
         public ConfigVault addPasscode(Configuration config, String passcode)
-        throws Exception {
+                throws Exception {
             Preconditions.checkArgument(config != null);
             Preconditions.checkArgument(!Strings.isNullOrEmpty(passcode));
             String key = getEncodingKey(config);
-            String encrypted = encryptAsString(passcode.getBytes(), key);
+            String iv = getIvSpec(config);
+
+            String encrypted = encryptAsString(passcode.getBytes(StandardCharsets.UTF_8), key, iv);
             vault.put(config.getInstanceId(), encrypted);
 
             return this;
@@ -134,8 +177,9 @@ public class CypherUtils {
             if (vault.containsKey(config.getInstanceId())) {
                 String value = vault.get(config.getInstanceId());
                 String key = getEncodingKey(config);
+                String iv = getIvSpec(config);
 
-                return new String(CypherUtils.decrypt(value, key));
+                return new String(CypherUtils.decrypt(value, key, iv));
             }
             return null;
         }
@@ -147,7 +191,9 @@ public class CypherUtils {
                 throw new Exception(
                         "Invalid Passcode: NULL/Empty passcode returned.");
             }
-            byte[] buff = CypherUtils.decrypt(data, passcode);
+            String iv = getIvSpec(config);
+
+            byte[] buff = CypherUtils.decrypt(data, passcode, iv);
             if (buff != null && buff.length > 0) {
                 return new String(buff, StandardCharsets.UTF_8);
             }
@@ -156,14 +202,21 @@ public class CypherUtils {
 
         private String getEncodingKey(Configuration config) {
             String key = String.format("%s%s%d", config.getName(),
-                                       config.getInstanceId(),
-                                       config.getCreatedBy().getTimestamp());
+                    config.getInstanceId(),
+                    config.getCreatedBy().getTimestamp());
             int index = (int) (config.getHeader().getTimestamp() % 16);
 
             if (index + 16 >= key.length()) {
                 index = key.length() - 17;
             }
             return key.substring(index, index + 16);
+        }
+
+        private String getIvSpec(Configuration config) {
+            String key = String.format("%s%s%s", config.getName(),
+                    config.getApplication(),
+                    config.getApplicationGroup());
+            return key.substring(0, 16);
         }
     }
 
@@ -182,6 +235,10 @@ public class CypherUtils {
     @Option(name = "-p", usage = "Password used to encrypt/decrypt",
             aliases = {"--password"})
     private String password;
+    @Option(name = "-i", usage = "IV Spec used to encrypt/decrypt",
+            aliases = {"--iv"})
+    private String ivSpec;
+
     @Argument
     private List<String> otherArgs = new ArrayList<>();
 
@@ -206,7 +263,7 @@ public class CypherUtils {
             value = otherArgs.get(0);
             if (Strings.isNullOrEmpty(value)) {
                 throw new CmdLineException(parser,
-                                           "NULL/Empty value to Hash/Encrypt.");
+                        "NULL/Empty value to Hash/Encrypt.");
             }
 
         } catch (CmdLineException e) {
@@ -216,11 +273,11 @@ public class CypherUtils {
         if (encrypt) {
             String pwd = getPassword();
             String output =
-                    encryptAsString(value.getBytes(StandardCharsets.UTF_8), pwd);
+                    encryptAsString(value.getBytes(StandardCharsets.UTF_8), pwd, ivSpec);
             System.out.println(String.format("Encrypted Text: %s", output));
         } else if (decrypt) {
             String pwd = getPassword();
-            byte[] buff = decrypt(value.getBytes(StandardCharsets.UTF_8), pwd);
+            byte[] buff = decrypt(value.getBytes(StandardCharsets.UTF_8), pwd, ivSpec);
             String output = new String(buff, StandardCharsets.UTF_8);
             System.out.println(String.format("Decrypted Text: %s", output));
         } else if (doHash) {
@@ -239,7 +296,7 @@ public class CypherUtils {
         // an error message.
         System.err.println(e.getMessage());
         System.err.println(String.format("java %s [options...] arguments...",
-                                         getClass().getCanonicalName()));
+                getClass().getCanonicalName()));
         // print the list of available options
         parser.printUsage(System.err);
         System.err.println();
@@ -247,7 +304,7 @@ public class CypherUtils {
         // print option sample. This is useful some time
         System.err.println(
                 String.format("  Example: java %s",
-                              getClass().getCanonicalName()) +
+                        getClass().getCanonicalName()) +
                         parser.printExample(
                                 OptionHandlerFilter.ALL));
     }

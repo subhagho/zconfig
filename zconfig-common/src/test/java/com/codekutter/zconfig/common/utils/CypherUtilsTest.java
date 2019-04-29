@@ -13,17 +13,17 @@ class CypherUtilsTest {
     void decrypt() {
         try {
             String passcode = UUID.randomUUID().toString().substring(0, 16);
-
+            String iv = UUID.randomUUID().toString().substring(0, 16);
             String data =
                     "I want to encrypt a string and then put it on a file. Also want to decrypt it when I want. I don’t need very strong security. I just want to make it harder to get my data others.";
-            byte[] encrypted = CypherUtils.encrypt(data.getBytes(), passcode);
+            byte[] encrypted = CypherUtils.encrypt(data.getBytes(), passcode, iv);
             assertNotNull(encrypted);
             assertTrue(encrypted.length > 0);
 
             String buff = new String(encrypted);
             LogUtils.debug(getClass(), String.format("Encrypted Data: [%s]", buff));
 
-            byte[] decrypted = CypherUtils.decrypt(encrypted, passcode);
+            byte[] decrypted = CypherUtils.decrypt(encrypted, passcode, iv);
             assertNotNull(decrypted);
             assertTrue(decrypted.length > 0);
             buff = new String(decrypted);
@@ -39,11 +39,12 @@ class CypherUtilsTest {
     void decryptString() {
         try {
             String passcode = UUID.randomUUID().toString().substring(0, 16);
+            String iv = UUID.randomUUID().toString().substring(0, 16);
 
             String data =
                     "I want to encrypt a string and then put it on a file. Also want to decrypt it when I want. I don’t need very strong security. I just want to make it harder to get my data others.";
             String encrypted =
-                    CypherUtils.encryptAsString(data.getBytes(), passcode);
+                    CypherUtils.encryptAsString(data, passcode, iv);
             assertNotNull(encrypted);
             assertTrue(encrypted.length() > 0);
 
@@ -51,7 +52,7 @@ class CypherUtilsTest {
                            String.format("Encrypted Data: [%s]", encrypted));
 
             byte[] decrypted = CypherUtils.decrypt(
-                    encrypted, passcode);
+                    encrypted, passcode, iv);
             assertNotNull(decrypted);
             assertTrue(decrypted.length > 0);
             String buff = new String(decrypted);

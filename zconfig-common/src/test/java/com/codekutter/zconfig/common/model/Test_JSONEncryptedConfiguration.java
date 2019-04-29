@@ -46,6 +46,7 @@ class Test_JSONEncryptedConfiguration {
             "src/test/resources/json/test-config-encrypted.properties";
     private static Configuration configuration = null;
     private static String encryptionKey = "21947a50-6755-47";
+    private static String IV = "test-configTEST-";
 
     @BeforeAll
     static void init() throws Exception {

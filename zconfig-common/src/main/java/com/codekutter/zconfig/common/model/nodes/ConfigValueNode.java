@@ -93,6 +93,11 @@ public class ConfigValueNode extends AbstractConfigNode
         return value;
     }
 
+    /**
+     * Get the decrypted value of this node.
+     *
+     * @return - Decrypted value.
+     */
     @JsonIgnore
     public String getDecryptedValue() {
         if (encrypted && !Strings.isNullOrEmpty(this.value)) {
@@ -109,23 +114,6 @@ public class ConfigValueNode extends AbstractConfigNode
             }
         }
         return value;
-    }
-
-    @JsonIgnore
-    public String getValue(String key) throws ConfigurationException {
-        if (encrypted && !Strings.isNullOrEmpty(getValue())) {
-            try {
-                byte[] data = CypherUtils.decrypt(getValue(), key);
-                if (data != null && data.length > 0) {
-                    return new String(data);
-                }
-                throw new ConfigurationException(
-                        "Decryption failed: Null buffer returned.");
-            } catch (Exception ex) {
-                throw new ConfigurationException(ex);
-            }
-        }
-        return getValue();
     }
 
     /**
