@@ -26,6 +26,7 @@ package com.codekutter.zconfig.client.factory;
 
 import com.codekutter.zconfig.common.model.nodes.AbstractConfigNode;
 import com.codekutter.zconfig.common.model.nodes.ConfigPathNode;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.*;
 import com.codekutter.zconfig.common.ConfigProviderFactory;
@@ -44,9 +45,36 @@ import java.util.concurrent.locks.ReentrantLock;
  * Class loads and manages configuration instances and annotated class instances.
  */
 public class ConfigurationManager {
-    private static class AutowiredType {
-        public String relativePath;
+    /**
+     * Local Struct to store the autowired instances
+     * loaded by this Configuration Manager.
+     */
+    private static class AutowiredIndexStruct {
+        /**
+         * Configuration Name
+         */
+        public String configName;
+        /**
+         * Instance Type
+         */
         public Class<?> type;
+        /**
+         * Relative Path instance loaded from.
+         */
+        public String relativePath;
+        /**
+         * Loaded instance handle.
+         */
+        public Object instance;
+
+        @Override
+        public String toString() {
+            return "AutowiredIndexStruct{" +
+                    "configName='" + configName + '\'' +
+                    ", type=" + type.getCanonicalName() +
+                    ", relativePath='" + relativePath + '\'' +
+                    '}';
+        }
     }
 
     /**
@@ -78,7 +106,7 @@ public class ConfigurationManager {
     /**
      * Index map for reading auto-wired instances impacted by a specific update.
      */
-    private Multimap<String, AutowiredType> autowiredIndex = HashMultimap.create();
+    private Multimap<String, AutowiredIndexStruct> autowiredIndex = HashMultimap.create();
     /**
      * Registered application Groups for which configurations has been loaded.
      */
@@ -288,12 +316,11 @@ public class ConfigurationManager {
     public void applyConfigurationUpdates(String configName, List<String> paths)
             throws ConfigurationException {
         Configuration config = loadedConfigs.get(configName);
-        if (config != null && config.getSyncMode() == ESyncMode.EVENTS) {
-            Map<String, AutowiredType> updated = getUpdatedTypes(configName, paths);
+        if (config != null && (config.getSyncMode() == ESyncMode.EVENTS || config.getSyncMode() == ESyncMode.BATCH)) {
+            Map<String, AutowiredIndexStruct> updated = getUpdatedTypes(configName, paths);
             if (updated != null && !updated.isEmpty()) {
                 for (String key : updated.keySet()) {
-                    AutowiredType type = updated.get(key);
-                    autowireType(type.type, configName, type.relativePath, true);
+                    updateAutowireType(updated.get(key));
                 }
             }
         }
@@ -306,17 +333,17 @@ public class ConfigurationManager {
      * @param paths      - List of updated node paths.
      * @return - Map of types needing update.
      */
-    private Map<String, AutowiredType> getUpdatedTypes(String configName,
-                                                       List<String> paths) {
-        Map<String, AutowiredType> map = new HashMap<>();
+    private Map<String, AutowiredIndexStruct> getUpdatedTypes(String configName,
+                                                              List<String> paths) {
+        Map<String, AutowiredIndexStruct> map = new HashMap<>();
         for (String path : paths) {
             String indexKey = getTypeIndexKey(path, configName);
             if (autowiredIndex.containsKey(indexKey)) {
-                Collection<AutowiredType> types = autowiredIndex.get(indexKey);
-                for (AutowiredType type : types) {
+                Collection<AutowiredIndexStruct> types = autowiredIndex.get(indexKey);
+                for (AutowiredIndexStruct type : types) {
+                    Preconditions.checkState(type.configName.compareTo(configName) == 0);
                     String key =
-                            String.format("%s::%s", type.type.getCanonicalName(),
-                                    type.relativePath);
+                            getTypeKey(type.type, type.relativePath, type.configName);
                     if (!map.containsKey(key)) {
                         map.put(key, type);
                     }
@@ -330,18 +357,51 @@ public class ConfigurationManager {
      * Create a new instance or Get a cached copy of the specified type. Types are
      * expected to be POJOs with empty constructors.
      *
-     * @param type         - Class type to create instance of.
-     * @param configName   - Configuration name to autowire from.
-     * @param relativePath - Relative Search path to prepend to the search.
-     * @param <T>          - Type.
+     * @param struct - Autowired Index Struct that needs to be reloaded.
      * @return - Type instance.
      * @throws ConfigurationException
      */
-    public <T> T autowireType(@Nonnull Class<? extends T> type,
-                              @Nonnull String configName,
-                              String relativePath)
+    @SuppressWarnings("unchecked")
+    private <T> void updateAutowireType(AutowiredIndexStruct struct)
             throws ConfigurationException {
-        return autowireType(type, configName, relativePath, false);
+        String key = getTypeKey(struct.type, struct.relativePath, struct.configName);
+        if (!Strings.isNullOrEmpty(key)) {
+            autowireCacheLock.lock();
+            try {
+                if (!autowiredInstances.containsKey(key)) {
+                    throw new ConfigurationException(String.format("Autowired instance not found. [key=%s]", struct.toString()));
+                }
+                T value = (T) autowiredInstances.get(key);
+                Configuration config = loadedConfigs.get(struct.configName);
+                if (config != null) {
+                    String path =
+                            getSearchPath(struct.type, struct.relativePath);
+                    if (!Strings.isNullOrEmpty(path)) {
+                        List<String> valuePaths = new ArrayList<>();
+                        if (Strings.isNullOrEmpty(struct.relativePath)) {
+                            value = ConfigurationAnnotationProcessor
+                                    .readConfigAnnotations((Class<? extends T>) struct.type, config, value, null, valuePaths);
+                        } else {
+                            AbstractConfigNode node = config.find(struct.relativePath);
+                            if (!(node instanceof ConfigPathNode)) {
+                                throw new ConfigurationException(
+                                        String.format("Specified configuration node not found. [config=%s][path=%s]",
+                                                struct.configName, struct.relativePath));
+                            }
+                            value = ConfigurationAnnotationProcessor.readConfigAnnotations((Class<? extends T>) struct.type,
+                                    (ConfigPathNode) node, value, valuePaths);
+                        }
+                    }
+                } else {
+                    throw new ConfigurationException(String.format(
+                            "Specified configuration not found. [name=%s]",
+                            struct.configName));
+                }
+            } finally {
+                autowireCacheLock.unlock();
+            }
+
+        }
     }
 
     /**
@@ -351,7 +411,6 @@ public class ConfigurationManager {
      * @param type         - Class type to create instance of.
      * @param configName   - Configuration name to autowire from.
      * @param relativePath - Relative Search path to prepend to the search.
-     * @param update       - Update the autowired instance.
      * @param <T>          - Type.
      * @return - Type instance.
      * @throws ConfigurationException
@@ -359,18 +418,17 @@ public class ConfigurationManager {
     @SuppressWarnings("unchecked")
     private <T> T autowireType(@Nonnull Class<? extends T> type,
                                @Nonnull String configName,
-                               String relativePath,
-                               boolean update)
+                               String relativePath)
             throws ConfigurationException {
         String key = getTypeKey(type, relativePath, configName);
         if (!Strings.isNullOrEmpty(key)) {
-            if (!update && autowiredInstances.containsKey(key)) {
+            if (autowiredInstances.containsKey(key)) {
                 return (T) autowiredInstances.get(key);
             }
             try {
                 autowireCacheLock.lock();
                 try {
-                    if (autowiredInstances.containsKey(key) && !update) {
+                    if (autowiredInstances.containsKey(key)) {
                         return (T) autowiredInstances.get(key);
                     }
                     Configuration config = loadedConfigs.get(configName);
@@ -378,16 +436,12 @@ public class ConfigurationManager {
                         String path =
                                 getSearchPath(type, relativePath);
                         if (!Strings.isNullOrEmpty(path)) {
-                            T value = null;
-                            if (update) {
-                                value = (T) autowiredInstances.get(key);
-                            } else {
-                                value = type.newInstance();
-                            }
-                            
+                            T value = type.newInstance();
+
+                            List<String> valuePaths = new ArrayList<>();
                             if (Strings.isNullOrEmpty(relativePath)) {
                                 value = ConfigurationAnnotationProcessor
-                                        .readConfigAnnotations(type, config, value);
+                                        .readConfigAnnotations(type, config, value, null, valuePaths);
                             } else {
                                 AbstractConfigNode node = config.find(relativePath);
                                 if (!(node instanceof ConfigPathNode)) {
@@ -395,17 +449,20 @@ public class ConfigurationManager {
                                             String.format("Specified configuration node not found. [config=%s][path=%s]",
                                                     configName, relativePath));
                                 }
-                                value = ConfigurationAnnotationProcessor.readConfigAnnotations(type, (ConfigPathNode) node, value);
+                                value = ConfigurationAnnotationProcessor.readConfigAnnotations(type, (ConfigPathNode) node, value, valuePaths);
                             }
                             autowiredInstances.put(key, value);
-                            if (config.getSyncMode() == ESyncMode.EVENTS &&
-                                    !update) {
-                                AutowiredType at = new AutowiredType();
-                                at.relativePath = relativePath;
-                                at.type = type;
-                                autowiredIndex
-                                        .put(getTypeIndexKey(path, configName),
-                                                at);
+                            if (config.getSyncMode() == ESyncMode.EVENTS || config.getSyncMode() == ESyncMode.BATCH) {
+                                if (!valuePaths.isEmpty()) {
+                                    AutowiredIndexStruct as = new AutowiredIndexStruct();
+                                    as.configName = configName;
+                                    as.type = type;
+                                    as.relativePath = relativePath;
+                                    as.instance = value;
+                                    for (String vp : valuePaths) {
+                                        autowiredIndex.put(vp, as);
+                                    }
+                                }
                             }
                             return value;
                         }

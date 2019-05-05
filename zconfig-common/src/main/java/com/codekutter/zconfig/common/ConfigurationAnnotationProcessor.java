@@ -81,8 +81,8 @@ public class ConfigurationAnnotationProcessor {
     public static <T> T readConfigAnnotations(@Nonnull Class<? extends T> type,
                                               @Nonnull Configuration config,
                                               @Nonnull T target)
-    throws ConfigurationException {
-        return readConfigAnnotations(type, config, target, null);
+            throws ConfigurationException {
+        return readConfigAnnotations(type, config, target, null, null);
     }
 
     /**
@@ -99,8 +99,9 @@ public class ConfigurationAnnotationProcessor {
     public static <T> T readConfigAnnotations(@Nonnull Class<? extends T> type,
                                               @Nonnull Configuration config,
                                               @Nonnull T target,
-                                              String path)
-    throws ConfigurationException {
+                                              String path,
+                                              List<String> valuePaths)
+            throws ConfigurationException {
         Preconditions.checkArgument(config != null);
         Preconditions.checkArgument(target != null);
         Preconditions.checkArgument(type != null);
@@ -120,9 +121,9 @@ public class ConfigurationAnnotationProcessor {
             if (node == null) {
                 throw new ConfigurationException(
                         String.format("Invalid Path : Path not found. [path=%s]",
-                                      path));
+                                path));
             }
-            processType(type, node, target);
+            processType(type, node, target, valuePaths);
         }
         return target;
     }
@@ -140,8 +141,9 @@ public class ConfigurationAnnotationProcessor {
      */
     public static <T> T readConfigAnnotations(@Nonnull Class<? extends T> type,
                                               @Nonnull ConfigPathNode config,
-                                              @Nonnull T target)
-    throws ConfigurationException {
+                                              @Nonnull T target,
+                                              List<String> valuePaths)
+            throws ConfigurationException {
         Preconditions.checkArgument(config != null);
         Preconditions.checkArgument(target != null);
         Preconditions.checkArgument(type != null);
@@ -154,7 +156,7 @@ public class ConfigurationAnnotationProcessor {
                         "Invalid Config Path : Path is NULL/Empty");
             }
             AbstractConfigNode node = config.find(path);
-            processType(type, node, target);
+            processType(type, node, target, valuePaths);
         }
         return target;
     }
@@ -175,7 +177,7 @@ public class ConfigurationAnnotationProcessor {
     public static <T> T readConfigAnnotations(@Nonnull Class<? extends T> type,
                                               @Nonnull Configuration config,
                                               String path)
-    throws ConfigurationException {
+            throws ConfigurationException {
         Preconditions.checkArgument(config != null);
         Preconditions.checkArgument(type != null);
 
@@ -195,14 +197,14 @@ public class ConfigurationAnnotationProcessor {
             if (node == null) {
                 throw new ConfigurationException(
                         String.format("Invalid Path : Path not found. [path=%s]",
-                                      path));
+                                path));
             }
             T target = createInstance(type, node);
-            return readConfigAnnotations(type, config, target, path);
+            return readConfigAnnotations(type, config, target, path, null);
         }
         throw new ConfigurationException(
                 String.format("Path Annotation not found. [type=%s]",
-                              type.getCanonicalName()));
+                        type.getCanonicalName()));
     }
 
     /**
@@ -218,7 +220,7 @@ public class ConfigurationAnnotationProcessor {
      */
     public static <T> T readConfigAnnotations(@Nonnull Class<? extends T> type,
                                               @Nonnull Configuration config)
-    throws ConfigurationException {
+            throws ConfigurationException {
         Preconditions.checkArgument(config != null);
         Preconditions.checkArgument(type != null);
 
@@ -234,14 +236,14 @@ public class ConfigurationAnnotationProcessor {
             if (node == null) {
                 throw new ConfigurationException(
                         String.format("Invalid Path : Path not found. [path=%s]",
-                                      path));
+                                path));
             }
             T target = createInstance(type, node);
             return readConfigAnnotations(type, config, target);
         }
         throw new ConfigurationException(
                 String.format("Path Annotation not found. [type=%s]",
-                              type.getCanonicalName()));
+                        type.getCanonicalName()));
     }
 
     /**
@@ -258,12 +260,12 @@ public class ConfigurationAnnotationProcessor {
      */
     public static <T> T readConfigAnnotations(@Nonnull Class<? extends T> type,
                                               @Nonnull ConfigPathNode config)
-    throws ConfigurationException {
+            throws ConfigurationException {
         Preconditions.checkArgument(config != null);
         Preconditions.checkArgument(type != null);
 
         T target = createInstance(type, config);
-        return readConfigAnnotations(type, config, target);
+        return readConfigAnnotations(type, config, target, null);
     }
 
     /**
@@ -280,7 +282,7 @@ public class ConfigurationAnnotationProcessor {
     @SuppressWarnings("unchecked")
     private static <T> T createInstance(Class<? extends T> type,
                                         AbstractConfigNode node)
-    throws ConfigurationException {
+            throws ConfigurationException {
         try {
             Constructor<?>[] constructors = type.getConstructors();
             Constructor<?> defaultConst = null;
@@ -321,7 +323,7 @@ public class ConfigurationAnnotationProcessor {
             } else if (target == null) {
                 throw new ConfigurationException(
                         String.format("No valid constructor found. [type=%s]",
-                                      type.getCanonicalName()));
+                                type.getCanonicalName()));
             }
             return target;
         } catch (IllegalAccessException | InstantiationException | InvocationTargetException e) {
@@ -339,12 +341,12 @@ public class ConfigurationAnnotationProcessor {
      * @throws ConfigurationException
      */
     private static <T> void processType(Class<? extends T> type,
-                                        AbstractConfigNode node, T target)
-    throws ConfigurationException {
+                                        AbstractConfigNode node, T target, List<String> valuePaths)
+            throws ConfigurationException {
         Field[] fields = ReflectionUtils.getAllFields(type);
         if (fields != null && fields.length > 0) {
             for (Field field : fields) {
-                processField(type, node, target, field);
+                processField(type, node, target, field, valuePaths);
             }
         }
         Method[] methods = ReflectionUtils.getAllMethods(type);
@@ -369,7 +371,7 @@ public class ConfigurationAnnotationProcessor {
     private static <T> void processMethod(Class<? extends T> type,
                                           AbstractConfigNode node, T target,
                                           Method method)
-    throws ConfigurationException {
+            throws ConfigurationException {
         if (method.isAnnotationPresent(MethodInvoke.class)) {
             MethodInvoke mi = method.getAnnotation(MethodInvoke.class);
             if (!Strings.isNullOrEmpty(mi.path())) {
@@ -378,7 +380,7 @@ public class ConfigurationAnnotationProcessor {
             if (node == null) {
                 throw new ConfigurationException(
                         String.format("Configuration Node Not Found : [path=%s]",
-                                      mi.path()));
+                                mi.path()));
             }
 
             try {
@@ -412,7 +414,7 @@ public class ConfigurationAnnotationProcessor {
     private static <T> Object getParamValue(Class<? extends T> type,
                                             AbstractConfigNode node,
                                             Parameter param)
-    throws ConfigurationException {
+            throws ConfigurationException {
         if (param.isAnnotationPresent(ConfigParam.class)) {
             ConfigParam p = param.getAnnotation(ConfigParam.class);
             String pname = p.name();
@@ -481,19 +483,19 @@ public class ConfigurationAnnotationProcessor {
      */
     private static <T> void processField(Class<? extends T> type,
                                          AbstractConfigNode node, T target,
-                                         Field field)
-    throws ConfigurationException {
+                                         Field field, List<String> valuePaths)
+            throws ConfigurationException {
         try {
             if (field.isAnnotationPresent(ConfigParam.class)) {
                 ConfigParam param = field.getAnnotation(ConfigParam.class);
-                processParam(param, field, node, target);
+                processParam(param, field, node, target, valuePaths);
             } else if (field.isAnnotationPresent(ConfigAttribute.class)) {
                 ConfigAttribute attr =
                         field.getAnnotation(ConfigAttribute.class);
-                processAttributes(attr, field, node, target);
+                processAttributes(attr, field, node, target, valuePaths);
             } else if (field.isAnnotationPresent(ConfigValue.class)) {
                 ConfigValue value = field.getAnnotation(ConfigValue.class);
-                processValue(type, value, field, node, target);
+                processValue(type, value, field, node, target, valuePaths);
             }
         } catch (Exception e) {
             throw new ConfigurationException(e);
@@ -514,8 +516,8 @@ public class ConfigurationAnnotationProcessor {
     @SuppressWarnings("unchecked")
     private static <T> void processValue(Class<? extends T> type,
                                          ConfigValue configValue, Field field,
-                                         AbstractConfigNode node, T target)
-    throws ConfigurationException {
+                                         AbstractConfigNode node, T target, List<String> valuePaths)
+            throws ConfigurationException {
         try {
             String name = configValue.name();
             if (Strings.isNullOrEmpty(name)) {
@@ -536,8 +538,11 @@ public class ConfigurationAnnotationProcessor {
                             value = cv.getValue();
                         } else if (fnode instanceof ConfigListValueNode) {
                             setListValueFromNode(type,
-                                                 ((ConfigListValueNode) fnode),
-                                                 target, field);
+                                    ((ConfigListValueNode) fnode),
+                                    target, field);
+                        }
+                        if (valuePaths != null) {
+                            valuePaths.add(fnode.getSearchPath());
                         }
                     }
                 }
@@ -562,6 +567,9 @@ public class ConfigurationAnnotationProcessor {
                                         vn.getSearchPath()));
                             }
                         }
+                        if (valuePaths != null) {
+                            valuePaths.add(fnode.getSearchPath());
+                        }
                     }
                 }
                 if (vn == null) {
@@ -585,6 +593,9 @@ public class ConfigurationAnnotationProcessor {
                             if (fnode instanceof ConfigValueNode) {
                                 ConfigValueNode cv = (ConfigValueNode) fnode;
                                 value = cv.getValue();
+                            }
+                            if (valuePaths != null) {
+                                valuePaths.add(fnode.getSearchPath());
                             }
                         }
                     }
@@ -611,10 +622,13 @@ public class ConfigurationAnnotationProcessor {
                                 (cnode instanceof ConfigPathNode)) {
                             Object value = ftype.newInstance();
                             value = readConfigAnnotations(ftype,
-                                                          (ConfigPathNode) cnode,
-                                                          value);
+                                    (ConfigPathNode) cnode,
+                                    value, valuePaths);
                             ReflectionUtils
                                     .setObjectValue(target, field, value);
+                            if (valuePaths != null) {
+                                valuePaths.add(cnode.getSearchPath());
+                            }
                         }
                         Object fv = ReflectionUtils.getFieldValue(target, field);
                         if (fv == null && configValue.required()) {
@@ -646,15 +660,15 @@ public class ConfigurationAnnotationProcessor {
      */
     @SuppressWarnings("unchecked")
     private static <T> void processParam(ConfigParam param, Field field,
-                                         AbstractConfigNode node, T target)
-    throws ConfigurationException {
+                                         AbstractConfigNode node, T target, List<String> valuePaths)
+            throws ConfigurationException {
         try {
             String name = param.name();
             if (Strings.isNullOrEmpty(name)) {
                 name = field.getName();
             }
             StructNodeInfo nodeInfo = checkAnnotationTags(name, node,
-                                                          ConfigParametersNode.NODE_ABBR_PREFIX);
+                    ConfigParametersNode.NODE_ABBR_PREFIX);
             if (field.getType() == EncryptedValue.class) {
                 ConfigValueNode vn = null;
                 if (node instanceof ConfigPathNode) {
@@ -663,6 +677,9 @@ public class ConfigurationAnnotationProcessor {
                     if (params != null && !params.isEmpty()) {
                         if (params.hasKey(nodeInfo.name))
                             vn = params.getValue(nodeInfo.name);
+                    }
+                    if (valuePaths != null) {
+                        valuePaths.add(node.getSearchPath());
                     }
                 }
                 if (vn == null) {
@@ -694,6 +711,9 @@ public class ConfigurationAnnotationProcessor {
                             value = vn.getValue();
                         }
                     }
+                }
+                if (valuePaths != null) {
+                    valuePaths.add(pathNode.getSearchPath());
                 }
             }
 
@@ -734,15 +754,15 @@ public class ConfigurationAnnotationProcessor {
     @SuppressWarnings("unchecked")
     private static <T> void processAttributes(ConfigAttribute attribute,
                                               Field field,
-                                              AbstractConfigNode node, T target)
-    throws ConfigurationException {
+                                              AbstractConfigNode node, T target, List<String> valuePaths)
+            throws ConfigurationException {
         try {
             String name = attribute.name();
             if (Strings.isNullOrEmpty(name)) {
                 name = field.getName();
             }
             StructNodeInfo nodeInfo = checkAnnotationTags(name, node,
-                                                          ConfigAttributesNode.NODE_ABBR_PREFIX);
+                    ConfigAttributesNode.NODE_ABBR_PREFIX);
             if (field.getType() == EncryptedValue.class) {
                 ConfigValueNode vn = null;
                 if (node instanceof ConfigPathNode) {
@@ -751,6 +771,9 @@ public class ConfigurationAnnotationProcessor {
                     if (attrs != null && !attrs.isEmpty()) {
                         if (attrs.hasKey(nodeInfo.name))
                             vn = attrs.getValue(nodeInfo.name);
+                    }
+                    if (valuePaths != null) {
+                        valuePaths.add(node.getSearchPath());
                     }
                 }
                 if (vn == null) {
@@ -783,6 +806,9 @@ public class ConfigurationAnnotationProcessor {
                             value = vn.getValue();
                         }
                     }
+                }
+                if (valuePaths != null) {
+                    valuePaths.add(node.getSearchPath());
                 }
             }
             if (!Strings.isNullOrEmpty(value)) {
@@ -819,7 +845,7 @@ public class ConfigurationAnnotationProcessor {
     private static StructNodeInfo checkAnnotationTags(String name,
                                                       AbstractConfigNode node,
                                                       String tag)
-    throws ConfigurationException {
+            throws ConfigurationException {
         StructNodeInfo ni = new StructNodeInfo();
         ni.name = name;
         ni.node = node;
@@ -844,7 +870,7 @@ public class ConfigurationAnnotationProcessor {
             } else {
                 throw new ConfigurationException(
                         String.format("Invalid ConfigParam : [name=%s]",
-                                      name));
+                                name));
             }
         }
         return ni;
@@ -863,7 +889,7 @@ public class ConfigurationAnnotationProcessor {
     private static <T> void setListValueFromNode(Class<? extends T> type,
                                                  ConfigListValueNode listValueNode,
                                                  T target, Field field)
-    throws ConfigurationException {
+            throws ConfigurationException {
         List<String> values = new ArrayList<>(listValueNode.size());
         List<ConfigValueNode> nodes = listValueNode.getValues();
         for (ConfigValueNode cvn : nodes) {
