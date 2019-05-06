@@ -22,7 +22,7 @@
  *
  */
 
-package com.codekutter.zconfig.common.events;
+package com.codekutter.zconfig.transport.events;
 
 /**
  * Configuration Update event to pass updates to the server.

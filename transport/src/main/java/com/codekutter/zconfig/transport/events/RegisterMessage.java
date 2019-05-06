@@ -22,7 +22,7 @@
  *
  */
 
-package com.codekutter.zconfig.common.events;
+package com.codekutter.zconfig.transport.events;
 
 import com.codekutter.zconfig.common.ZConfigInstance;
 

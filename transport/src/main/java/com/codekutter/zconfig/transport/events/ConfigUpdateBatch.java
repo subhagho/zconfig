@@ -17,27 +17,19 @@
  * under the License.
  *
  * Copyright (c) $year
- * Date: 4/3/19 8:40 AM
+ * Date: 4/3/19 1:53 PM
  * Subho Ghosh (subho dot ghosh at outlook.com)
  *
  */
 
-package com.codekutter.zconfig.common.events;
+package com.codekutter.zconfig.transport.events;
 
 /**
- * Enum to indicate the update type in update events.
+ * Class defines a batch of configuration update event to be consumed by
+ * dynamically updates clients. All events in the
+ * batch are expected to be for the same configuration and transaction.
  */
-public enum EUpdateEventType {
-    /**
-     * Event reflects a newly added node.
-     */
-    Add,
-    /**
-     * Event for a node value being updated.
-     */
-    Update,
-    /**
-     * Event for a node being deleted.
-     */
-    Remove
+public class ConfigUpdateBatch
+        extends AbstractConfigUpdateBatch<ConfigUpdateEvent> {
+
 }

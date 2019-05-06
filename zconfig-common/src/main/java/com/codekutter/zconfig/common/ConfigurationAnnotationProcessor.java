@@ -141,6 +141,23 @@ public class ConfigurationAnnotationProcessor {
      */
     public static <T> T readConfigAnnotations(@Nonnull Class<? extends T> type,
                                               @Nonnull ConfigPathNode config,
+                                              @Nonnull T target)
+            throws ConfigurationException {
+        return readConfigAnnotations(type, config, target, null);
+    }
+
+    /**
+     * Reader and apply the values from the passed configuration based on the type annotations.
+     *
+     * @param type   - Type of the target object.
+     * @param config - Configuration node source.
+     * @param target - Target to apply the values to.
+     * @param <T>    - Annotated object type.
+     * @return - Updated target instance.
+     * @throws ConfigurationException
+     */
+    public static <T> T readConfigAnnotations(@Nonnull Class<? extends T> type,
+                                              @Nonnull ConfigPathNode config,
                                               @Nonnull T target,
                                               List<String> valuePaths)
             throws ConfigurationException {

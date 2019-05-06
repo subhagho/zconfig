@@ -17,18 +17,23 @@
  * under the License.
  *
  * Copyright (c) $year
- * Date: 4/3/19 4:53 PM
+ * Date: 4/3/19 4:45 PM
  * Subho Ghosh (subho dot ghosh at outlook.com)
  *
  */
 
-package com.codekutter.zconfig.common.events;
+package com.codekutter.zconfig.transport.events;
 
-/**
- * Class defines a batch of configuration update event to be sent to the server. All events in the
- * batch are expected to be for the same configuration and transaction.
- */
-public class ConfigServerUpdateBatch
-        extends AbstractConfigUpdateBatch<ConfigServerUpdateEvent> {
+import com.codekutter.zconfig.common.model.nodes.ConfigValueNode;
 
+public class ConfigUpdateEvent extends AbstractConfigUpdateEvent {
+    private ConfigValueNode value;
+
+    public ConfigValueNode getValue() {
+        return value;
+    }
+
+    public void setValue(ConfigValueNode value) {
+        this.value = value;
+    }
 }

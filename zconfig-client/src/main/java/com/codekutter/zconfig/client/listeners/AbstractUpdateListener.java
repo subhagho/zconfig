@@ -27,7 +27,7 @@ package com.codekutter.zconfig.client.listeners;
 import com.codekutter.zconfig.common.ZConfigClientEnv;
 import com.codekutter.zconfig.client.factory.ConfigurationManager;
 import com.codekutter.zconfig.common.*;
-import com.codekutter.zconfig.common.events.ConfigUpdateBatch;
+import com.codekutter.zconfig.transport.events.ConfigUpdateBatch;
 import com.codekutter.zconfig.common.model.Configuration;
 import com.codekutter.zconfig.common.model.ESyncMode;
 

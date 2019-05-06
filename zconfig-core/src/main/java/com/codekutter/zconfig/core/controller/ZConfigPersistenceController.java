@@ -25,9 +25,9 @@
 package com.codekutter.zconfig.core.controller;
 
 import com.codekutter.zconfig.common.ConfigurationException;
-import com.codekutter.zconfig.common.events.AbstractConfigUpdateEvent;
-import com.codekutter.zconfig.common.events.ConfigServerUpdateBatch;
-import com.codekutter.zconfig.common.events.ConfigServerUpdateEvent;
+import com.codekutter.zconfig.transport.events.AbstractConfigUpdateEvent;
+import com.codekutter.zconfig.transport.events.ConfigServerUpdateBatch;
+import com.codekutter.zconfig.transport.events.ConfigServerUpdateEvent;
 import com.codekutter.zconfig.common.model.Configuration;
 import com.codekutter.zconfig.common.model.Version;
 import com.codekutter.zconfig.common.utils.IUniqueIDGenerator;

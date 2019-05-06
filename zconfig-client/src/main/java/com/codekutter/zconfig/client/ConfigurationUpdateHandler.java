@@ -30,8 +30,8 @@ import com.codekutter.zconfig.common.model.nodes.*;
 import com.google.common.base.Preconditions;
 import com.codekutter.zconfig.common.ConfigurationException;
 import com.codekutter.zconfig.common.LogUtils;
-import com.codekutter.zconfig.common.events.ConfigUpdateBatch;
-import com.codekutter.zconfig.common.events.ConfigUpdateEvent;
+import com.codekutter.zconfig.transport.events.ConfigUpdateBatch;
+import com.codekutter.zconfig.transport.events.ConfigUpdateEvent;
 import com.codekutter.zconfig.common.model.Configuration;
 import com.codekutter.zconfig.common.model.Version;
 

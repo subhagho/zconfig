@@ -22,7 +22,7 @@
  *
  */
 
-package com.codekutter.zconfig.common.events;
+package com.codekutter.zconfig.transport.events;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;

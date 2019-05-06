@@ -17,23 +17,27 @@
  * under the License.
  *
  * Copyright (c) $year
- * Date: 4/3/19 4:45 PM
+ * Date: 4/3/19 8:40 AM
  * Subho Ghosh (subho dot ghosh at outlook.com)
  *
  */
 
-package com.codekutter.zconfig.common.events;
+package com.codekutter.zconfig.transport.events;
 
-import com.codekutter.zconfig.common.model.nodes.ConfigValueNode;
-
-public class ConfigUpdateEvent extends AbstractConfigUpdateEvent {
-    private ConfigValueNode value;
-
-    public ConfigValueNode getValue() {
-        return value;
-    }
-
-    public void setValue(ConfigValueNode value) {
-        this.value = value;
-    }
+/**
+ * Enum to indicate the update type in update events.
+ */
+public enum EUpdateEventType {
+    /**
+     * Event reflects a newly added node.
+     */
+    Add,
+    /**
+     * Event for a node value being updated.
+     */
+    Update,
+    /**
+     * Event for a node being deleted.
+     */
+    Remove
 }

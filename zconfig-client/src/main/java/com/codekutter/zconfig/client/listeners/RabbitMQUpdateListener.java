@@ -31,8 +31,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.*;
 import com.codekutter.zconfig.common.ConfigurationException;
 import com.codekutter.zconfig.common.LogUtils;
-import com.codekutter.zconfig.common.events.ConfigUpdateBatch;
-import com.codekutter.zconfig.common.events.RegisterMessage;
+import com.codekutter.zconfig.transport.events.ConfigUpdateBatch;
+import com.codekutter.zconfig.transport.events.RegisterMessage;
 import com.codekutter.zconfig.common.model.nodes.ConfigPathNode;
 
 import javax.annotation.Nonnull;

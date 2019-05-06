@@ -22,7 +22,7 @@
  *
  */
 
-package com.codekutter.zconfig.common.events;
+package com.codekutter.zconfig.transport.events;
 
 import org.joda.time.DateTime;
 

@@ -317,9 +317,9 @@ public class ConfigurationManager {
             throws ConfigurationException {
         Configuration config = loadedConfigs.get(configName);
         if (config != null && (config.getSyncMode() == ESyncMode.EVENTS || config.getSyncMode() == ESyncMode.BATCH)) {
-            Map<String, AutowiredIndexStruct> updated = getUpdatedTypes(configName, paths);
+            Map<Integer, AutowiredIndexStruct> updated = getUpdatedTypes(configName, paths);
             if (updated != null && !updated.isEmpty()) {
-                for (String key : updated.keySet()) {
+                for (int key : updated.keySet()) {
                     updateAutowireType(updated.get(key));
                 }
             }
@@ -333,22 +333,24 @@ public class ConfigurationManager {
      * @param paths      - List of updated node paths.
      * @return - Map of types needing update.
      */
-    private Map<String, AutowiredIndexStruct> getUpdatedTypes(String configName,
+    private Map<Integer, AutowiredIndexStruct> getUpdatedTypes(String configName,
                                                               List<String> paths) {
-        Map<String, AutowiredIndexStruct> map = new HashMap<>();
+        Map<Integer, AutowiredIndexStruct> map = new HashMap<>();
         for (String path : paths) {
             String indexKey = getTypeIndexKey(path, configName);
             if (autowiredIndex.containsKey(indexKey)) {
                 Collection<AutowiredIndexStruct> types = autowiredIndex.get(indexKey);
                 for (AutowiredIndexStruct type : types) {
                     Preconditions.checkState(type.configName.compareTo(configName) == 0);
-                    String key =
-                            getTypeKey(type.type, type.relativePath, type.configName);
-                    if (!map.containsKey(key)) {
-                        map.put(key, type);
+                    int indx = type.hashCode();
+                    if (!map.containsKey(indx)) {
+                        map.put(indx, type);
                     }
                 }
             }
+        }
+        if (map.isEmpty()) {
+            return null;
         }
         return map;
     }
@@ -416,7 +418,7 @@ public class ConfigurationManager {
      * @throws ConfigurationException
      */
     @SuppressWarnings("unchecked")
-    private <T> T autowireType(@Nonnull Class<? extends T> type,
+    public <T> T autowireType(@Nonnull Class<? extends T> type,
                                @Nonnull String configName,
                                String relativePath)
             throws ConfigurationException {
@@ -460,7 +462,8 @@ public class ConfigurationManager {
                                     as.relativePath = relativePath;
                                     as.instance = value;
                                     for (String vp : valuePaths) {
-                                        autowiredIndex.put(vp, as);
+                                        String vk = getTypeIndexKey(vp, configName);
+                                        autowiredIndex.put(vk, as);
                                     }
                                 }
                             }
