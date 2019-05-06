@@ -25,15 +25,11 @@
 package com.codekutter.zconfig.transport.events;
 
 import com.codekutter.zconfig.common.model.nodes.ConfigValueNode;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class ConfigUpdateEvent extends AbstractConfigUpdateEvent {
     private ConfigValueNode value;
-
-    public ConfigValueNode getValue() {
-        return value;
-    }
-
-    public void setValue(ConfigValueNode value) {
-        this.value = value;
-    }
 }

@@ -114,32 +114,10 @@ public class AbstractConfigUpdateBatch<T extends AbstractConfigUpdateEvent> {
         Preconditions.checkState(!Strings.isNullOrEmpty(prevVersion));
         try {
             for (AbstractConfigUpdateEvent event : events) {
-                if (group.compareTo(event.getGroup()) != 0) {
-                    throw new ConfigurationException(String.format(
-                            "Batch contains multiple groups. [header config=%s][event config=%s]",
-                            group, event.getGroup()));
-                }
-                if (application.compareTo(event.getApplication()) != 0) {
-                    throw new ConfigurationException(String.format(
-                            "Batch contains multiple applications. [header config=%s][event config=%s]",
-                            application, event.getApplication()));
-                }
-                if (configName.compareTo(event.getConfigName()) != 0) {
-                    throw new ConfigurationException(String.format(
-                            "Batch contains multiple configurations. [header config=%s][event config=%s]",
-                            configName, event.getConfigName()));
-                }
-                if (prevVersion.compareTo(event.getPreVersion()) != 0) {
-                    throw new ConfigurationException(String.format(
-                            "Batch contains multiple versions. [header version=%s][event version=%s]",
-                            prevVersion, event.getPreVersion()));
-                }
-                Version pre = Version.parse(prevVersion);
-                Version post = Version.parse(header.getUpdatedVersion());
-                if (!pre.isCompatible(post)) {
-                    throw new ConfigurationException(String.format(
-                            "Update version incompatible: [pre-update version=%s][post-update version=%s]",
-                            pre.toString(), post.toString()));
+                Preconditions.checkState(event.getHeader() != null);
+                if (!header.equals(event.getHeader())) {
+                    throw new ConfigurationException(String.format("Event Header mis-match: [expected=%s][actual=%s]",
+                            header.toString(), event.getHeader().toString()));
                 }
             }
         } catch (Exception e) {

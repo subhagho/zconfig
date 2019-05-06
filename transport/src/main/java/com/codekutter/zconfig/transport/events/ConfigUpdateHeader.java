@@ -24,11 +24,16 @@
 
 package com.codekutter.zconfig.transport.events;
 
-import org.joda.time.DateTime;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.Objects;
 
 /**
  * Class to define the header of a configuration update transaction batch.
  */
+@Getter
+@Setter
 public class ConfigUpdateHeader {
     /**
      * Application Group name.
@@ -57,133 +62,37 @@ public class ConfigUpdateHeader {
     /**
      * Timestamp of the update.
      */
-    private DateTime timestamp;
+    private long timestamp;
 
-
-    /**
-     * Get the application Group name.
-     *
-     * @return - Application Group name.
-     */
-    public String getGroup() {
-        return group;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ConfigUpdateHeader)) return false;
+        ConfigUpdateHeader that = (ConfigUpdateHeader) o;
+        return timestamp == that.timestamp &&
+                group.equals(that.group) &&
+                application.equals(that.application) &&
+                configName.equals(that.configName) &&
+                preVersion.equals(that.preVersion) &&
+                updatedVersion.equals(that.updatedVersion) &&
+                transactionId.equals(that.transactionId);
     }
 
-    /**
-     * Set the application Group name.
-     *
-     * @param group - Application Group name.
-     */
-    public void setGroup(String group) {
-        this.group = group;
+    @Override
+    public int hashCode() {
+        return Objects.hash(group, application, configName, preVersion, updatedVersion, transactionId, timestamp);
     }
 
-    /**
-     * Get the application name.
-     *
-     * @return - Application name.
-     */
-    public String getApplication() {
-        return application;
+    @Override
+    public String toString() {
+        return "ConfigUpdateHeader{" +
+                "group='" + group + '\'' +
+                ", application='" + application + '\'' +
+                ", configName='" + configName + '\'' +
+                ", preVersion='" + preVersion + '\'' +
+                ", updatedVersion='" + updatedVersion + '\'' +
+                ", transactionId='" + transactionId + '\'' +
+                ", timestamp=" + timestamp +
+                '}';
     }
-
-    /**
-     * Set the application name.
-     *
-     * @param application - Application name.
-     */
-    public void setApplication(String application) {
-        this.application = application;
-    }
-
-    /**
-     * Get the configuration name.
-     *
-     * @return - Configuration name.
-     */
-    public String getConfigName() {
-        return configName;
-    }
-
-    /**
-     * Set the configuration name.
-     *
-     * @param configName - Configuration name.
-     */
-    public void setConfigName(String configName) {
-        this.configName = configName;
-    }
-
-    /**
-     * Get the pre-update version of the configuration.
-     *
-     * @return - Pre-Update version.
-     */
-    public String getPreVersion() {
-        return preVersion;
-    }
-
-    /**
-     * Set the pre-update version of the configuration.
-     *
-     * @param preVersion - Pre-Update version.
-     */
-    public void setPreVersion(String preVersion) {
-        this.preVersion = preVersion;
-    }
-
-    /**
-     * Get the updated version of this configuration.
-     *
-     * @return - Updated (post-update) version.
-     */
-    public String getUpdatedVersion() {
-        return updatedVersion;
-    }
-
-    /**
-     * Set the updated version of this configuration.
-     *
-     * @param updatedVersion - Updated (post-update) version.
-     */
-    public void setUpdatedVersion(String updatedVersion) {
-        this.updatedVersion = updatedVersion;
-    }
-
-    /**
-     * Get the transaction ID of this update batch.
-     *
-     * @return - Update transaction ID.
-     */
-    public String getTransactionId() {
-        return transactionId;
-    }
-
-    /**
-     * Set the transaction ID of this update batch.
-     *
-     * @param transactionId - Update transaction ID.
-     */
-    public void setTransactionId(String transactionId) {
-        this.transactionId = transactionId;
-    }
-
-    /**
-     * Get the update timestamp of this batch.
-     *
-     * @return - Update timestamp
-     */
-    public DateTime getTimestamp() {
-        return timestamp;
-    }
-
-    /**
-     * Set the update timestamp of this batch.
-     *
-     * @param timestamp - Update timestamp
-     */
-    public void setTimestamp(DateTime timestamp) {
-        this.timestamp = timestamp;
-    }
-
 }

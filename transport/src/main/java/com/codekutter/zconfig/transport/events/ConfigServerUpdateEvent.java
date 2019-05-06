@@ -24,9 +24,14 @@
 
 package com.codekutter.zconfig.transport.events;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Configuration Update event to pass updates to the server.
  */
+@Getter
+@Setter
 public class ConfigServerUpdateEvent extends AbstractConfigUpdateEvent {
     /**
      * Name of the node.
@@ -40,58 +45,4 @@ public class ConfigServerUpdateEvent extends AbstractConfigUpdateEvent {
      * Updated value object.
      */
     private Object value;
-
-    /**
-     * Get the node name.
-     *
-     * @return - Node name.
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * Set the node name.
-     *
-     * @param name - Node name.
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    /**
-     * Get the node description.
-     *
-     * @return - Node description
-     */
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * Set the node description.
-     *
-     * @param description - Node description
-     */
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    /**
-     * Get updated value.
-     *
-     * @return - Updated value.
-     */
-    public Object getValue() {
-        return value;
-    }
-
-    /**
-     * Set updated value.
-     *
-     * @param value - Updated value.
-     */
-    public void setValue(Object value) {
-        this.value = value;
-    }
 }
