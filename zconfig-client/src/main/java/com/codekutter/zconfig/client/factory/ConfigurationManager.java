@@ -36,6 +36,7 @@ import com.codekutter.zconfig.common.model.Configuration;
 import com.codekutter.zconfig.common.model.ConfigurationSettings;
 import com.codekutter.zconfig.common.model.ESyncMode;
 import com.codekutter.zconfig.common.model.Version;
+import sun.security.krb5.Config;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -112,6 +113,22 @@ public class ConfigurationManager {
      */
     private Multimap<String, Configuration> applicationGroups =
             HashMultimap.create();
+
+    /**
+     * Add an externally loaded configuration.
+     *
+     * @param configuration - Configuration instance.
+     * @throws ConfigurationException
+     */
+    public void add(@Nonnull Configuration configuration) throws ConfigurationException {
+        Preconditions.checkArgument(configuration != null);
+        configCacheLock.lock();
+        try {
+            postConfigurationLoad(configuration);
+        } finally {
+            configCacheLock.unlock();
+        }
+    }
 
     /**
      * Load configuration from the specified URI.

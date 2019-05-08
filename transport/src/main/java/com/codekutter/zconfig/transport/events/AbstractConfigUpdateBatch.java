@@ -28,6 +28,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.codekutter.zconfig.common.ConfigurationException;
 import com.codekutter.zconfig.common.model.Version;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
@@ -36,7 +38,9 @@ import java.util.List;
  *
  * @param <T>
  */
-public class AbstractConfigUpdateBatch<T extends AbstractConfigUpdateEvent> {
+@Getter
+@Setter
+public class AbstractConfigUpdateBatch<D, T extends AbstractConfigUpdateEvent<D>> {
     /**
      * Config Update Header for this batch.
      */
@@ -45,43 +49,6 @@ public class AbstractConfigUpdateBatch<T extends AbstractConfigUpdateEvent> {
      * List of update events in the batch.
      */
     protected List<T> events;
-
-    /**
-     * Get the batch update header.
-     *
-     * @return - Update header.
-     */
-    public ConfigUpdateHeader getHeader() {
-        return header;
-    }
-
-    /**
-     * Set the batch update header.
-     *
-     * @param header - Update header.
-     */
-    public void setHeader(ConfigUpdateHeader header) {
-        this.header = header;
-    }
-
-    /**
-     * Get the list of update events.
-     *
-     * @return - List of Update events.
-     */
-    public List<T> getEvents() {
-        return events;
-    }
-
-    /**
-     * Set the list of update events.
-     *
-     * @param events - List of Update events.
-     */
-    public void setEvents(
-            List<T> events) {
-        this.events = events;
-    }
 
     /**
      * Get the size of this event batch.

@@ -136,6 +136,7 @@ public class ZConfigClientEnv extends ZConfigEnv {
         LogUtils.debug(getClass(), settings);
         LogUtils.info(getClass(),
                       "Client environment successfully initialized...");
+        configurationManager.add(getConfiguration());
     }
 
     /**

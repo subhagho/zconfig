@@ -24,6 +24,7 @@
 
 package com.codekutter.zconfig.common;
 
+import com.codekutter.zconfig.common.model.nodes.AbstractConfigNode;
 import com.codekutter.zconfig.common.model.nodes.ConfigPathNode;
 
 import javax.annotation.Nonnull;
@@ -39,5 +40,5 @@ public interface IConfigurable {
      * @param node - Handle to the configuration node.
      * @throws ConfigurationException
      */
-    void configure(@Nonnull ConfigPathNode node) throws ConfigurationException;
+    void configure(@Nonnull AbstractConfigNode node) throws ConfigurationException;
 }

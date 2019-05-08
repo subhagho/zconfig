@@ -25,6 +25,8 @@
 package com.codekutter.zconfig.client.listeners;
 
 import com.codekutter.zconfig.common.ZConfigClientEnv;
+import com.codekutter.zconfig.common.model.annotations.MethodInvoke;
+import com.codekutter.zconfig.common.model.nodes.AbstractConfigNode;
 import com.codekutter.zconfig.transport.rabbitmq.RMQChannelConstants;
 import com.codekutter.zconfig.transport.rabbitmq.RMQConnectionFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -51,7 +53,8 @@ public class RabbitMQUpdateListener extends AbstractUpdateListener {
      * @throws ConfigurationException
      */
     @Override
-    public void configure(@Nonnull ConfigPathNode node)
+    @MethodInvoke
+    public void configure(@Nonnull AbstractConfigNode node)
     throws ConfigurationException {
         if (!NODE_NAME_LISTENER.equals(node.getName())) {
             throw new ConfigurationException(String.format(

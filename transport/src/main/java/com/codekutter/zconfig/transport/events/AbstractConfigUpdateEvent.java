@@ -46,7 +46,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public abstract class AbstractConfigUpdateEvent {
+public abstract class AbstractConfigUpdateEvent<T> {
     /**
      * Update header for this event.
      */
@@ -69,4 +69,9 @@ public abstract class AbstractConfigUpdateEvent {
      * Event timestamp of the transaction.
      */
     private long timestamp;
+
+    /**
+     * Event Data.
+     */
+    private T value;
 }

@@ -30,6 +30,6 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ConfigUpdateEvent extends AbstractConfigUpdateEvent {
-    private ConfigValueNode value;
+public class ConfigUpdateEvent extends AbstractConfigUpdateEvent<ConfigValueNode> {
+
 }

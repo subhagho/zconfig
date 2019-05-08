@@ -190,23 +190,23 @@ public class ZConfigPersistenceController {
                             configNode.getCurrentVersion().getMajorVersion() + 1);
 
                     for (ConfigServerUpdateEvent event : batch.getEvents()) {
-                        if (event.getGroup().compareTo(appGroup.getName()) != 0) {
+                        if (event.getHeader().getGroup().compareTo(appGroup.getName()) != 0) {
                             throw new PersistenceException(String.format(
                                     "Invalid Update Event : Application Group doesn't match. [expected=%s][actual=%s]",
-                                    appGroup.getName(), event.getGroup()));
+                                    appGroup.getName(), event.getHeader().getGroup()));
                         }
-                        if (event.getApplication().compareTo(app.getName()) != 0) {
+                        if (event.getHeader().getApplication().compareTo(app.getName()) != 0) {
                             throw new PersistenceException(String.format(
                                     "Invalid Update Event : Application doesn't match. [expected=%s][actual=%s]",
-                                    app.getName(), event.getApplication()));
+                                    app.getName(), event.getHeader().getApplication()));
                         }
-                        if (event.getConfigName().compareTo(configNode.getName()) !=
+                        if (event.getHeader().getConfigName().compareTo(configNode.getName()) !=
                                 0) {
                             throw new PersistenceException(String.format(
                                     "Invalid Update Event : Configuration doesn't match. [expected=%s][actual=%s]",
-                                    configNode.getName(), event.getConfigName()));
+                                    configNode.getName(), event.getHeader().getConfigName()));
                         }
-                        Version ev = Version.parse(event.getPreVersion());
+                        Version ev = Version.parse(event.getHeader().getPreVersion());
                         if (!ev.equals(v)) {
                             throw new PersistenceException(String.format(
                                     "Invalid Update Event : Version doesn't match. [expected=%s][actual=%s]",

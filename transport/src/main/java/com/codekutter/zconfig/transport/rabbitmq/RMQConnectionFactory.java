@@ -26,6 +26,8 @@ package com.codekutter.zconfig.transport.rabbitmq;
 
 import com.codekutter.zconfig.common.model.annotations.ConfigParam;
 import com.codekutter.zconfig.common.model.annotations.ConfigPath;
+import com.codekutter.zconfig.common.model.annotations.MethodInvoke;
+import com.codekutter.zconfig.common.model.nodes.AbstractConfigNode;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.rabbitmq.client.Connection;
@@ -45,7 +47,7 @@ import java.io.IOException;
 /**
  * RabbitMQ Connection Factory - Class abstracts the RabbitMQ Connection.
  */
-@ConfigPath(path = "*/rmq/settings")
+@ConfigPath(path = "rmq/settings")
 public class RMQConnectionFactory implements IConfigurable, Closeable {
     /**
      * Default Virtual Host value.
@@ -88,12 +90,14 @@ public class RMQConnectionFactory implements IConfigurable, Closeable {
      * @throws ConfigurationException
      */
     @Override
-    public void configure(@Nonnull ConfigPathNode node)
+    @MethodInvoke
+    public void configure(@Nonnull AbstractConfigNode node)
     throws ConfigurationException {
         Preconditions.checkArgument(node != null);
+        Preconditions.checkArgument(node instanceof ConfigPathNode);
         try {
             ConfigurationAnnotationProcessor
-                    .readConfigAnnotations(getClass(), node, this);
+                    .readConfigAnnotations(getClass(), (ConfigPathNode) node, this);
             setup();
 
             state.setState(EClientState.Initialized);

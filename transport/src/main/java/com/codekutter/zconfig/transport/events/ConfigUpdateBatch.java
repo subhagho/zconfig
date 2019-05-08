@@ -24,12 +24,14 @@
 
 package com.codekutter.zconfig.transport.events;
 
+import com.codekutter.zconfig.common.model.nodes.ConfigValueNode;
+
 /**
  * Class defines a batch of configuration update event to be consumed by
  * dynamically updates clients. All events in the
  * batch are expected to be for the same configuration and transaction.
  */
 public class ConfigUpdateBatch
-        extends AbstractConfigUpdateBatch<ConfigUpdateEvent> {
+        extends AbstractConfigUpdateBatch<ConfigValueNode, ConfigUpdateEvent> {
 
 }

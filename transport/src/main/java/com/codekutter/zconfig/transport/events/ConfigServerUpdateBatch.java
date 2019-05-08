@@ -29,6 +29,6 @@ package com.codekutter.zconfig.transport.events;
  * batch are expected to be for the same configuration and transaction.
  */
 public class ConfigServerUpdateBatch
-        extends AbstractConfigUpdateBatch<ConfigServerUpdateEvent> {
+        extends AbstractConfigUpdateBatch<Object, ConfigServerUpdateEvent> {
 
 }

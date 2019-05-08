@@ -63,7 +63,7 @@ public class ConfigurationUpdateHandler {
             String configName = null;
             List<String> updatePaths = new ArrayList<>(batch.getEvents().size());
             for (ConfigUpdateEvent event : batch.getEvents()) {
-                if (configName.compareTo(event.getConfigName()) != 0) {
+                if (configName.compareTo(event.getHeader().getConfigName()) != 0) {
                     throw new ConfigurationException(String.format(
                             "Invalid Event batch : Multiple configurations specified. [configName=%s]",
                             configName));
@@ -94,17 +94,17 @@ public class ConfigurationUpdateHandler {
         try {
             ConfigurationManager manager =
                     ZConfigClientEnv.clientEnv().getConfigurationManager();
-            Configuration config = manager.getWithLock(event.getConfigName());
+            Configuration config = manager.getWithLock(event.getHeader().getConfigName());
             if (config == null) {
                 LogUtils.debug(getClass(),
                                String.format(
                                        "Configuration not loaded. [name=%s]",
-                                       event.getConfigName()));
+                                       event.getHeader().getConfigName()));
                 return;
             }
             try {
-                Version prev = Version.parse(event.getPreVersion());
-                Version curr = Version.parse(event.getNewVersion());
+                Version prev = Version.parse(event.getHeader().getPreVersion());
+                Version curr = Version.parse(event.getHeader().getUpdatedVersion());
                 if (!config.getVersion().equals(prev)) {
                     throw new ConfigurationException(String.format(
                             "Invalid Sync state: Event version out of sync. [expected=%s][actual=%s]",
@@ -114,7 +114,7 @@ public class ConfigurationUpdateHandler {
                 if (node == null) {
                     throw new ConfigurationException(String.format(
                             "Invalid Sync state: Specified node not found. [config=%s][path=%s]",
-                            event.getConfigName(), event.getPath()));
+                            event.getHeader().getConfigName(), event.getPath()));
                 }
                 switch (event.getEventType()) {
                     case Add:
@@ -129,12 +129,12 @@ public class ConfigurationUpdateHandler {
                 }
                 LogUtils.info(getClass(), String.format(
                         "Updated configuration : [name=%s][version=%s]",
-                        event.getConfigName(), curr.toString()));
+                        event.getHeader().getConfigName(), curr.toString()));
             } finally {
-                if (!manager.releaseLock(event.getConfigName())) {
+                if (!manager.releaseLock(event.getHeader().getConfigName())) {
                     LogUtils.warn(getClass(), String.format(
                             "Configuration update lock release failed. [config=%s]",
-                            event.getConfigName()));
+                            event.getHeader().getConfigName()));
                 }
             }
         } catch (Exception e) {
@@ -156,7 +156,7 @@ public class ConfigurationUpdateHandler {
     throws ConfigurationException {
         LogUtils.debug(getClass(),
                        String.format("Applying Add change. [config=%s][path=%s]",
-                                     event.getConfigName(),
+                                     event.getHeader().getConfigName(),
                                      parent.getAbsolutePath()));
         if (parent instanceof ConfigPathNode) {
             ConfigPathNode cp = (ConfigPathNode) parent;
@@ -164,7 +164,7 @@ public class ConfigurationUpdateHandler {
             if (cnode != null) {
                 throw new ConfigurationException(String.format(
                         "Add failed : Node already exists. [config=%s][path=%s][name=%s]",
-                        event.getConfigName(), cnode.getAbsolutePath(),
+                        event.getHeader().getConfigName(), cnode.getAbsolutePath(),
                         event.getValue().getName()));
             }
             cp.addChildNode(event.getValue());
@@ -173,7 +173,7 @@ public class ConfigurationUpdateHandler {
             if (cp.hasKey(event.getValue().getName())) {
                 throw new ConfigurationException(String.format(
                         "Add failed : Node already exists. [config=%s][path=%s][name=%s]",
-                        event.getConfigName(), cp.getAbsolutePath(),
+                        event.getHeader().getConfigName(), cp.getAbsolutePath(),
                         event.getValue().getName()));
             }
             cp.addKeyValue(event.getValue().getName(), event.getValue().getValue());
@@ -183,13 +183,13 @@ public class ConfigurationUpdateHandler {
             if (vn != null) {
                 throw new ConfigurationException(String.format(
                         "Add failed : Node already exists. [config=%s][path=%s][name=%s]",
-                        event.getConfigName(), vn.getAbsolutePath(),
+                        event.getHeader().getConfigName(), vn.getAbsolutePath(),
                         event.getValue().getName()));
             }
             cp.addValue(event.getValue());
         } else throw new ConfigurationException(
                 String.format("Add event not supported : [config=%s][path=%s]",
-                              event.getConfigName(), parent.getAbsolutePath()));
+                              event.getHeader().getConfigName(), parent.getAbsolutePath()));
     }
 
     /**
@@ -210,13 +210,13 @@ public class ConfigurationUpdateHandler {
             if (cnode == null) {
                 throw new ConfigurationException(String.format(
                         "Add failed : Node to update not found. [config=%s][path=%s][name=%s]",
-                        event.getConfigName(), cp.getAbsolutePath(),
+                        event.getHeader().getConfigName(), cp.getAbsolutePath(),
                         event.getValue().getName()));
             }
             if (!(cnode instanceof ConfigValueNode)) {
                 throw new ConfigurationException(String.format(
                         "Add failed : Cannot update node. [config=%s][path=%s][name=%s]",
-                        event.getConfigName(), cp.getAbsolutePath(),
+                        event.getHeader().getConfigName(), cp.getAbsolutePath(),
                         event.getValue().getName()));
             }
             ((ConfigValueNode) cnode).setValue(event.getValue().getValue());
@@ -226,7 +226,7 @@ public class ConfigurationUpdateHandler {
             if (vn == null) {
                 throw new ConfigurationException(String.format(
                         "Add failed : Node not found. [config=%s][path=%s][name=%s]",
-                        event.getConfigName(), cp.getAbsolutePath(),
+                        event.getHeader().getConfigName(), cp.getAbsolutePath(),
                         event.getValue().getName()));
             }
             vn.setValue(event.getValue().getValue());
@@ -235,13 +235,13 @@ public class ConfigurationUpdateHandler {
             if (!cp.hasKey(event.getValue().getName())) {
                 throw new ConfigurationException(String.format(
                         "Add failed : Key/Value to update not found. [config=%s][path=%s][name=%s]",
-                        event.getConfigName(), cp.getAbsolutePath(),
+                        event.getHeader().getConfigName(), cp.getAbsolutePath(),
                         event.getValue().getName()));
             }
             cp.addKeyValue(event.getValue().getName(), event.getValue().getValue());
         } else throw new ConfigurationException(
                 String.format("Add event not supported : [config=%s][path=%s]",
-                              event.getConfigName(), parent.getAbsolutePath()));
+                              event.getHeader().getConfigName(), parent.getAbsolutePath()));
     }
 
     /**
@@ -262,13 +262,13 @@ public class ConfigurationUpdateHandler {
             if (cnode == null) {
                 throw new ConfigurationException(String.format(
                         "Add failed : Node to update not found. [config=%s][path=%s][name=%s]",
-                        event.getConfigName(), cp.getAbsolutePath(),
+                        event.getHeader().getConfigName(), cp.getAbsolutePath(),
                         event.getValue().getName()));
             }
             if (!(cnode instanceof ConfigValueNode)) {
                 throw new ConfigurationException(String.format(
                         "Add failed : Cannot update node. [config=%s][path=%s][name=%s]",
-                        event.getConfigName(), cp.getAbsolutePath(),
+                        event.getHeader().getConfigName(), cp.getAbsolutePath(),
                         event.getValue().getName()));
             }
             cp.removeChildNode(event.getValue().getName());
@@ -278,7 +278,7 @@ public class ConfigurationUpdateHandler {
             if (vn == null) {
                 throw new ConfigurationException(String.format(
                         "Add failed : Node not found. [config=%s][path=%s][name=%s]",
-                        event.getConfigName(), cp.getAbsolutePath(),
+                        event.getHeader().getConfigName(), cp.getAbsolutePath(),
                         event.getValue().getName()));
             }
             cp.removeValue(vn);
@@ -287,12 +287,12 @@ public class ConfigurationUpdateHandler {
             if (!cp.hasKey(event.getValue().getName())) {
                 throw new ConfigurationException(String.format(
                         "Add failed : Key/Value to update not found. [config=%s][path=%s][name=%s]",
-                        event.getConfigName(), cp.getAbsolutePath(),
+                        event.getHeader().getConfigName(), cp.getAbsolutePath(),
                         event.getValue().getName()));
             }
             cp.removeKeyValue(event.getValue().getName());
         } else throw new ConfigurationException(
                 String.format("Add event not supported : [config=%s][path=%s]",
-                              event.getConfigName(), parent.getAbsolutePath()));
+                              event.getHeader().getConfigName(), parent.getAbsolutePath()));
     }
 }

@@ -32,7 +32,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class ConfigServerUpdateEvent extends AbstractConfigUpdateEvent {
+public class ConfigServerUpdateEvent extends AbstractConfigUpdateEvent<Object> {
     /**
      * Name of the node.
      */
@@ -41,8 +41,4 @@ public class ConfigServerUpdateEvent extends AbstractConfigUpdateEvent {
      * Description of the node.
      */
     private String description;
-    /**
-     * Updated value object.
-     */
-    private Object value;
 }
