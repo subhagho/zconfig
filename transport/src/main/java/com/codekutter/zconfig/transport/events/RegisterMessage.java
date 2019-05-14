@@ -25,10 +25,14 @@
 package com.codekutter.zconfig.transport.events;
 
 import com.codekutter.zconfig.common.ZConfigInstance;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Message Body to be send during instance registration.
  */
+@Getter
+@Setter
 public class RegisterMessage {
     /**
      * Instance handle.
@@ -36,20 +40,7 @@ public class RegisterMessage {
     private ZConfigInstance instance;
 
     /**
-     * Get instance handle.
-     *
-     * @return - Instance handle.
+     * Authentication header.
      */
-    public ZConfigInstance getInstance() {
-        return instance;
-    }
-
-    /**
-     * Set instance handle.
-     *
-     * @param instance - Instance handle.
-     */
-    public void setInstance(ZConfigInstance instance) {
-        this.instance = instance;
-    }
+    private AuthHeader authHeader;
 }

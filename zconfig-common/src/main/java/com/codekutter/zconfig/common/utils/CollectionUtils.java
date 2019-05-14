@@ -29,6 +29,7 @@ import com.google.common.base.Preconditions;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.ParseException;
@@ -36,6 +37,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class CollectionUtils {
+
     /**
      * Set the value of the specified field to a list of elements converted from the
      * List of input strings.
@@ -61,7 +63,7 @@ public class CollectionUtils {
     public static final void setListValues(@Nonnull Object source,
                                            @Nonnull Field field,
                                            @Nonnull List<String> values)
-    throws Exception {
+            throws Exception {
         Preconditions.checkArgument(source != null);
         Preconditions.checkArgument(field != null);
         Preconditions.checkArgument(values != null);
@@ -70,8 +72,8 @@ public class CollectionUtils {
         if (!type.equals(List.class)) {
             throw new Exception(
                     String.format("Invalid field type. [expected=%s][actual=%s]",
-                                  List.class.getCanonicalName(),
-                                  type.getCanonicalName()));
+                            List.class.getCanonicalName(),
+                            type.getCanonicalName()));
         }
         Class<?> ptype = ReflectionUtils.getGenericListType(field);
         Preconditions.checkNotNull(ptype);
@@ -221,7 +223,7 @@ public class CollectionUtils {
     public static final void setSetValues(@Nonnull Object source,
                                           @Nonnull Field field,
                                           @Nonnull List<String> values)
-    throws Exception {
+            throws Exception {
         Preconditions.checkArgument(source != null);
         Preconditions.checkArgument(field != null);
         Preconditions.checkArgument(values != null);
@@ -230,8 +232,8 @@ public class CollectionUtils {
         if (!type.equals(Set.class)) {
             throw new Exception(
                     String.format("Invalid field type. [expected=%s][actual=%s]",
-                                  Set.class.getCanonicalName(),
-                                  type.getCanonicalName()));
+                            Set.class.getCanonicalName(),
+                            type.getCanonicalName()));
         }
         Class<?> ptype = ReflectionUtils.getGenericSetType(field);
         Preconditions.checkNotNull(ptype);
