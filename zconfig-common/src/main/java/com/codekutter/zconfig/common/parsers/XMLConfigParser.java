@@ -741,7 +741,7 @@ public class XMLConfigParser extends AbstractConfigParser {
                             configuration.getName()));
                 }
                 String chash = CypherUtils.getKeyHash(password);
-                if (password.compareTo(chash) != 0) {
+                if (hash.compareTo(chash) != 0) {
                     throw new ConfigurationException(String.format(
                             "Invalid Passcode: Doesn't match with passcode set in configuration. [config=%s]",
                             configuration.getName()));
