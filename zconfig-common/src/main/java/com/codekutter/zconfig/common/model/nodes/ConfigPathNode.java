@@ -189,8 +189,21 @@ public class ConfigPathNode extends ConfigElementNode {
      * @return - Node found or NULL.
      */
     @Override
-    public AbstractConfigNode find(List<String> path, int index) {
+    public AbstractConfigNode find(List<String> path, int index)
+    throws ConfigurationException {
         String key = path.get(index);
+        if (key.compareTo(ConfigurationSettings.NODE_PARENT_TERM) == 0) {
+            if (getParent() != null) {
+                String pname = getParent().getName();
+                StringBuffer buff = new StringBuffer(pname);
+                for (int ii = index + 1; ii < path.size(); ii++) {
+                    buff.append(ConfigurationSettings.NODE_SEARCH_SEPERATOR)
+                        .append(path.get(ii));
+                }
+                return getParent().find(buff.toString());
+            }
+            return null;
+        }
         if (getName().compareTo(key) == 0) {
             if (index == path.size() - 1) {
                 return this;
@@ -227,7 +240,8 @@ public class ConfigPathNode extends ConfigElementNode {
      * @param index - Index in the path array.
      * @return - Found node or NULL.
      */
-    public AbstractConfigNode findChild(List<String> path, int index) {
+    public AbstractConfigNode findChild(List<String> path, int index)
+    throws ConfigurationException {
         String cname = path.get(index + 1);
         String name = path.get(index);
         if (children.containsKey(cname)) {

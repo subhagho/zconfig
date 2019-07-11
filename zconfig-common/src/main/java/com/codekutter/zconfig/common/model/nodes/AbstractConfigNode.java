@@ -238,7 +238,8 @@ public abstract class AbstractConfigNode {
                                             this);
         if (stack != null && !stack.isEmpty()) {
             String node = stack.get(0);
-            if (node.compareTo(getName()) != 0) {
+            if (node.compareTo(getName()) != 0 &&
+                    node.compareTo(ConfigurationSettings.NODE_PARENT_TERM) != 0) {
                 stack.add(0, getName());
             }
             return find(stack, 0);
@@ -253,7 +254,8 @@ public abstract class AbstractConfigNode {
      * @param index - Current index in the path array to search for.
      * @return - Configuration Node found.
      */
-    public abstract AbstractConfigNode find(List<String> path, int index);
+    public abstract AbstractConfigNode find(List<String> path, int index)
+    throws ConfigurationException;
 
     /**
      * Indicate this node has been updated.

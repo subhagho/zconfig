@@ -76,7 +76,8 @@ public class ConfigSearchListNode extends ConfigListNode<AbstractConfigNode> {
      * @return - Configuration Node found.
      */
     @Override
-    public AbstractConfigNode find(List<String> path, int index) {
+    public AbstractConfigNode find(List<String> path, int index)
+    throws ConfigurationException {
         List<AbstractConfigNode> values = getValues();
         if (values != null && !values.isEmpty()) {
             List<AbstractConfigNode> result = new ArrayList<>();

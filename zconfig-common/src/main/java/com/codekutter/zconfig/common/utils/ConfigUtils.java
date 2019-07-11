@@ -59,15 +59,6 @@ public class ConfigUtils {
                 if (Strings.isNullOrEmpty(part)) {
                     continue;
                 }
-                if (part.compareTo(ConfigurationSettings.NODE_PARENT_TERM) == 0) {
-                    if (node == null || node.getParent() == null) {
-                        throw new ConfigurationException(
-                                "Cannot find parent: Node is NULL or parent is null.");
-                    }
-                    node = node.getParent();
-                    stack.add(node.getName());
-                    continue;
-                }
                 String[] pc = checkSubPath(part, settings);
                 if (pc != null && pc.length > 0) {
                     for (String p : pc) {
@@ -108,8 +99,16 @@ public class ConfigUtils {
             return new String[]{pname, index};
         }
         int index = name.indexOf(ConfigurationSettings.PARAM_NODE_CHAR);
-        if (index > 0) {
+        if (index >= 0) {
+            if (name.compareTo(ConfigurationSettings.PARAM_NODE_CHAR) == 0) {
+                return new String[]{settings
+                                            .getParametersNodeName()};
+            }
             String[] parts = name.split(ConfigurationSettings.PARAM_NODE_CHAR);
+            if (index == 0) {
+                return new String[]{settings
+                                            .getParametersNodeName(), parts[1]};
+            }
             if (parts.length == 1) {
                 return new String[]{parts[0],
                                     settings
@@ -122,8 +121,16 @@ public class ConfigUtils {
             }
         }
         index = name.indexOf(ConfigurationSettings.ATTR_NODE_CHAR);
-        if (index > 0) {
+        if (index >= 0) {
+            if (name.compareTo(ConfigurationSettings.ATTR_NODE_CHAR) == 0) {
+                return new String[]{settings
+                                            .getAttributesNodeName()};
+            }
             String[] parts = name.split(ConfigurationSettings.ATTR_NODE_CHAR);
+            if (index == 0) {
+                return new String[]{settings
+                                            .getAttributesNodeName(), parts[1]};
+            }
             if (parts.length == 1) {
                 return new String[]{parts[0],
                                     settings
@@ -136,9 +143,17 @@ public class ConfigUtils {
             }
         }
         index = name.indexOf(ConfigurationSettings.PROP_NODE_CHAR);
-        if (index > 0) {
+        if (index >= 0) {
+            if (name.compareTo(ConfigurationSettings.PROP_NODE_CHAR) == 0) {
+                return new String[]{settings
+                                            .getPropertiesNodeName()};
+            }
             String[] parts = name.split(
                     String.format("\\%s", ConfigurationSettings.PROP_NODE_CHAR));
+            if (index == 0) {
+                return new String[]{settings
+                                            .getPropertiesNodeName(), parts[1]};
+            }
             if (parts.length == 1) {
                 return new String[]{parts[0],
                                     settings

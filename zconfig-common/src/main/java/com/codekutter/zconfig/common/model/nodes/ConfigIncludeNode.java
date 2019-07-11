@@ -207,7 +207,8 @@ public class ConfigIncludeNode extends ConfigElementNode {
      * @return - Node found or NULL.
      */
     @Override
-    public AbstractConfigNode find(List<String> path, int index) {
+    public AbstractConfigNode find(List<String> path, int index)
+    throws ConfigurationException {
         return node.find(path, index);
     }
 
@@ -238,8 +239,9 @@ public class ConfigIncludeNode extends ConfigElementNode {
                 return file.toURI();
             } else {
                 String uriString = String.format("%s://%s",
-                        EReaderType.getURIScheme(readerType),
-                        pp);
+                                                 EReaderType
+                                                         .getURIScheme(readerType),
+                                                 pp);
                 return URI.create(uriString);
             }
         }

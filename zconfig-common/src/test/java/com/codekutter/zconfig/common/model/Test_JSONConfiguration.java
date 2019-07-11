@@ -267,10 +267,10 @@ class Test_JSONConfiguration {
             assertTrue(node instanceof ConfigPathNode);
             debug(getClass(), node);
 
-            path = "../@";
+            path = "../createdBy/../node_3/node_4/../updatedBy";
             node = node.find(path);
             assertNotNull(node);
-            assertTrue(node instanceof ConfigAttributesNode);
+            assertTrue(node instanceof ConfigPathNode);
             debug(getClass(), node);
         } catch (Throwable e) {
             error(getClass(), e);
