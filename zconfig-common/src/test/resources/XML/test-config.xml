@@ -25,8 +25,8 @@
 <root>
     <header ID="UNIQUE-99918239013" group="TEST-APP-GROUP" application="TEST-APPLICATION" name="test-config" version="0.2">
         <description>This is a test JSON configuration file.</description>
-        <createdBy user="subho" tiemstamp="1552835141000" />
-        <updatedBy user="subho" tiemstamp="1552835341000" />
+        <createdBy user="subho" tiemstamp="1552835141000"/>
+        <updatedBy user="subho" tiemstamp="1552835341000"/>
     </header>
     <configuration>
         <nodeVersion>2</nodeVersion>
@@ -69,7 +69,7 @@
                 <TEST_VALUE_LIST>TEST_STRING_7</TEST_VALUE_LIST>
                 <TEST_VALUE_LIST>TEST_STRING_8</TEST_VALUE_LIST>
             </VALUE_LIST>
-            <ELEMENT_LIST>
+            <TEST_ELEMENT_LIST>
                 <TEST_ELEMENT_LIST>
                     <nodeVersion>1</nodeVersion>
                     <createdBy>
@@ -121,7 +121,7 @@
                     <string_1>STRING_1</string_1>
                     <string_2>STRING_2</string_2>
                 </TEST_ELEMENT_LIST>
-            </ELEMENT_LIST>
+            </TEST_ELEMENT_LIST>
             <node_2 ATTRIBUTE_2="Attribute Two" ATTRIBUTE_3="Attribute Three" ATTRIBUTE_4="Attribute Four"
                     ATTRIBUTE_5="Attribute Five" ATTRIBUTE_1="Attribute One">
                 <description>This is a test description</description>
@@ -176,6 +176,16 @@
                             <user>subho</user>
                             <timestamp>01.02.2019 12:32:19</timestamp>
                         </updatedBy>
+                        <TEST_VALUE_LIST>
+                            <STRING_LIST_VALUE>TEST_STRING_1</STRING_LIST_VALUE>
+                            <STRING_LIST_VALUE>TEST_STRING_2</STRING_LIST_VALUE>
+                            <STRING_LIST_VALUE>TEST_STRING_3</STRING_LIST_VALUE>
+                            <STRING_LIST_VALUE>TEST_STRING_4</STRING_LIST_VALUE>
+                            <STRING_LIST_VALUE>Test override property. ${PROP_1}</STRING_LIST_VALUE>
+                            <STRING_LIST_VALUE>TEST_STRING_6</STRING_LIST_VALUE>
+                            <STRING_LIST_VALUE>TEST_STRING_7</STRING_LIST_VALUE>
+                            <STRING_LIST_VALUE>TEST_STRING_8</STRING_LIST_VALUE>
+                        </TEST_VALUE_LIST>
                         <LONG_VALUE_LIST>
                             <TEST_LONG_LIST>1298901409</TEST_LONG_LIST>
                             <TEST_LONG_LIST>9435804955</TEST_LONG_LIST>

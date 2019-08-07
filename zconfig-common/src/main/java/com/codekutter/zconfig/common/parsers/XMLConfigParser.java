@@ -34,10 +34,7 @@ import com.google.common.base.Strings;
 import com.codekutter.zconfig.common.readers.AbstractConfigReader;
 import com.codekutter.zconfig.common.utils.IOUtils;
 import com.codekutter.zconfig.common.utils.RemoteFileHelper;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -227,28 +224,24 @@ public class XMLConfigParser extends AbstractConfigParser {
                 if (nodeName.compareTo(settings.getPropertiesNodeName()) == 0) {
                     ConfigPropertiesNode pnode =
                             new ConfigPropertiesNode(configuration, parent);
-                    pnode.setName(settings.getPropertiesNodeName());
-                    ((ConfigPathNode) parent).addChildNode(pnode);
+                    setupNode(settings.getPropertiesNodeName(), pnode, parent);
+                    //pnode.setName(settings.getPropertiesNodeName());
+                    //((ConfigPathNode) parent).addChildNode(pnode);
                     parseChildren(node, pnode, password);
                 } else if (nodeName.compareTo(settings.getParametersNodeName()) ==
                         0) {
                     ConfigParametersNode pnode =
                             new ConfigParametersNode(configuration, parent);
-                    pnode.setName(settings.getParametersNodeName());
-                    ((ConfigPathNode) parent).addChildNode(pnode);
-                    parseChildren(node, pnode, password);
-                } else if (nodeName.compareTo(settings.getAttributesNodeName()) ==
-                        0) {
-                    ConfigAttributesNode pnode =
-                            new ConfigAttributesNode(configuration, parent);
-                    pnode.setName(settings.getAttributesNodeName());
-                    ((ConfigPathNode) parent).addChildNode(pnode);
+                    setupNode(settings.getParametersNodeName(), pnode, parent);
+                    //pnode.setName(settings.getParametersNodeName());
+                    //((ConfigPathNode) parent).addChildNode(pnode);
                     parseChildren(node, pnode, password);
                 } else if (nodeName.compareTo(ConfigIncludeNode.NODE_NAME) == 0) {
                     ConfigIncludeNode pnode =
                             new ConfigIncludeNode(configuration, parent);
-                    ((ConfigPathNode) parent).addChildNode(pnode);
-                    parseIncludeNode(node, pnode, password);
+                    setupNode(ConfigIncludeNode.NODE_NAME, pnode, parent);
+                    //((ConfigPathNode) parent).addChildNode(pnode);
+                    //parseIncludeNode(node, pnode, password);
                 } else if (nodeName.compareTo(ConfigResourceNode.NODE_NAME) == 0) {
                     EResourceType type = parseResourceType(node);
                     if (type == null) {
@@ -258,23 +251,27 @@ public class XMLConfigParser extends AbstractConfigParser {
                     ConfigResourceFile pnode = null;
                     if (type == EResourceType.FILE) {
                         pnode = new ConfigResourceFile(configuration, parent);
-                        ((ConfigPathNode) parent).addChildNode(pnode);
+                        //((ConfigPathNode) parent).addChildNode(pnode);
+                        setupNode(ConfigResourceNode.NODE_NAME, pnode, parent);
                         parseResourceFileNode(node, pnode);
                     } else if (type == EResourceType.BLOB) {
                         pnode = new ConfigResourceBlob(configuration, parent);
-                        ((ConfigPathNode) parent).addChildNode(pnode);
+                        setupNode(ConfigResourceNode.NODE_NAME, pnode, parent);
+                        //((ConfigPathNode) parent).addChildNode(pnode);
                         parseResourceFileNode(node, pnode);
                     } else if (type == EResourceType.DIRECTORY) {
                         pnode = new ConfigResourceDirectory(configuration, parent);
-                        ((ConfigPathNode) parent).addChildNode(pnode);
+                        setupNode(ConfigResourceNode.NODE_NAME, pnode, parent);
+                        //((ConfigPathNode) parent).addChildNode(pnode);
                         parseResourceDirNode(node, (ConfigResourceDirectory) pnode);
                     }
                     pnode.setName(nodeName);
                 } else {
                     ConfigPathNode pnode =
                             new ConfigPathNode(configuration, parent);
-                    pnode.setName(node.getNodeName());
-                    ((ConfigPathNode) parent).addChildNode(pnode);
+                    //pnode.setName(node.getNodeName());
+                    //((ConfigPathNode) parent).addChildNode(pnode);
+                    setupNode(node.getNodeName(), pnode, parent);
                     parseChildren(node, pnode, password);
                 }
             }
@@ -573,6 +570,48 @@ public class XMLConfigParser extends AbstractConfigParser {
         }
     }
 
+
+    /**
+     * Setup the common node elements.
+     *
+     * @param name       - Node name.
+     * @param configNode - Config node handle.
+     * @param parent     - Parent config node.
+     * @throws ConfigurationException
+     */
+    private void setupNode(String name, AbstractConfigNode configNode,
+                           AbstractConfigNode parent)
+    throws ConfigurationException {
+        configNode.setName(name);
+        configNode.setParent(parent);
+        configNode.setConfiguration(configuration);
+        configNode.loading();
+        addToParentNode(parent, configNode);
+    }
+
+
+    /**
+     * Validate and add the specified node to the parent.
+     *
+     * @param parent - Parent configuration node.
+     * @param node   - Child node to add.
+     * @throws ConfigurationException
+     */
+    private void addToParentNode(AbstractConfigNode parent, AbstractConfigNode node)
+    throws ConfigurationException {
+        if (parent instanceof ConfigPathNode) {
+            ((ConfigPathNode) parent).addChildNode(node);
+        } else if (parent instanceof ConfigListElementNode) {
+            if (node instanceof ConfigElementNode) {
+                ((ConfigListElementNode) parent).addValue((ConfigElementNode) node);
+            }
+        } else {
+            throw new ConfigurationException(String.format(
+                    "Cannot add child node to parent node. [type=%s]",
+                    parent.getClass().getCanonicalName()));
+        }
+    }
+
     /**
      * Parse the child nodes for the passed XML Element.
      *
@@ -583,6 +622,23 @@ public class XMLConfigParser extends AbstractConfigParser {
     private void parseChildren(Element node, AbstractConfigNode parent,
                                String password)
     throws ConfigurationException {
+        if (node.hasAttributes() && (parent instanceof ConfigPathNode)) {
+            NamedNodeMap nattrs = node.getAttributes();
+            if (nattrs != null) {
+                ConfigAttributesNode attrs = ((ConfigPathNode) parent).attributes();
+                if (attrs == null) {
+                    attrs = new ConfigAttributesNode(configuration, parent);
+                    setupNode(configuration.getSettings().getAttributesNodeName(),
+                              attrs, parent);
+                }
+                for (int ii = 0; ii < nattrs.getLength(); ii++) {
+                    Node attr = nattrs.item(ii);
+                    String name = attr.getNodeName();
+                    String value = attr.getNodeValue();
+                    attrs.addKeyValue(name, value);
+                }
+            }
+        }
         if (node.hasChildNodes()) {
             NodeList nodeList = node.getChildNodes();
             for (int ii = 0; ii < nodeList.getLength(); ii++) {
