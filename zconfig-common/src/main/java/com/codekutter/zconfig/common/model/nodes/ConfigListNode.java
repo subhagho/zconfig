@@ -92,10 +92,6 @@ public abstract class ConfigListNode<T extends AbstractConfigNode>
         Preconditions.checkArgument(value != null);
         if (values == null) {
             values = new ArrayList<>();
-        } else {
-            for (T v : values) {
-
-            }
         }
 
         values.add(value);

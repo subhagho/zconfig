@@ -23,7 +23,8 @@
   ~
   -->
 <root>
-    <header ID="UNIQUE-99918239013" group="TEST-APP-GROUP" application="TEST-APPLICATION" name="test-config" version="0.2">
+    <header ID="UNIQUE-99918239013" group="TEST-APP-GROUP" application="TEST-APPLICATION" name="test-config" version="0.2"
+            passwordHash="2ff9irI7zQgaWmitmRK1Yg==">
         <description>This is a test JSON configuration file.</description>
         <createdBy user="subho" tiemstamp="1552835141000"/>
         <updatedBy user="subho" tiemstamp="1552835341000"/>
@@ -136,10 +137,11 @@
                     <PARAM_5>18473498</PARAM_5>
                     <PARAM_6>EValue3</PARAM_6>
                 </parameters>
-                <remoteResource>
-                    <type>BLOB</type>
-                    <url>https://github.com/subhagho/openriver-maven/blob/wookler-repo/com/wookler/common/1.0-SNAPSHOT/common-1.0-20171127.050926-1-javadoc.jar?raw=true</url>
-                    <resourceName>common-1.0-20171127.050926-1-javadoc.jar</resourceName>
+                <remoteResource type="BLOB"
+                                resourceName="common-1.0-20171127.050926-1-javadoc.jar">
+                    <url>
+                        https://github.com/subhagho/openriver-maven/blob/wookler-repo/com/wookler/common/1.0-SNAPSHOT/common-1.0-20171127.050926-1-javadoc.jar?raw=true
+                    </url>
                 </remoteResource>
                 <node_3>
                     <nodeVersion>1</nodeVersion>
@@ -186,10 +188,8 @@
                         <TEST_LONG_LIST>-129814901</TEST_LONG_LIST>
                         <TEST_LONG_LIST>-134981490134</TEST_LONG_LIST>
                     </node_4>
-                    <remoteResource>
-                        <type>FILE</type>
+                    <remoteResource type="FILE" resourceName="data/LICENSE.txt">
                         <url>https://raw.githubusercontent.com/subhagho/zconfig/master/LICENSE</url>
-                        <resourceName>data/LICENSE.txt</resourceName>
                     </remoteResource>
                 </node_3>
             </node_2>

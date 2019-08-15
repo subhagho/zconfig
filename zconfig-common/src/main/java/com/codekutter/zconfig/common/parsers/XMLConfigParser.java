@@ -296,7 +296,7 @@ public class XMLConfigParser extends AbstractConfigParser {
                 ((ConfigListValueNode) parent).addValue(vn);
             } else if (parent instanceof ConfigKeyValueNode) {
                 ((ConfigKeyValueNode) parent)
-                        .addKeyValue(vn.getName(), vn.getValue());
+                        .addKeyValue(vn);
             } else {
                 throw new ConfigurationException(String.format(
                         "Cannot add ConfigValue to parent : [parent=%s][path=%s]",
@@ -663,6 +663,14 @@ public class XMLConfigParser extends AbstractConfigParser {
             if (children.getLength() == 1) {
                 if (children.item(0).getNodeType() == Node.TEXT_NODE) {
                     String value = children.item(0).getTextContent();
+                    // Empty element nodes also have empty text
+                    value = value.trim();
+                    if (!Strings.isNullOrEmpty(value))
+                        return true;
+                }
+            } else if (((Element) node).hasAttribute(XMLConfigConstants.CONFIG_NODE_ENCRYPTED)) {
+                if (((Element) node).hasAttribute(XMLConfigConstants.CONFIG_NODE_ENCRYPTED)) {
+                    String value = children.item(1).getTextContent();
                     // Empty element nodes also have empty text
                     value = value.trim();
                     if (!Strings.isNullOrEmpty(value))
