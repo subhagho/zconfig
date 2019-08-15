@@ -194,13 +194,7 @@ public class ConfigPathNode extends ConfigElementNode {
         String key = path.get(index);
         if (key.compareTo(ConfigurationSettings.NODE_PARENT_TERM) == 0) {
             if (getParent() != null) {
-                String pname = getParent().getName();
-                StringBuffer buff = new StringBuffer(pname);
-                for (int ii = index + 1; ii < path.size(); ii++) {
-                    buff.append(ConfigurationSettings.NODE_SEARCH_SEPERATOR)
-                        .append(path.get(ii));
-                }
-                return getParent().find(buff.toString());
+                return findInParent(path, index, index + 1);
             }
             return null;
         }
@@ -298,8 +292,22 @@ public class ConfigPathNode extends ConfigElementNode {
                     return nodes.get(0);
                 }
             }
+        } else if (getParent() != null &&
+                cname.compareTo(ConfigurationSettings.NODE_PARENT_TERM) == 0) {
+            return findInParent(path, index, index + 2);
         }
         return null;
+    }
+
+    private AbstractConfigNode findInParent(List<String> path, int index, int offset)
+    throws ConfigurationException {
+        String pname = getParent().getName();
+        StringBuffer buff = new StringBuffer(pname);
+        for (int ii = offset; ii < path.size(); ii++) {
+            buff.append(ConfigurationSettings.NODE_SEARCH_SEPERATOR)
+                .append(path.get(ii));
+        }
+        return getParent().find(buff.toString());
     }
 
     /**
