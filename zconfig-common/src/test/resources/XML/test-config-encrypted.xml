@@ -171,22 +171,26 @@
                             <user>subho</user>
                             <timestamp>01.02.2019 12:32:19</timestamp>
                         </updatedBy>
-                        <TEST_VALUE_LIST>TEST_STRING_1</TEST_VALUE_LIST>
-                        <TEST_VALUE_LIST>TEST_STRING_2</TEST_VALUE_LIST>
-                        <TEST_VALUE_LIST>TEST_STRING_3</TEST_VALUE_LIST>
-                        <TEST_VALUE_LIST>TEST_STRING_4</TEST_VALUE_LIST>
-                        <TEST_VALUE_LIST>Test override property. ${PROP_1}</TEST_VALUE_LIST>
-                        <TEST_VALUE_LIST>TEST_STRING_6</TEST_VALUE_LIST>
-                        <TEST_VALUE_LIST>TEST_STRING_7</TEST_VALUE_LIST>
-                        <TEST_VALUE_LIST>TEST_STRING_8</TEST_VALUE_LIST>
-                        <TEST_LONG_LIST>1298901409</TEST_LONG_LIST>
-                        <TEST_LONG_LIST>9435804955</TEST_LONG_LIST>
-                        <TEST_LONG_LIST>9285923590</TEST_LONG_LIST>
-                        <TEST_LONG_LIST>239423932509</TEST_LONG_LIST>
-                        <TEST_LONG_LIST>12918419348</TEST_LONG_LIST>
-                        <TEST_LONG_LIST>92085925857</TEST_LONG_LIST>
-                        <TEST_LONG_LIST>-129814901</TEST_LONG_LIST>
-                        <TEST_LONG_LIST>-134981490134</TEST_LONG_LIST>
+                        <TEST_VALUE_LIST>
+                            <STRING_LIST_VALUE>TEST_STRING_1</STRING_LIST_VALUE>
+                            <STRING_LIST_VALUE>TEST_STRING_2</STRING_LIST_VALUE>
+                            <STRING_LIST_VALUE>TEST_STRING_3</STRING_LIST_VALUE>
+                            <STRING_LIST_VALUE>TEST_STRING_4</STRING_LIST_VALUE>
+                            <STRING_LIST_VALUE>Test override property. ${PROP_1}</STRING_LIST_VALUE>
+                            <STRING_LIST_VALUE>TEST_STRING_6</STRING_LIST_VALUE>
+                            <STRING_LIST_VALUE>TEST_STRING_7</STRING_LIST_VALUE>
+                            <STRING_LIST_VALUE>TEST_STRING_8</STRING_LIST_VALUE>
+                        </TEST_VALUE_LIST>
+                        <LONG_VALUE_LIST>
+                            <TEST_LONG_LIST>1298901409</TEST_LONG_LIST>
+                            <TEST_LONG_LIST>9435804955</TEST_LONG_LIST>
+                            <TEST_LONG_LIST>9285923590</TEST_LONG_LIST>
+                            <TEST_LONG_LIST>239423932509</TEST_LONG_LIST>
+                            <TEST_LONG_LIST>12918419348</TEST_LONG_LIST>
+                            <TEST_LONG_LIST>92085925857</TEST_LONG_LIST>
+                            <TEST_LONG_LIST>-129814901</TEST_LONG_LIST>
+                            <TEST_LONG_LIST>-134981490134</TEST_LONG_LIST>
+                        </LONG_VALUE_LIST>
                     </node_4>
                     <remoteResource type="FILE" resourceName="data/LICENSE.txt">
                         <url>https://raw.githubusercontent.com/subhagho/zconfig/master/LICENSE</url>

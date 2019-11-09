@@ -24,19 +24,20 @@
 
 package com.codekutter.zconfig.common;
 
-import com.codekutter.zconfig.common.model.EncryptedValue;
-import com.codekutter.zconfig.common.model.annotations.MethodInvoke;
-import com.codekutter.zconfig.common.model.nodes.AbstractConfigNode;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 import com.codekutter.zconfig.common.model.Configuration;
+import com.codekutter.zconfig.common.model.EncryptedValue;
 import com.codekutter.zconfig.common.model.Version;
 import com.codekutter.zconfig.common.model.annotations.ConfigParam;
 import com.codekutter.zconfig.common.model.annotations.ConfigPath;
 import com.codekutter.zconfig.common.model.annotations.ConfigValue;
+import com.codekutter.zconfig.common.model.annotations.MethodInvoke;
 import com.codekutter.zconfig.common.model.annotations.transformers.JodaTimeTransformer;
+import com.codekutter.zconfig.common.model.nodes.AbstractConfigNode;
 import com.codekutter.zconfig.common.parsers.JSONConfigParser;
+import com.codekutter.zconfig.common.parsers.XMLConfigParser;
 import com.codekutter.zconfig.common.readers.ConfigFileReader;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import lombok.Data;
 import lombok.ToString;
 import org.joda.time.DateTime;
@@ -49,9 +50,9 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class Test_ConfigurationAnnotationProcessor {
+class Test_ConfigurationXmlAnnotationProcessor {
     private static final String BASE_PROPS_FILE =
-            "src/test/resources/json/test-config-encrypted.properties";
+            "src/test/resources/XML/test-config-encrypted.properties";
     private static Configuration configuration = null;
     private static String encryptionKey = "21947a50-6755-47";
 
@@ -80,7 +81,7 @@ class Test_ConfigurationAnnotationProcessor {
         private long longValue;
         @ConfigValue(name = "values/doubleValue", required = true)
         private double doubleValue;
-        @ConfigValue(name = "node_3/node_4/TEST_LONG_LIST")
+        @ConfigValue(name = "node_3/node_4/LONG_VALUE_LIST")
         private Set<Long> longListSet;
         @ConfigValue(name = "updatedBy")
         private ModifiedBy updatedBy;
@@ -127,9 +128,9 @@ class Test_ConfigurationAnnotationProcessor {
 
     @BeforeAll
     static void init() throws Exception {
-        JSONConfigParser parser =
-                (JSONConfigParser) ConfigProviderFactory.parser(
-                        ConfigProviderFactory.EConfigType.JSON);
+        XMLConfigParser parser =
+                (XMLConfigParser) ConfigProviderFactory.parser(
+                        ConfigProviderFactory.EConfigType.XML);
         assertNotNull(parser);
 
         Properties properties = new Properties();
@@ -163,7 +164,10 @@ class Test_ConfigurationAnnotationProcessor {
             assertEquals(ETestValue.EValue3, value.paramEnum);
             assertNotNull(value.password);
             assertNotNull(value.encryptedValue);
+            String password = value.password.getDecryptedValue();
+            assertFalse(Strings.isNullOrEmpty(password));
 
+            LogUtils.debug(getClass(), String.format("PASSWORD=%s", password));
             LogUtils.debug(getClass(), value);
         } catch (Throwable t) {
             LogUtils.error(getClass(), t);
