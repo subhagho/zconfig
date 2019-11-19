@@ -26,12 +26,10 @@ package com.codekutter.zconfig.common.utils;
 
 import com.codekutter.zconfig.common.ConfigurationException;
 import com.codekutter.zconfig.common.model.ConfigurationSettings;
+import com.codekutter.zconfig.common.model.annotations.ConfigPath;
+import com.codekutter.zconfig.common.model.nodes.*;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.codekutter.zconfig.common.model.nodes.AbstractConfigNode;
-import com.codekutter.zconfig.common.model.nodes.ConfigKeyValueNode;
-import com.codekutter.zconfig.common.model.nodes.ConfigPathNode;
-import com.codekutter.zconfig.common.model.nodes.ConfigValueNode;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -43,12 +41,14 @@ import java.util.regex.Matcher;
  */
 public class ConfigUtils {
     private static final String NODE_NAME_DESCRIPTION = "__description";
+    private static final String ATTR_CLASS = "class";
+    private static final String ATTR_NAME = "name";
 
     public static List<String> getResolvedPath(@Nonnull String path,
                                                @Nonnull
                                                        ConfigurationSettings settings,
                                                AbstractConfigNode node)
-    throws ConfigurationException {
+            throws ConfigurationException {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(path));
         Preconditions.checkArgument(settings != null);
 
@@ -82,8 +82,8 @@ public class ConfigUtils {
      */
     public static String[] checkSubPath(@Nonnull String name,
                                         @Nonnull ConfigurationSettings settings)
-    throws
-    ConfigurationException {
+            throws
+            ConfigurationException {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(name));
         Preconditions.checkArgument(settings != null);
 
@@ -102,67 +102,67 @@ public class ConfigUtils {
         if (index >= 0) {
             if (name.compareTo(ConfigurationSettings.PARAM_NODE_CHAR) == 0) {
                 return new String[]{settings
-                                            .getParametersNodeName()};
+                        .getParametersNodeName()};
             }
             String[] parts = name.split(ConfigurationSettings.PARAM_NODE_CHAR);
             if (index == 0) {
                 return new String[]{settings
-                                            .getParametersNodeName(), parts[1]};
+                        .getParametersNodeName(), parts[1]};
             }
             if (parts.length == 1) {
                 return new String[]{parts[0],
-                                    settings
-                                            .getParametersNodeName()};
+                        settings
+                                .getParametersNodeName()};
             } else if (parts.length == 2) {
                 return new String[]{parts[0],
-                                    settings
-                                            .getParametersNodeName(),
-                                    parts[1]};
+                        settings
+                                .getParametersNodeName(),
+                        parts[1]};
             }
         }
         index = name.indexOf(ConfigurationSettings.ATTR_NODE_CHAR);
         if (index >= 0) {
             if (name.compareTo(ConfigurationSettings.ATTR_NODE_CHAR) == 0) {
                 return new String[]{settings
-                                            .getAttributesNodeName()};
+                        .getAttributesNodeName()};
             }
             String[] parts = name.split(ConfigurationSettings.ATTR_NODE_CHAR);
             if (index == 0) {
                 return new String[]{settings
-                                            .getAttributesNodeName(), parts[1]};
+                        .getAttributesNodeName(), parts[1]};
             }
             if (parts.length == 1) {
                 return new String[]{parts[0],
-                                    settings
-                                            .getAttributesNodeName()};
+                        settings
+                                .getAttributesNodeName()};
             } else if (parts.length == 2) {
                 return new String[]{parts[0],
-                                    settings
-                                            .getAttributesNodeName(),
-                                    parts[1]};
+                        settings
+                                .getAttributesNodeName(),
+                        parts[1]};
             }
         }
         index = name.indexOf(ConfigurationSettings.PROP_NODE_CHAR);
         if (index >= 0) {
             if (name.compareTo(ConfigurationSettings.PROP_NODE_CHAR) == 0) {
                 return new String[]{settings
-                                            .getPropertiesNodeName()};
+                        .getPropertiesNodeName()};
             }
             String[] parts = name.split(
                     String.format("\\%s", ConfigurationSettings.PROP_NODE_CHAR));
             if (index == 0) {
                 return new String[]{settings
-                                            .getPropertiesNodeName(), parts[1]};
+                        .getPropertiesNodeName(), parts[1]};
             }
             if (parts.length == 1) {
                 return new String[]{parts[0],
-                                    settings
-                                            .getPropertiesNodeName()};
+                        settings
+                                .getPropertiesNodeName()};
             } else if (parts.length == 2) {
                 return new String[]{parts[0],
-                                    settings
-                                            .getPropertiesNodeName(),
-                                    parts[1]};
+                        settings
+                                .getPropertiesNodeName(),
+                        parts[1]};
             }
         }
         return null;
@@ -176,7 +176,7 @@ public class ConfigUtils {
      */
     public static final void addDescription(@Nonnull AbstractConfigNode node,
                                             @Nonnull String description)
-    throws ConfigurationException {
+            throws ConfigurationException {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(description));
         if (node instanceof ConfigPathNode) {
             AbstractConfigNode cnode = node.find(
@@ -201,7 +201,7 @@ public class ConfigUtils {
      * @return - Description.
      */
     public static final String getDescription(@Nonnull AbstractConfigNode node)
-    throws ConfigurationException {
+            throws ConfigurationException {
         if (node instanceof ConfigPathNode) {
             AbstractConfigNode cnode = node.find(
                     String.format("%s.%s", node.getName(), NODE_NAME_DESCRIPTION));
@@ -211,7 +211,51 @@ public class ConfigUtils {
         } else if (node instanceof ConfigKeyValueNode) {
             if (((ConfigKeyValueNode) node).hasKey(NODE_NAME_DESCRIPTION)) {
                 return ((ConfigKeyValueNode) node).getValue(NODE_NAME_DESCRIPTION)
-                                                  .getValue();
+                        .getValue();
+            }
+        }
+        return null;
+    }
+
+    public static final String getAnnotationPath(@Nonnull Class<?> type) {
+        if (type.isAnnotationPresent(ConfigPath.class)) {
+            ConfigPath path = type.getAnnotation(ConfigPath.class);
+            if (path != null && !Strings.isNullOrEmpty(path.path())) {
+                return path.path();
+            }
+        }
+        return null;
+    }
+
+    public static final AbstractConfigNode getPathNode(@Nonnull Class<?> type, @Nonnull ConfigPathNode node) throws ConfigurationException {
+        String path = getAnnotationPath(type);
+        if (!Strings.isNullOrEmpty(path)) {
+            return node.find(path);
+        }
+        return null;
+    }
+
+    public static final String getClassAttribute(@Nonnull AbstractConfigNode node) {
+        if (node instanceof ConfigPathNode) {
+            ConfigAttributesNode attrs = ((ConfigPathNode) node).attributes();
+            if (attrs.hasKey(ATTR_CLASS)) {
+                ConfigValueNode vn = attrs.getValue(ATTR_CLASS);
+                if (vn != null) {
+                    return vn.getValue();
+                }
+            }
+        }
+        return null;
+    }
+
+    public static final String getNameAttribute(@Nonnull AbstractConfigNode node) {
+        if (node instanceof ConfigPathNode) {
+            ConfigAttributesNode attrs = ((ConfigPathNode) node).attributes();
+            if (attrs.hasKey(ATTR_NAME)) {
+                ConfigValueNode vn = attrs.getValue(ATTR_NAME);
+                if (vn != null) {
+                    return vn.getValue();
+                }
             }
         }
         return null;
