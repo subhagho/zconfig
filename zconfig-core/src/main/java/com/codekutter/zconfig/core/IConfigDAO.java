@@ -53,7 +53,7 @@ public interface IConfigDAO {
     ApplicationGroup saveApplicationGroup(@Nonnull CuratorFramework client,
                                           @Nonnull ApplicationGroup group,
                                           @Nonnull Principal user)
-    throws PersistenceException;
+            throws PersistenceException;
 
     /**
      * Create/Update the Application Group passed to ZooKeeper.
@@ -67,26 +67,24 @@ public interface IConfigDAO {
     Application saveApplication(@Nonnull CuratorFramework client,
                                 @Nonnull Application application,
                                 @Nonnull Principal user)
-    throws PersistenceException;
+            throws PersistenceException;
 
     /**
-     * Save the updated Configuration header.
+     * Create/Update the header for the specified configuration.
      *
      * @param client - Curator Client handle.
-     * @param config - Configuration header node.
-     * @param user   - User Principal
-     * @return - Configuration header node.
+     * @param configuration - Configuration to save header for
+     * @param version - Updated Version
+     * @param user - Invoking User
+     * @return - Persisted Configuration node.
+     * @throws PersistenceException
      */
-    PersistedConfigNode saveConfigHeader(@Nonnull CuratorFramework client,
-                                         @Nonnull PersistedConfigNode config,
-                                         @Nonnull Principal user);
-
     PersistedConfigNode saveConfigHeader(@Nonnull CuratorFramework client,
                                          @Nonnull
                                                  Configuration configuration,
                                          @Nonnull Version version,
                                          @Nonnull Principal user)
-    throws PersistenceException;
+            throws PersistenceException;
 
     /**
      * Save or Update the passed configuration node.
@@ -105,7 +103,7 @@ public interface IConfigDAO {
                                                    PersistedConfigNode configNode,
                                            @Nonnull Version version,
                                            @Nonnull Principal user)
-    throws PersistenceException;
+            throws PersistenceException;
 
     /**
      * Read the Config Path node for the specified node path.
@@ -157,7 +155,7 @@ public interface IConfigDAO {
      */
     ApplicationGroup readApplicationGroup(@Nonnull CuratorFramework client,
                                           @Nonnull String groupName)
-    throws PersistenceException;
+            throws PersistenceException;
 
     /**
      * Read an Application Group instance specified by the group name.
@@ -171,7 +169,7 @@ public interface IConfigDAO {
     Application readApplication(@Nonnull CuratorFramework client,
                                 @Nonnull ApplicationGroup group,
                                 @Nonnull String name)
-    throws PersistenceException;
+            throws PersistenceException;
 
     /**
      * Read an Configuration Header instance specified by the group name.
@@ -187,5 +185,5 @@ public interface IConfigDAO {
                                          @Nonnull Application application,
                                          @Nonnull String name,
                                          @Nonnull Version version)
-    throws PersistenceException;
+            throws PersistenceException;
 }

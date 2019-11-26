@@ -66,7 +66,7 @@ public class ZkConfigDAO implements IConfigDAO {
     public ApplicationGroup saveApplicationGroup(@Nonnull CuratorFramework client,
                                                  @Nonnull ApplicationGroup group,
                                                  @Nonnull Principal user)
-    throws PersistenceException {
+            throws PersistenceException {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(group.getName()));
         Preconditions.checkArgument(!Strings.isNullOrEmpty(group.getDescription()));
         Preconditions.checkArgument(!Strings.isNullOrEmpty(group.getChannelName()));
@@ -122,7 +122,7 @@ public class ZkConfigDAO implements IConfigDAO {
     public Application saveApplication(@Nonnull CuratorFramework client,
                                        @Nonnull Application application,
                                        @Nonnull Principal user)
-    throws PersistenceException {
+            throws PersistenceException {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(application.getName()));
         Preconditions.checkArgument(
                 !Strings.isNullOrEmpty(application.getDescription()));
@@ -181,21 +181,21 @@ public class ZkConfigDAO implements IConfigDAO {
                                                         Configuration configuration,
                                                 @Nonnull Version version,
                                                 @Nonnull Principal user)
-    throws PersistenceException {
+            throws PersistenceException {
         try {
             ApplicationGroup group = readApplicationGroup(client, configuration
                     .getApplicationGroup());
             if (group == null) {
                 throw new PersistenceException(
                         String.format("Application Group not found. [group=%s]",
-                                      configuration.getApplicationGroup()));
+                                configuration.getApplicationGroup()));
             }
             Application application =
                     readApplication(client, group, configuration.getApplication());
             if (application == null) {
                 throw new PersistenceException(
                         String.format("Application not found. [application=%s]",
-                                      configuration.getApplication()));
+                                configuration.getApplication()));
             }
             ModifiedBy<String> modifiedBy = new ModifiedBy<>(user.getName());
             String zkPath = ZkUtils.getZkPath(configuration);
@@ -204,19 +204,19 @@ public class ZkConfigDAO implements IConfigDAO {
             if (stat == null) {
                 configNode = new PersistedConfigNode();
                 setupConfigHeaderNode(configNode, configuration, application,
-                                      modifiedBy);
+                        modifiedBy);
                 zkPath = client.create().creatingParentsIfNeeded().forPath(zkPath);
             } else {
                 byte[] data = client.getData().forPath(zkPath);
                 if (data == null || data.length == 0) {
                     configNode = new PersistedConfigNode();
                     setupConfigHeaderNode(configNode, configuration, application,
-                                          modifiedBy);
+                            modifiedBy);
                 } else {
                     ObjectMapper mapper = ZConfigCoreEnv.coreEnv().getJsonMapper();
                     configNode = mapper.readValue(data, PersistedConfigNode.class);
                     if (!configuration.getVersion()
-                                      .equals(configNode.getCurrentVersion())) {
+                            .equals(configNode.getCurrentVersion())) {
                         throw new PersistenceException(String.format(
                                 "Updating Stale Version : [expected=%s][actual=%s]",
                                 configNode.getCurrentVersion().toString(),
@@ -240,22 +240,6 @@ public class ZkConfigDAO implements IConfigDAO {
         }
     }
 
-
-    /**
-     * Save the updated Configuration header.
-     *
-     * @param client - Curator Client handle.
-     * @param config - Configuration header node.
-     * @param user   - User Principal
-     * @return - Configuration header node.
-     */
-    @Override
-    public PersistedConfigNode saveConfigHeader(@Nonnull CuratorFramework client,
-                                                @Nonnull PersistedConfigNode config,
-                                                @Nonnull Principal user) {
-        return null;
-    }
-
     /**
      * Setup the configuration header node.
      *
@@ -269,10 +253,10 @@ public class ZkConfigDAO implements IConfigDAO {
                                        Configuration configuration,
                                        Application application,
                                        ModifiedBy<String> modifiedBy)
-    throws ServiceEnvException {
+            throws ServiceEnvException {
         try {
             configNode.setId(ZConfigCoreEnv.coreEnv().getIdGenerator()
-                                           .generateStringId(null));
+                    .generateStringId(null));
             configNode.setApplication(application);
             configNode.setName(configuration.getName());
             configNode.setDescription(configuration.getDescription());
@@ -301,27 +285,27 @@ public class ZkConfigDAO implements IConfigDAO {
                                                           PersistedConfigNode configNode,
                                                   @Nonnull Version version,
                                                   @Nonnull Principal user)
-    throws PersistenceException {
+            throws PersistenceException {
         try {
             String path = node.getAbsolutePath();
             String zkPath = ZkUtils.getZkPath(configNode, path);
             Stat stat = client.checkExists().forPath(zkPath);
             if (node instanceof ConfigValueNode) {
                 return saveValueConfigNode(client, (ConfigValueNode) node,
-                                           configNode,
-                                           user, version, zkPath, stat);
+                        configNode,
+                        user, version, zkPath, stat);
             } else if (node instanceof ConfigListValueNode) {
                 return saveValueListConfigNode(client, (ConfigListValueNode) node,
-                                               configNode,
-                                               user, version, zkPath, stat);
+                        configNode,
+                        user, version, zkPath, stat);
             } else if (node instanceof ConfigParametersNode) {
                 return saveKeyValueConfigNode(client, (ConfigParametersNode) node,
-                                              configNode,
-                                              user, version, zkPath, stat);
+                        configNode,
+                        user, version, zkPath, stat);
             } else if (node instanceof ConfigPropertiesNode) {
                 return saveKeyValueConfigNode(client, (ConfigPropertiesNode) node,
-                                              configNode,
-                                              user, version, zkPath, stat);
+                        configNode,
+                        user, version, zkPath, stat);
             }
             return null;
         } catch (Exception e) {
@@ -358,7 +342,7 @@ public class ZkConfigDAO implements IConfigDAO {
             if (stat == null) {
                 zkNode = new PersistedConfigValueNode();
                 setupNewPathNode(zkNode, node, modifiedBy, configNode,
-                                 version);
+                        version);
                 zkNode.setValue(node.getValue());
                 String path = zkNode.getAbsolutePath();
                 path = client.create().creatingParentsIfNeeded().forPath(path);
@@ -367,14 +351,14 @@ public class ZkConfigDAO implements IConfigDAO {
                 if (data == null || data.length <= 0) {
                     zkNode = new PersistedConfigValueNode();
                     setupNewPathNode(zkNode, node, modifiedBy, configNode,
-                                     version);
+                            version);
                     zkNode.setValue(node.getValue());
                 } else {
                     String json = new String(data);
                     ObjectMapper mapper = ZConfigCoreEnv.coreEnv().getJsonMapper();
                     zkNode = mapper.readValue(json, PersistedConfigValueNode.class);
                     if (configNode.getCurrentVersion()
-                                  .compareMinorVersion(zkNode.getNodeVersion()) <
+                            .compareMinorVersion(zkNode.getNodeVersion()) <
                             0) {
                         throw new PersistenceException(String.format(
                                 "Update Failed : Passed node version is stale. [expected=%s][actual=%s]",
@@ -389,7 +373,7 @@ public class ZkConfigDAO implements IConfigDAO {
             String path = zkNode.getAbsolutePath();
             String json =
                     ZConfigCoreEnv.coreEnv().getJsonMapper()
-                                  .writeValueAsString(zkNode);
+                            .writeValueAsString(zkNode);
             client.setData().forPath(path, json.getBytes());
 
             return zkNode;
@@ -412,8 +396,8 @@ public class ZkConfigDAO implements IConfigDAO {
     private void setupNewPathNode(PersistedConfigPathNode zkNode,
                                   AbstractConfigNode node, ModifiedBy<String> owner,
                                   PersistedConfigNode configNode, Version version)
-    throws
-    ServiceEnvException {
+            throws
+            ServiceEnvException {
         try {
             zkNode = new PersistedConfigValueNode();
             IUniqueIDGenerator idGenerator =
@@ -466,7 +450,7 @@ public class ZkConfigDAO implements IConfigDAO {
             if (stat == null) {
                 zkNode = new PersistedConfigListValueNode();
                 setupNewPathNode(zkNode, node, modifiedBy, configNode,
-                                 version);
+                        version);
                 zkNode.setValues(values);
                 String path = zkNode.getAbsolutePath();
                 path = client.create().creatingParentsIfNeeded().forPath(path);
@@ -475,15 +459,15 @@ public class ZkConfigDAO implements IConfigDAO {
                 if (data == null || data.length <= 0) {
                     zkNode = new PersistedConfigListValueNode();
                     setupNewPathNode(zkNode, node, modifiedBy, configNode,
-                                     version);
+                            version);
                     zkNode.setValues(values);
                 } else {
                     String json = new String(data);
                     ObjectMapper mapper = ZConfigCoreEnv.coreEnv().getJsonMapper();
                     zkNode = mapper.readValue(json,
-                                              PersistedConfigListValueNode.class);
+                            PersistedConfigListValueNode.class);
                     if (configNode.getCurrentVersion()
-                                  .compareMinorVersion(zkNode.getNodeVersion()) <
+                            .compareMinorVersion(zkNode.getNodeVersion()) <
                             0) {
                         throw new PersistenceException(String.format(
                                 "Update Failed : Passed node version is stale. [expected=%s][actual=%s]",
@@ -498,7 +482,7 @@ public class ZkConfigDAO implements IConfigDAO {
             String path = zkNode.getAbsolutePath();
             String json =
                     ZConfigCoreEnv.coreEnv().getJsonMapper()
-                                  .writeValueAsString(zkNode);
+                            .writeValueAsString(zkNode);
             client.setData().forPath(path, json.getBytes());
 
             return zkNode;
@@ -535,7 +519,7 @@ public class ZkConfigDAO implements IConfigDAO {
             if (stat == null) {
                 zkNode = new PersistedConfigMapNode();
                 setupNewPathNode(zkNode, node, modifiedBy, configNode,
-                                 version);
+                        version);
                 zkNode.setMapFrom(node.getKeyValues());
                 String path = zkNode.getAbsolutePath();
                 path = client.create().creatingParentsIfNeeded().forPath(path);
@@ -544,14 +528,14 @@ public class ZkConfigDAO implements IConfigDAO {
                 if (data == null || data.length <= 0) {
                     zkNode = new PersistedConfigMapNode();
                     setupNewPathNode(zkNode, node, modifiedBy, configNode,
-                                     version);
+                            version);
                     zkNode.setMapFrom(node.getKeyValues());
                 } else {
                     String json = new String(data);
                     ObjectMapper mapper = ZConfigCoreEnv.coreEnv().getJsonMapper();
                     zkNode = mapper.readValue(json, PersistedConfigMapNode.class);
                     if (configNode.getCurrentVersion()
-                                  .compareMinorVersion(zkNode.getNodeVersion()) <
+                            .compareMinorVersion(zkNode.getNodeVersion()) <
                             0) {
                         throw new PersistenceException(String.format(
                                 "Update Failed : Passed node version is stale. [expected=%s][actual=%s]",
@@ -566,7 +550,7 @@ public class ZkConfigDAO implements IConfigDAO {
             String path = zkNode.getAbsolutePath();
             String json =
                     ZConfigCoreEnv.coreEnv().getJsonMapper()
-                                  .writeValueAsString(zkNode);
+                            .writeValueAsString(zkNode);
             client.setData().forPath(path, json.getBytes());
 
             return zkNode;
@@ -668,7 +652,7 @@ public class ZkConfigDAO implements IConfigDAO {
     @Override
     public ApplicationGroup readApplicationGroup(@Nonnull CuratorFramework client,
                                                  @Nonnull String groupName)
-    throws PersistenceException {
+            throws PersistenceException {
         try {
             String zkPath = ZkUtils.getZkPath(groupName);
             Stat stat = client.checkExists().forPath(zkPath);
@@ -698,7 +682,7 @@ public class ZkConfigDAO implements IConfigDAO {
     public Application readApplication(@Nonnull CuratorFramework client,
                                        @Nonnull ApplicationGroup group,
                                        @Nonnull String name)
-    throws PersistenceException {
+            throws PersistenceException {
         try {
             String zkPath = ZkUtils.getZkPath(group, name);
             Stat stat = client.checkExists().forPath(zkPath);
@@ -730,7 +714,7 @@ public class ZkConfigDAO implements IConfigDAO {
                                                 @Nonnull Application application,
                                                 @Nonnull String name,
                                                 @Nonnull Version version)
-    throws PersistenceException {
+            throws PersistenceException {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(name));
         try {
             String zkPath = ZkUtils.getZkPath(application, name, version);

@@ -28,15 +28,14 @@ import com.codekutter.zconfig.common.ConfigurationException;
 import com.codekutter.zconfig.common.LogUtils;
 import com.codekutter.zconfig.common.model.nodes.*;
 import com.codekutter.zconfig.common.utils.ConfigUtils;
+import com.codekutter.zconfig.common.utils.CypherUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import lombok.Data;
 
-import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
 import java.security.MessageDigest;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -402,8 +401,7 @@ public class Configuration {
                 MessageDigest md = MessageDigest.getInstance("MD5");
                 md.update(key.getBytes());
                 byte[] digest = md.digest();
-                String hash = DatatypeConverter
-                        .printHexBinary(digest).toUpperCase();
+                String hash = CypherUtils.getKeyHash(key);
                 return (header.encryptionHash.compareTo(hash) == 0);
             }
         } catch (Exception ex) {

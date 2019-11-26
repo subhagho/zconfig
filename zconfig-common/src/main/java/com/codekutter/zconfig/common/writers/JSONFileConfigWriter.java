@@ -74,8 +74,7 @@ public class JSONFileConfigWriter extends AbstractConfigWriter {
 
         File outdir = new File(path);
         if (!outdir.exists() || !outdir.isDirectory()) {
-            throw new ConfigurationException(String.format(
-                    "Invalid output directory specified : Directory does not exist or path isn't a directory."));
+            throw new ConfigurationException("Invalid output directory specified : Directory does not exist or path isn't a directory.");
         }
         File outfile = new File(
                 String.format("%s/%s_%s.json", outdir.getAbsolutePath(),
@@ -128,10 +127,6 @@ public class JSONFileConfigWriter extends AbstractConfigWriter {
                 fos.write(json.getBytes());
                 fos.flush();
             }
-        } catch (JsonProcessingException e) {
-            throw new ConfigurationException(e);
-        } catch (FileNotFoundException e) {
-            throw new ConfigurationException(e);
         } catch (IOException e) {
             throw new ConfigurationException(e);
         }
