@@ -44,6 +44,15 @@ public class ConfigUtils {
     private static final String ATTR_CLASS = "class";
     private static final String ATTR_NAME = "name";
 
+    /**
+     * Get the resolved search path for specified search string.
+     *
+     * @param path - Specified Search Path
+     * @param settings - Configuration Settings.
+     * @param node - Node to search under
+     * @return - Resolved search path.
+     * @throws ConfigurationException
+     */
     public static List<String> getResolvedPath(@Nonnull String path,
                                                @Nonnull
                                                        ConfigurationSettings settings,
@@ -217,6 +226,12 @@ public class ConfigUtils {
         return null;
     }
 
+    /**
+     * Get the path annotation (if specified) for the type.
+     *
+     * @param type - Instance Type
+     * @return - Path Annotation
+     */
     public static final String getAnnotationPath(@Nonnull Class<?> type) {
         if (type.isAnnotationPresent(ConfigPath.class)) {
             ConfigPath path = type.getAnnotation(ConfigPath.class);
@@ -227,6 +242,14 @@ public class ConfigUtils {
         return null;
     }
 
+    /**
+     * Search the node based on the path annotation specified in the type.
+     *
+     * @param type - Instance Type
+     * @param node - Configuration node to search under.
+     * @return - Node, if found.
+     * @throws ConfigurationException
+     */
     public static final AbstractConfigNode getPathNode(@Nonnull Class<?> type, @Nonnull ConfigPathNode node) throws ConfigurationException {
         String path = getAnnotationPath(type);
         if (!Strings.isNullOrEmpty(path)) {
@@ -235,6 +258,12 @@ public class ConfigUtils {
         return null;
     }
 
+    /**
+     * Get the "class" attribute for the node.
+     *
+     * @param node - Configuration node.
+     * @return - Class attribute value.
+     */
     public static final String getClassAttribute(@Nonnull AbstractConfigNode node) {
         if (node instanceof ConfigPathNode) {
             ConfigAttributesNode attrs = ((ConfigPathNode) node).attributes();
@@ -248,6 +277,12 @@ public class ConfigUtils {
         return null;
     }
 
+    /**
+     * Get the "name" attribute for the node.
+     *
+     * @param node - Configuration node.
+     * @return - Name attribute value.
+     */
     public static final String getNameAttribute(@Nonnull AbstractConfigNode node) {
         if (node instanceof ConfigPathNode) {
             ConfigAttributesNode attrs = ((ConfigPathNode) node).attributes();

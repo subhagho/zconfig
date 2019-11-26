@@ -54,7 +54,7 @@ public class RabbitMQUpdateListener extends AbstractUpdateListener {
     @Override
     @MethodInvoke
     public void configure(@Nonnull AbstractConfigNode node)
-    throws ConfigurationException {
+            throws ConfigurationException {
         if (!NODE_NAME_LISTENER.equals(node.getName())) {
             throw new ConfigurationException(String.format(
                     "Invalid Configuration Node: [expected=%s][actual=%s]",
@@ -66,26 +66,26 @@ public class RabbitMQUpdateListener extends AbstractUpdateListener {
     @Override
     public void run() {
         LogUtils.info(getClass(),
-                      String.format("Starting Update listener: [type=%s]",
-                                    getClass().getCanonicalName()));
+                String.format("Starting Update listener: [type=%s]",
+                        getClass().getCanonicalName()));
         try {
 
             updateServer(RMQChannelConstants.RMQ_REGISTER_ROUTING_KEY);
             try (
                     Channel updateChannel = connectionFactory.getConnection()
-                                                             .createChannel()) {
+                            .createChannel()) {
                 updateChannel
                         .exchangeDeclarePassive(
                                 RMQChannelConstants.RMQ_UPDATE_CHANNEL);
                 String queueName = updateChannel.queueDeclarePassive(
                         RMQChannelConstants.getGroupUpdateQueue(
                                 ZConfigClientEnv.clientEnv().getInstance()
-                                                .getApplicationGroup()))
-                                                .getQueue();
+                                        .getApplicationGroup()))
+                        .getQueue();
                 updateChannel.queueBind(queueName,
-                                        RMQChannelConstants.RMQ_UPDATE_CHANNEL,
-                                        ZConfigClientEnv.clientEnv().getInstance()
-                                                        .getApplicationName());
+                        RMQChannelConstants.RMQ_UPDATE_CHANNEL,
+                        ZConfigClientEnv.clientEnv().getInstance()
+                                .getApplicationName());
                 DeliverCallback deliverCallback = (consumerTag, delivery) -> {
                     try {
                         if (!state.isAvailable()) {
@@ -95,7 +95,7 @@ public class RabbitMQUpdateListener extends AbstractUpdateListener {
                             return;
                         }
                         String message = new String(delivery.getBody(),
-                                                    StandardCharsets.UTF_8);
+                                StandardCharsets.UTF_8);
                         LogUtils.debug(getClass(), " [x] Received '" +
                                 delivery.getEnvelope()
                                         .getRoutingKey() +
@@ -103,7 +103,7 @@ public class RabbitMQUpdateListener extends AbstractUpdateListener {
                         ObjectMapper mapper =
                                 ZConfigClientEnv.clientEnv().getJsonMapper();
                         ConfigUpdateBatch batch = mapper.readValue(message,
-                                                                   ConfigUpdateBatch.class);
+                                ConfigUpdateBatch.class);
                         executeUpdateBatch(batch);
                         LogUtils.debug(getClass(), batch);
                     } catch (Exception e) {
@@ -113,13 +113,13 @@ public class RabbitMQUpdateListener extends AbstractUpdateListener {
                     }
                 };
                 updateChannel.basicConsume(queueName, true, deliverCallback,
-                                           consumerTag -> {
-                                           });
+                        consumerTag -> {
+                        });
                 LogUtils.warn(getClass(),
-                              String.format(
-                                      "Shutting down Update listener: [type=%s][state=%s]",
-                                      getClass().getCanonicalName(),
-                                      state.getState().name()));
+                        String.format(
+                                "Shutting down Update listener: [type=%s][state=%s]",
+                                getClass().getCanonicalName(),
+                                state.getState().name()));
 
             } finally {
                 connectionFactory.close();
@@ -139,7 +139,7 @@ public class RabbitMQUpdateListener extends AbstractUpdateListener {
     private void updateServer(String key) throws Exception {
         try (
                 Channel registerChannel = connectionFactory.getConnection()
-                                                           .createChannel()) {
+                        .createChannel()) {
             registerChannel
                     .exchangeDeclarePassive(RMQChannelConstants.RMQ_ADMIN_CHANNEL);
             String queueName = registerChannel
@@ -151,9 +151,9 @@ public class RabbitMQUpdateListener extends AbstractUpdateListener {
             String json = mapper.writeValueAsString(message);
 
             registerChannel.basicPublish(RMQChannelConstants.RMQ_ADMIN_CHANNEL,
-                                         key,
-                                         MessageProperties.PERSISTENT_TEXT_PLAIN,
-                                         json.getBytes(StandardCharsets.UTF_8));
+                    key,
+                    MessageProperties.PERSISTENT_TEXT_PLAIN,
+                    json.getBytes(StandardCharsets.UTF_8));
         }
     }
 }

@@ -36,7 +36,6 @@ import com.codekutter.zconfig.common.model.Configuration;
 import com.codekutter.zconfig.common.model.ConfigurationSettings;
 import com.codekutter.zconfig.common.model.ESyncMode;
 import com.codekutter.zconfig.common.model.Version;
-import sun.security.krb5.Config;
 
 import javax.annotation.Nonnull;
 import java.util.*;

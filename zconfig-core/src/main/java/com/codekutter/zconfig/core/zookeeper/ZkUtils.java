@@ -99,8 +99,8 @@ public class ZkUtils {
             if (retryPolicy == null) {
                 retryPolicy = new RetryOneTime(DEFAULT_RETRY_SLEEP);
             }
-            CuratorFramework client = CuratorFrameworkFactory
-                    .newClient(config.getConnectionString(), retryPolicy);
+            CuratorFramework client = CuratorFrameworkFactory.builder()
+                    .connectString(config.getConnectionString()).retryPolicy(retryPolicy).build();
             client.start();
             return client;
         } catch (Exception e) {

@@ -46,6 +46,7 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -105,7 +106,7 @@ class ZkConfigDAOTest {
                     group.setId(UUID.randomUUID().toString());
                     group.setName(configuration.getApplicationGroup());
                     group.setDescription(
-                            ResourceReaderUtils.readResourceAsText(TEST_TEXT_FILE));
+                            Objects.requireNonNull(ResourceReaderUtils.readResourceAsText(TEST_TEXT_FILE)));
                     group.setChannelName(group.getName());
                     for (int ii = 0; ii < 10; ii++) {
                         group.addProperty(String.format("PROP_NAME_%d", ii),
@@ -121,7 +122,7 @@ class ZkConfigDAOTest {
                     application.setId(UUID.randomUUID().toString());
                     application.setName(configuration.getApplication());
                     application.setDescription(
-                            ResourceReaderUtils.readResourceAsText(TEST_TEXT_FILE));
+                            Objects.requireNonNull(ResourceReaderUtils.readResourceAsText(TEST_TEXT_FILE)));
                     application.setGroup(group);
                     application.setState(EPersistedNodeState.Available);
 
@@ -130,6 +131,9 @@ class ZkConfigDAOTest {
                 Version current = getSavedConfigVersion(client, dao, application,
                                                         configuration.getName(),
                                                         configuration.getVersion());
+                if (current == null) {
+                    current = new Version(0, 0);
+                }
                 configuration.setVersion(current);
                 PersistedConfigNode configNode =
                         dao.saveConfigHeader(client, configuration, new Version(
@@ -157,6 +161,9 @@ class ZkConfigDAOTest {
             PersistenceException {
         PersistedConfigNode node =
                 dao.readConfigHeader(client, application, name, version);
+        if (node == null) {
+            return null;
+        }
         return node.getCurrentVersion();
     }
 
