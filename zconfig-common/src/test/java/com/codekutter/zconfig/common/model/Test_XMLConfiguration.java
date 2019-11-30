@@ -177,6 +177,7 @@ class Test_XMLConfiguration {
             assertTrue(node instanceof ConfigValueNode);
             String param = ((ConfigValueNode) node).getValue();
             assertFalse(Strings.isNullOrEmpty(param));
+            assertEquals("TEST_PROP_1", param);
             debug(getClass(),
                   String.format("[path=%s] parameter value = %s", path, param));
         } catch (Throwable e) {
@@ -195,7 +196,7 @@ class Test_XMLConfiguration {
             assertEquals(path, node.getSearchPath());
             assertEquals(4, ((ConfigListElementNode) node).size());
 
-            path = "TEST_ELEMENT_LIST[2]/string_2";
+            path = "TEST_ELEMENT_LIST[2]/TEST_ELEMENT_LIST/string_2";
             node = configuration.find(node, path);
             assertNotNull(node);
             assertTrue(node instanceof ConfigValueNode);

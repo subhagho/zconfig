@@ -173,6 +173,9 @@ public class ConfigurationAnnotationProcessor {
                         "Invalid Config Path : Path is NULL/Empty");
             }
             AbstractConfigNode node = config.find(path);
+            if (node == null) {
+                throw new ConfigurationException(String.format("Configuration node not found. [node path=%s][search=%s]", config.getAbsolutePath(), cPath));
+            }
             processType(type, node, target, valuePaths);
         }
         return target;

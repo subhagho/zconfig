@@ -29,6 +29,7 @@ import com.google.common.base.Strings;
 import com.codekutter.zconfig.common.ConfigurationException;
 import com.codekutter.zconfig.common.model.Configuration;
 import com.codekutter.zconfig.common.model.ENodeState;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import java.util.List;
 
@@ -102,7 +103,18 @@ public class ConfigListElementNode extends ConfigListNode<ConfigElementNode> {
                 return this;
             } else if (!isEmpty()) {
                 index = index + 1;
+                String nn = path.get(index);
+
                 List<ConfigElementNode> nodes = getValues();
+                if (!Strings.isNullOrEmpty(nn)) {
+                    if (NumberUtils.isCreatable(nn)) {
+                        int arrIdx = Integer.parseInt(nn);
+                        if (arrIdx >= 0 && arrIdx < nodes.size()) {
+                            AbstractConfigNode anode = nodes.get(arrIdx);
+                            return anode.find(path, index + 1);
+                        }
+                    }
+                }
                 for (ConfigElementNode node : nodes) {
                     AbstractConfigNode fn = node.find(path, index);
                     if (fn != null) {

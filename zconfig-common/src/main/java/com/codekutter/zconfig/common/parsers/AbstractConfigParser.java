@@ -109,9 +109,9 @@ public abstract class AbstractConfigParser implements Closeable {
                     nodePostLoad(nodes.get(key), properties);
                 }
             }
-        } else if (node instanceof ConfigParametersNode) {
+        } else if (node instanceof ConfigKeyValueNode) {
             // Check parameter value replacement.
-            ConfigParametersNode params = (ConfigParametersNode) node;
+            ConfigKeyValueNode params = (ConfigKeyValueNode) node;
             Map<String, ConfigValueNode> pp = params.getKeyValues();
             for (String key : pp.keySet()) {
                 String value = pp.get(key).getValue();
@@ -122,7 +122,7 @@ public abstract class AbstractConfigParser implements Closeable {
                     }
                 }
             }
-        } else if (node instanceof ConfigListElementNode) {
+        }  else if (node instanceof ConfigListElementNode) {
             ConfigListElementNode le = (ConfigListElementNode) node;
             List<ConfigElementNode> nodes = le.getValues();
             if (nodes != null && !nodes.isEmpty()) {

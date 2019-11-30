@@ -31,6 +31,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 import javax.annotation.Nonnull;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,7 +42,39 @@ public class Context {
     /**
      * Context data Map.
      */
-    protected Map<String, Object> params = new HashMap<>();
+    private Map<String, Object> params = new HashMap<>();
+
+    /**
+     * Copy Constructor for initializing the current Context.
+     *
+     * @param source - Source context to initialize from.
+     */
+    public Context(@Nonnull Context source) {
+        if (!source.params.isEmpty()) {
+            for(String key : source.params.keySet()) {
+                Object value = source.params.get(key);
+                params.put(key, value);
+            }
+        }
+    }
+
+    /**
+     * Get the values in this context.
+     *
+     * @return - Context values.
+     */
+    public Collection<Object> getValues() {
+        return params.values();
+    }
+
+    /**
+     * Get the keys in this context.
+     *
+     * @return - Context keys.
+     */
+    public Collection<String> getKeys() {
+        return params.keySet();
+    }
 
     /**
      * Add a param (key/value).
