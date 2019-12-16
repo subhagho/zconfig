@@ -42,7 +42,7 @@ import java.util.List;
  */
 public abstract class ConfigListNode<T extends AbstractConfigNode>
         extends ConfigElementNode {
-    private List<T> values;
+    private List<T> values = new ArrayList<>();
 
     /**
      * Default constructor - Initialize the state object.

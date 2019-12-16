@@ -43,7 +43,7 @@ public abstract class ConfigKeyValueNode extends ConfigElementNode {
     /**
      * Map containing the defined parameters within a node definition.
      */
-    private Map<String, ConfigValueNode> keyValues;
+    private Map<String, ConfigValueNode> keyValues = new HashMap<>();
 
     /**
      * Default constructor - Initialize the state object.

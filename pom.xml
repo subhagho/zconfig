@@ -69,6 +69,10 @@
             <id>jgit-repository</id>
             <url>https://repo.eclipse.org/content/groups/releases/</url>
         </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
     </repositories>
 
     <modules>
@@ -253,7 +257,6 @@
             <version>1.18.6</version>
             <scope>provided</scope>
         </dependency>
-
     </dependencies>
 
 

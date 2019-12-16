@@ -156,7 +156,7 @@ public class CypherUtils {
         return decrypt(array, password, iv);
     }
 
-    public static class ConfigVault {
+    public static class ConfigVault  {
         private Map<String, String> vault = new HashMap<>();
 
         public ConfigVault addPasscode(Configuration config, String passcode)

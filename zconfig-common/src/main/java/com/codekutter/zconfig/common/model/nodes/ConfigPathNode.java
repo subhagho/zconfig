@@ -47,7 +47,7 @@ public class ConfigPathNode extends ConfigElementNode {
     /**
      * Map containing the child nodes.
      */
-    private Map<String, AbstractConfigNode> children;
+    private Map<String, AbstractConfigNode> children = new HashMap<>();
 
     /**
      * Default constructor - Initialize the state object.
