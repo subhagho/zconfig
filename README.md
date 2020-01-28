@@ -1,3 +1,7 @@
+
+# Deprecated Repository
+Moved to https://github.com/subhagho/codekutter
+
 # zconfig
 ZooKeeper backed configuration management server
 
